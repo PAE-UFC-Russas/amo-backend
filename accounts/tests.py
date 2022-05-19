@@ -1,5 +1,6 @@
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
+from django.test import TestCase
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
@@ -18,3 +19,21 @@ class UserAuthTest(APITestCase):
         data = {"username": "test@user.com", "password": "password"}
         response = self.client.post(reverse("obtain-api-token"), data, format="json")
         self.assertEqual(response.data["token"], token.key)
+
+
+class CustomUserTest(TestCase):
+    def test_create_user(self):
+        CustomUser.objects.create_user(email="usuario@test.com", password="password")
+
+        user = CustomUser.objects.first()
+        self.assertEqual(user.email, "usuario@test.com")
+        self.assertFalse(user.is_superuser)
+
+    def test_create_superuser(self):
+        CustomUser.objects.create_superuser(
+            email="usuario@test.com", password="password"
+        )
+
+        user = CustomUser.objects.first()
+        self.assertEqual(user.email, "usuario@test.com")
+        self.assertTrue(user.is_superuser)
