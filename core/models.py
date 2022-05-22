@@ -7,3 +7,5 @@ class Curso(models.Model):
 
     def __str__(self):
         return f"Curso: {self.nome}"
+
+

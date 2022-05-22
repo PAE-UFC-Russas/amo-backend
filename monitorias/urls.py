@@ -17,14 +17,17 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
-
+import core
 from core.views import CursoViewSet
 
 router = routers.DefaultRouter()
+
+
 router.register(r"cursos", CursoViewSet, basename="cursos")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", auth_views.obtain_auth_token, name="obtain-api-token"),
-    path("", include(router.urls)),
+    path("", include(router.urls )),
+    path("cursos/add/", include('core.urls'))
 ]
