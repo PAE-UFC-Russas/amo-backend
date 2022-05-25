@@ -1,4 +1,3 @@
-import json
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework.test import APITestCase
