@@ -11,6 +11,10 @@ from rest_framework.decorators import api_view
 
 
 class CursoViewSet(ViewSet):
+    
+    permission_classes = [IsAuthenticated]
+
+    
     def list(self, request):
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
