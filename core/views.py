@@ -8,17 +8,19 @@ from rest_framework.response import Response
 from core.models import Curso
 from core.serializer import CursoSerializer
 from rest_framework.decorators import api_view
+from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import permission_classes
+
 
 
 class CursoViewSet(ViewSet):
     
-    permission_classes = [IsAuthenticated]
 
-    
+    #@permission_classes([IsAuthenticated])
     def list(self, request):
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
-        return Response(cursos)
+        return Response(serializer.data)
     def create(self, request):
         serializer=CursoSerializer(data=request.data)
         if serializer.is_valid():
