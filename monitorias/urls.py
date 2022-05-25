@@ -20,7 +20,10 @@ from rest_framework.authtoken import views as auth_views
 import core
 from core.views import CursoViewSet
 
+from core.views import CursoViewSet
+
 router = routers.DefaultRouter()
+router.register(r"cursos", CursoViewSet, basename="cursos")
 
 
 router.register(r"cursos", CursoViewSet, basename="cursos")

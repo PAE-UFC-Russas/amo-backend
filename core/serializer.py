@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from core.models import Curso
 
 class CursoSerializer(serializers.Serializer):
@@ -9,4 +10,5 @@ class CursoSerializer(serializers.Serializer):
     class Meta:
         model = Curso
         fields = ['__all__']
+
 
