@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitView
 import core
 from core.views import CursoViewSet
 
@@ -31,6 +32,13 @@ router.register(r"cursos", CursoViewSet, basename="cursos")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", auth_views.obtain_auth_token, name="obtain-api-token"),
-    path("", include(router.urls )),
-    path("cursos/add/", include('core.urls'))
+    path("", include(router.urls)),
+    path("cursos/add/", include("core.urls")),
+    # documentação/drf_spectacular
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/schema/openapi/",
+        SpectacularSwaggerSplitView.as_view(url_name="schema"),
+        name="openapi",
+    ),
 ]
