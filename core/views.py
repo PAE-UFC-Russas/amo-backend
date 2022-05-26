@@ -1,3 +1,4 @@
+
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -11,4 +12,10 @@ class CursoViewSet(ViewSet):
     def list(self, request):
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer=CursoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
         return Response(serializer.data)
