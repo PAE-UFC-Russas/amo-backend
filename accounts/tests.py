@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.test import TestCase
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
+from rest_framework.reverse import reverse as rest_reverse
 
 from .models import CustomUser
 
@@ -37,3 +38,16 @@ class CustomUserTest(TestCase):
         user = CustomUser.objects.first()
         self.assertEqual(user.email, "usuario@test.com")
         self.assertTrue(user.is_superuser)
+
+
+class UserRegistration(TestCase):
+    def test_user_registration(self):
+        response = self.client.post(
+            reverse("usuario-list"),
+            {"email": "test@user.com", "password": "password"},
+            format="json",
+        )
+        user = CustomUser.objects.first()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.email, response.data["email"])
+        self.assertFalse(user.is_active)
