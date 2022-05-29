@@ -15,4 +15,4 @@ class UserSerializer(Serializer):
 
     class Meta:
         model = CustomUser
-        fields = ["password"]
+        fields = ["email", "password"]
