@@ -2,6 +2,8 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from core.models import Curso
+from accounts.models import CustomUser
+from rest_framework.decorators import action
 from core.serializer import CursoSerializer
 
 
@@ -10,6 +12,7 @@ class CursoViewSet(ViewSet):
     serializer_class = CursoSerializer
 
     def list(self, request):
+
         """Retorna uma lista de Cursos"""
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
@@ -21,3 +24,8 @@ class CursoViewSet(ViewSet):
         if serializer.is_valid():
             serializer.save()
         return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        curso = Curso.objects.filter(id=pk)
+        curso.delete()
+        return Response("OK")
