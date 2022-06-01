@@ -5,10 +5,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse as rest_reverse
 from django.core.exceptions import ValidationError
+from django.core import mail
 
 from accounts.serializer import UserSerializer
 
-from .models import CustomUser
+from .models import CustomUser, EmailActivationToken
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
 
@@ -72,3 +73,14 @@ class UserRegistration(TestCase):
             UserSerializer().create(
                 validated_data={"email": "test@user.com", "password": "15798452"}
             )
+
+    def test_send_registration_token(self):
+        response = self.client.post(
+            reverse("usuario-list"),
+            {"email": "test@user.com", "password": PASSWORD},
+            format="json",
+        )
+        user = CustomUser.objects.first()
+        token = EmailActivationToken.objects.first()
+        self.assertEqual(user.pk, token.user.pk)
+        self.assertIn(f"Seu código de ativação: {token.token}", mail.outbox[0].body)
