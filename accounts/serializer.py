@@ -1,6 +1,7 @@
 from telnetlib import SE
 from accounts.models import CustomUser
 from rest_framework.serializers import Serializer, EmailField, CharField
+from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(Serializer):
@@ -9,6 +10,7 @@ class UserSerializer(Serializer):
 
     def create(self, validated_data):
         user = CustomUser(email=validated_data["email"], is_active=False)
+        validate_password(validated_data["password"], user=user)
         user.set_password(validated_data["password"])
         user.save()
         return user
