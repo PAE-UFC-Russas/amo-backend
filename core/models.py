@@ -9,5 +9,11 @@ class Curso(models.Model):
         return f"Curso: {self.nome}"
 
 
-class Disciplina(models.Model):
-    pass
+class Disciplinas(models.Model):
+    nome = models.TextField()
+    descricao = models.TextField()
+
+    cursos = models.ManyToManyField(Curso)
+
+    def __str__(self):
+        return f"Curso: {self.nome}"
