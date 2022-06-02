@@ -6,10 +6,12 @@ from accounts.models import CustomUser
 from rest_framework.decorators import action
 from core.serializer import CursoSerializer
 
+from django.core.exceptions import ObjectDoesNotExist
+
 
 class CursoViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = CursoSerializer
+    # permission_classes = [IsAuthenticated]
+    # serializer_class = CursoSerializer
 
     def list(self, request):
 
@@ -26,6 +28,9 @@ class CursoViewSet(ViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, pk=None):
-        curso = Curso.objects.filter(id=pk)
-        curso.delete()
-        return Response("OK")
+        try:
+            curso = Curso.objects.get(id=pk)
+            curso.delete()
+            return Response("Curso deletado")
+        except ObjectDoesNotExist:
+            return Response("Não deletado/Não existe este curso")
