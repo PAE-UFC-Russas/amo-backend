@@ -34,3 +34,10 @@ class CursoViewSet(ViewSet):
             return Response("Curso deletado")
         except ObjectDoesNotExist:
             return Response("Não deletado/Não existe este curso")
+
+    def partial_update(self, request, *args, **kwargs):
+        curso = Curso.objects.get(pk=kwargs.get("pk"))
+        serializer = CursoSerializer(curso, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
