@@ -1,17 +1,17 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from core.models import Curso
+from core.models import Curso, Disciplinas
 from accounts.models import CustomUser
 from rest_framework.decorators import action
-from core.serializer import CursoSerializer
+from core.serializer import CursoSerializer, DisciplinaSerializer
 
 from django.core.exceptions import ObjectDoesNotExist
 
 
 class CursoViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = CursoSerializer
+    # permission_classes = [IsAuthenticated]
+    # serializer_class = CursoSerializer
 
     def list(self, request):
 
@@ -40,4 +40,22 @@ class CursoViewSet(ViewSet):
         serializer = CursoSerializer(curso, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+class DisciplinaViewSet(ViewSet):
+    # permission_classes = [IsAuthenticated]
+    # serializer_class = CursoSerializer
+
+    def list(self, request):
+        """Retorna uma lista de disciplinas"""
+
+        disciplinas = Disciplinas.objects.all()
+        serializer = DisciplinaSerializer(disciplinas, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        """Adiciona uma disciplina"""
+        serializer = DisciplinaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
         return Response(serializer.data)

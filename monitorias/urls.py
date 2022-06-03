@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from core.views import CursoViewSet
+from core.views import CursoViewSet, DisciplinaViewSet
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitView
@@ -22,6 +22,8 @@ from rest_framework.authtoken import views as auth_views
 
 router = routers.DefaultRouter()
 router.register(r"cursos", CursoViewSet, basename="cursos")
+router.register(r"disciplinas", DisciplinaViewSet, basename="disciplinas")
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),

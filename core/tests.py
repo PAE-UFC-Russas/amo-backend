@@ -30,3 +30,17 @@ class CursoTestCase(APITestCase):
     def test_no_auth(self):
         response = self.client.get(reverse("cursos-list"))
         self.assertEqual(response.status_code, 401)
+
+
+class testaDisciplina(APITestCase):
+    def criar(self):
+        curso = Curso.objects.create(
+            nome="Ciência da Computação",
+            descricao="Curso de Bacharelado em Ciência da Computação da UFC em Russas",
+        )
+        disciplina1 = Disciplinas.objects.create(nome="Requisitos", descricao="Prof Patricia", curso=curso)
+        disciplina2 = Disciplinas.objects.create(
+            nome="FUP",
+            descricao="Fundamentos da programação",curso=curso
+        )
+    def listar_disciplinas
