@@ -10,8 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class CursoViewSet(ViewSet):
-    # permission_classes = [IsAuthenticated]
-    # serializer_class = CursoSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_class = CursoSerializer
 
     def list(self, request):
 
