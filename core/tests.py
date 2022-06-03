@@ -42,7 +42,7 @@ class testaDisciplina(APITestCase):
             nome="FUP",
             descricao="Fundamentos da programação",curso=curso
         )
-    def listar_disciplinas:
+    def listar_disciplinas(self):
         pass
 
 
