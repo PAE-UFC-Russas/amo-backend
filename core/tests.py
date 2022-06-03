@@ -32,5 +32,3 @@ class CursoTestCase(APITestCase):
         self.assertEqual(response.status_code, 401)
 
 
-class testaDisciplina(APITestCase):
-    pass
