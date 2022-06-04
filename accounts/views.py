@@ -1,11 +1,16 @@
 from random import randint
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
+from django.utils.timezone import now
 from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from accounts.models import CustomUser, EmailActivationToken
-from accounts.serializer import UserSerializer
+from accounts.models import EmailActivationToken
+from accounts.serializer import EmailValidationTokenSerializer, UserSerializer
 
 
 class UserViewSet(ViewSet):
@@ -26,3 +31,18 @@ class UserViewSet(ViewSet):
             )
             email.send()
         return Response(serializer.data)
+
+    @extend_schema(request=EmailValidationTokenSerializer)
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def activate(self, request, pk=None):
+        try:
+            token = EmailActivationToken.objects.get(
+                token=request.data["token"], email=request.user.email
+            )
+        except ObjectDoesNotExist:
+            return Response(None, 404)
+        token.activated_at = now()
+        token.save()
+        request.user.is_email_active = True
+        request.user.save()
+        return Response(None, 200)

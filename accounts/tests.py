@@ -1,11 +1,10 @@
 from django.contrib.auth.hashers import make_password
-from django.urls import reverse
+from django.core import mail
+from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
-from rest_framework.reverse import reverse as rest_reverse
-from django.core.exceptions import ValidationError
-from django.core import mail
 
 from accounts.serializer import UserSerializer
 
@@ -44,7 +43,7 @@ class CustomUserTest(TestCase):
         self.assertTrue(user.is_superuser)
 
 
-class UserRegistration(TestCase):
+class UserRegistration(APITestCase):
     def test_user_registration(self):
         response = self.client.post(
             reverse("usuario-list"),
@@ -54,7 +53,7 @@ class UserRegistration(TestCase):
         user = CustomUser.objects.first()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(user.email, response.data["email"])
-        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_email_active)
 
     def test_easy_password(self):
         with self.assertRaises(ValidationError):
@@ -84,3 +83,50 @@ class UserRegistration(TestCase):
         token = EmailActivationToken.objects.first()
         self.assertEqual(user.pk, token.user.pk)
         self.assertIn(f"Seu código de ativação: {token.token}", mail.outbox[0].body)
+
+    def test_email_activation(self):
+        """Verifica a confirmação do email, começando com o cadastro do usuário."""
+        # realiza o cadastro do usuário
+        self.client.post(
+            reverse("usuario-list"),
+            {"email": "test@user.com", "password": PASSWORD},
+            format="json",
+        )
+
+        # verifica que email não foi confirmardo
+        user = CustomUser.objects.first()
+        self.assertFalse(user.is_email_active)
+
+        # faz a ativação
+        auth_token = Token.objects.create(user=user)
+        activation_token = EmailActivationToken.objects.first()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
+        response = self.client.post(
+            reverse("usuario-activate", args=[1]),
+            {"token": f"{activation_token.token}"},
+        )
+
+        # verifica se foi ativado com sucesso
+        user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(user.is_email_active)
+
+    def test_no_email_token(self):
+        """Verifica que erro é retornado em uma tentativa sem o token de confirmação."""
+        user = CustomUser.objects.create_user(
+            email="usuario@test.com", password=PASSWORD
+        )
+        auth_token = Token.objects.create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
+        response = self.client.post(
+            reverse("usuario-activate", args=[1]), {"token": "12345hgjkhjk"}
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_no_auth_token(self):
+        """Verifica se uma tentativa de validação sem o token de autenticação é recusada."""
+        response = self.client.post(
+            reverse("usuario-activate", args=[1]),
+            {"token": "123456"},
+        )
+        self.assertEqual(response.status_code, 401)
