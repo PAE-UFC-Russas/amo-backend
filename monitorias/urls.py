@@ -19,13 +19,15 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitView
 from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
+from accounts.views import UserViewSet
 
 router = routers.DefaultRouter()
 router.register(r"cursos", CursoViewSet, basename="cursos")
+router.register(r"usuario", UserViewSet, basename="usuario")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/auth/", auth_views.obtain_auth_token, name="obtain-api-token"),
+    path("usuario/login/", auth_views.obtain_auth_token, name="obtain-api-token"),
     path("", include(router.urls)),
     # documentação/drf_spectacular
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

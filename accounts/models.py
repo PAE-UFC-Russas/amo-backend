@@ -28,6 +28,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), blank=False, unique=True)
+    is_email_active = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -35,3 +36,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class EmailActivationToken(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    email = models.EmailField(blank=False)
+    token = models.CharField(unique=True, blank=False, max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    activated_at = models.DateTimeField(null=True)
