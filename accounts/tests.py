@@ -46,7 +46,7 @@ class CustomUserTest(TestCase):
 class UserRegistration(APITestCase):
     def test_user_registration(self):
         response = self.client.post(
-            reverse("usuario-list"),
+            reverse("usuario-registrar"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
         )
@@ -75,7 +75,7 @@ class UserRegistration(APITestCase):
 
     def test_send_registration_token(self):
         response = self.client.post(
-            reverse("usuario-list"),
+            reverse("usuario-registrar"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
         )
@@ -88,7 +88,7 @@ class UserRegistration(APITestCase):
         """Verifica a confirmação do email, começando com o cadastro do usuário."""
         # realiza o cadastro do usuário
         self.client.post(
-            reverse("usuario-list"),
+            reverse("usuario-registrar"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
         )
@@ -102,7 +102,7 @@ class UserRegistration(APITestCase):
         activation_token = EmailActivationToken.objects.first()
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
         response = self.client.post(
-            reverse("usuario-activate", args=[1]),
+            reverse("usuario-ativar", args=[1]),
             {"token": f"{activation_token.token}"},
         )
 
@@ -119,14 +119,14 @@ class UserRegistration(APITestCase):
         auth_token = Token.objects.create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
         response = self.client.post(
-            reverse("usuario-activate", args=[1]), {"token": "12345hgjkhjk"}
+            reverse("usuario-ativar", args=[1]), {"token": "12345hgjkhjk"}
         )
         self.assertEqual(response.status_code, 404)
 
     def test_no_auth_token(self):
         """Verifica se uma tentativa de validação sem o token de autenticação é recusada."""
         response = self.client.post(
-            reverse("usuario-activate", args=[1]),
+            reverse("usuario-ativar", args=[1]),
             {"token": "123456"},
         )
         self.assertEqual(response.status_code, 401)

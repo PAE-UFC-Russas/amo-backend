@@ -27,7 +27,7 @@ router.register(r"usuario", UserViewSet, basename="usuario")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/auth/", auth_views.obtain_auth_token, name="obtain-api-token"),
+    path("usuario/login/", auth_views.obtain_auth_token, name="obtain-api-token"),
     path("", include(router.urls)),
     # documentação/drf_spectacular
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

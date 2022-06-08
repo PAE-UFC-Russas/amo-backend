@@ -15,7 +15,8 @@ from accounts.serializer import EmailValidationTokenSerializer, UserSerializer
 
 class UserViewSet(ViewSet):
     @extend_schema(request=UserSerializer, responses=UserSerializer)
-    def create(self, request):
+    @action(detail=False, methods=["post"])
+    def registrar(self, request):
         """Realiza o cadastro de um novo usuário."""
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -34,7 +35,7 @@ class UserViewSet(ViewSet):
 
     @extend_schema(request=EmailValidationTokenSerializer)
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
-    def activate(self, request, pk=None):
+    def ativar(self, request, pk=None):
         try:
             token = EmailActivationToken.objects.get(
                 token=request.data["token"], email=request.user.email
