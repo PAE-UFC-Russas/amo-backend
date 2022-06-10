@@ -4,7 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 from core.models import Curso, Disciplinas
 from accounts.models import CustomUser
 from rest_framework.decorators import action
-from core.serializer import CursoSerializer, DisciplinaSerializer
+from core.serializer import (
+    CursoSerializer,
+    DisciplinaRequestSerializer,
+    DisciplinaResponseSerializer,
+)
+from drf_spectacular.utils import extend_schema
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -42,20 +47,24 @@ class CursoViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
+
 class DisciplinaViewSet(ViewSet):
     # permission_classes = [IsAuthenticated]
-    # serializer_class = CursoSerializer
 
+    @extend_schema(responses=DisciplinaResponseSerializer)
     def list(self, request):
         """Retorna uma lista de disciplinas"""
 
         disciplinas = Disciplinas.objects.all()
-        serializer = DisciplinaSerializer(disciplinas, many=True)
+        serializer = DisciplinaResponseSerializer(disciplinas, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=DisciplinaRequestSerializer, responses=DisciplinaResponseSerializer
+    )
     def create(self, request):
         """Adiciona uma disciplina"""
-        serializer = DisciplinaSerializer(data=request.data)
+        serializer = DisciplinaRequestSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
         return Response(serializer.data)

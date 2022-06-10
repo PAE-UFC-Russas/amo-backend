@@ -15,13 +15,35 @@ class CursoSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["id", "nome", "descricao"]
 
 
-class DisciplinaSerializer(serializers.HyperlinkedModelSerializer):
+class DisciplinaRequestSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializer utilizado para criar e atualizar disciplinas."""
+
     nome = serializers.CharField()
     descricao = serializers.CharField()
+    cursos = serializers.PrimaryKeyRelatedField(many=True, queryset=Curso.objects.all())
 
     def create(self, validated_data):
-        return Disciplinas.objects.create(**validated_data)
+        cursos = validated_data.pop("cursos")
+        disciplina = Disciplinas.objects.create(**validated_data)
+        for curso in cursos:
+            disciplina.cursos.add(curso)
+        disciplina.save()
+        return disciplina
 
     class Meta:
         model = Disciplinas
-        fields = ["id", "nome", "descricao"]
+        queryset = Disciplinas.objects.all()
+        fields = ["id", "nome", "descricao", "cursos"]
+
+
+class DisciplinaResponseSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializer utilizado para responder ao cliente."""
+
+    nome = serializers.CharField()
+    descricao = serializers.CharField()
+    cursos = CursoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Disciplinas
+        queryset = Disciplinas.objects.all()
+        fields = ["id", "nome", "descricao", "cursos"]
