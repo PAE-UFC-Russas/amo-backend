@@ -9,23 +9,40 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu"
+if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+    DEBUG = False
+    ALLOWED_HOSTS = os.getenv("DJANGO_HOSTS").split(";")
+    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+else:
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = ("django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu",)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+    # SECURITY WARNING: don't run with debug turned on in production!
+    DEBUG = True
 
-ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = []
+
+    # Database
+    # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR + "db.sqlite3",
+        }
+    }
 
 
 # Application definition
@@ -52,6 +69,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "monitorias.urls"
@@ -74,16 +92,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "monitorias.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
 # User models
 AUTH_USER_MODEL = "accounts.CustomUser"
@@ -129,7 +137,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_URL = "/static/"
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -140,6 +152,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
