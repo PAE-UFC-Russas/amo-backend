@@ -38,4 +38,5 @@ urlpatterns = [
         SpectacularSwaggerSplitView.as_view(url_name="schema"),
         name="openapi",
     ),
+    path("api-auth/", include("rest_framework.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
