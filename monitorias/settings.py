@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 import dj_database_url
+import rollbar
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -44,7 +44,6 @@ else:
         }
     }
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -70,6 +69,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "rollbar.contrib.django.middleware.RollbarNotifierMiddleware",
 ]
 
 ROOT_URLCONF = "monitorias.urls"
@@ -91,7 +91,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "monitorias.wsgi.application"
-
 
 # User models
 AUTH_USER_MODEL = "accounts.CustomUser"
@@ -121,7 +120,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -132,7 +130,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -148,7 +145,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
@@ -156,3 +152,12 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# https://docs.rollbar.com/docs
+ROLLBAR = {
+    "access_token": "cd05d027472f40898ca9021789476e39",
+    "environment": "development" if DEBUG else "production",
+    "root": BASE_DIR,
+}
+
+rollbar.init(**ROLLBAR)
