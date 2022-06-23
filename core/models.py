@@ -7,3 +7,13 @@ class Curso(models.Model):
 
     def __str__(self):
         return f"Curso: {self.nome}"
+
+
+class Disciplinas(models.Model):
+    nome = models.TextField()
+    descricao = models.TextField()
+
+    cursos = models.ManyToManyField(Curso)
+
+    def __str__(self):
+        return f"Curso: {self.nome}"
