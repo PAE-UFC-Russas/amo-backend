@@ -158,6 +158,7 @@ ROLLBAR = {
     "access_token": "cd05d027472f40898ca9021789476e39",
     "environment": "development" if DEBUG else "production",
     "root": BASE_DIR,
+    "suppress_reinit_warning": True,
 }
 
 rollbar.init(**ROLLBAR)
