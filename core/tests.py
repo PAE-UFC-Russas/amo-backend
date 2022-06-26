@@ -4,34 +4,96 @@ from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
+from rest_framework import status
 
 from accounts.models import CustomUser
 from core.models import Curso, Disciplinas
-from core.serializer import DisciplinaResponseSerializer
+from core.serializer import DisciplinaResponseSerializer, CursoSerializer
 
 
 class CursoTestCase(APITestCase):
     def setUp(self):
-        user = CustomUser.objects.create(
-            email="test@user.com", password=make_password("password")
+        self.user = CustomUser.objects.create(
+            email="user@localhost", password=make_password("password")
         )
-        self.token = Token.objects.create(user=user)
+        self.admin = CustomUser.objects.create_superuser(
+            email="superuser@localhost", password=make_password("adminpassword")
+        )
 
-    def test_get_list(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
-        curso = Curso.objects.create(
+        self.token = Token.objects.create(user=self.user)
+        self.admin_token = Token.objects.create(user=self.admin)
+
+        self.curso = Curso.objects.create(
             nome="Ciência da Computação",
             descricao="Curso de Bacharelado em Ciência da Computação da UFC em Russas",
         )
-        response = self.client.get(reverse("cursos-list"))
+
+    def test_get_list(self):
+        """Verifica a lista de Cursos"""
+        response = self.client.get(
+            reverse("cursos-list"), HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+        self.assertEqual(response.data, [CursoSerializer(self.curso).data])
+
+    def test_create(self):
+        """Verifica a criação de Cursos."""
+        response = self.client.post(
+            reverse("cursos-list"),
+            {"nome": "curso do admin", "descricao": "curso"},
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+        )
+        self.assertEqual(Curso.objects.all().count(), 2)
         self.assertEqual(
-            response.data,
-            [{"id": curso.id, "nome": curso.nome, "descricao": curso.descricao}],
+            CursoSerializer(Curso.objects.get(nome="curso do admin")).data,
+            json.loads(response.content),
         )
 
-    def test_no_auth(self):
-        response = self.client.get(reverse("cursos-list"))
-        self.assertEqual(response.status_code, 401)
+    def test_unauthenticated_access(self):
+        """Verifica acesso de usuários não autenticados."""
+        with self.subTest("Listar Cursos"):
+            response = self.client.get(reverse("cursos-list"))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Criar Curso"):
+            response = self.client.post(
+                reverse("cursos-list"), {"nome": "curso", "descricao": ""}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Editar Curso"):
+            response = self.client.patch(
+                reverse("cursos-detail", args=[1]), {"nome": "editado"}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Remover Curso"):
+            response = self.client.delete(reverse("cursos-detail", args=[1]))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_access(self):
+        """Verifica acesso de usuários comuns autenticados."""
+        with self.subTest("Criar Curso"):
+            response = self.client.post(
+                reverse("cursos-list"),
+                {"nome": "curso", "descricao": ""},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("Editar Curso"):
+            response = self.client.patch(
+                reverse("cursos-detail", args=[1]),
+                {"nome": "editado"},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("Remover Curso"):
+            response = self.client.delete(
+                reverse("cursos-detail", args=[1]),
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DisciplinaTestCase(APITestCase):
