@@ -159,6 +159,7 @@ ROLLBAR = {
     "environment": "development" if DEBUG else "production",
     "root": BASE_DIR,
     "suppress_reinit_warning": True,
+    "enabled": not DEBUG,
 }
 
 rollbar.init(**ROLLBAR)
