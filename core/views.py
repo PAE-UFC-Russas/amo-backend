@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from core.access_policy import CursoAccessPolicy
+from core.access_policy import CursoAccessPolicy, DisciplinaAccessPolicy
 from core.models import Curso, Disciplinas
 from core.serializer import (
     CursoSerializer,
@@ -57,8 +57,8 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
         return Response(serializer.data)
 
 
-class DisciplinaViewSet(ViewSet):
-    # permission_classes = [IsAuthenticated]
+class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
+    access_policy = DisciplinaAccessPolicy
 
     @extend_schema(responses=DisciplinaResponseSerializer)
     def list(self, request):

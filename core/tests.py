@@ -133,11 +133,13 @@ class CursoTestCase(APITestCase):
 
 class DisciplinaTestCase(APITestCase):
     def setUp(self):
-        user = CustomUser.objects.create(
-            email="test@user.com", password=make_password("password")
+        self.user = CustomUser.objects.create(email="user@localhost", password="")
+        self.token = Token.objects.create(user=self.user)
+
+        self.admin = CustomUser.objects.create_superuser(
+            email="admin@localhost", password=""
         )
-        self.token = Token.objects.create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
+        self.admin_token = Token.objects.create(user=self.admin)
 
         self.curso_cc = Curso.objects.create(
             nome="Ciência da Computação",
@@ -173,6 +175,7 @@ class DisciplinaTestCase(APITestCase):
                 "visão geral da área enquanto ciência.",
                 cursos=[self.curso_cc.pk],
             ),
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
         )
         self.assertEqual(Disciplinas.objects.all().count(), 3)
         self.assertEqual(
@@ -195,7 +198,10 @@ class DisciplinaTestCase(APITestCase):
 
     def test_list(self):
         """Verifica que a view list retorna todos os objetos"""
-        response = self.client.get(reverse("disciplinas-list"))
+        response = self.client.get(
+            reverse("disciplinas-list"),
+            HTTP_AUTHORIZATION=f"Token {self.token.key}",
+        )
         self.assertEqual(
             [
                 DisciplinaResponseSerializer(self.disciplina_req).data,
@@ -203,3 +209,32 @@ class DisciplinaTestCase(APITestCase):
             ],
             json.loads(response.content),
         )
+
+    def test_unauthenticated_access(self):
+        """Verifica controle de acesso para usuários não autenticados"""
+        with self.subTest("Listar Disciplinas"):
+            response = self.client.get(reverse("disciplinas-list"))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Criar Disciplina"):
+            response = self.client.post(
+                reverse("disciplinas-list"), {"nome": "disciplina", "descricao": ""}
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_access(self):
+        """Verifica controle de acesso para usuários autenticados"""
+        with self.subTest("Listar Disciplinas"):
+            response = self.client.get(
+                reverse("disciplinas-list"),
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("Criar Disciplina"):
+            response = self.client.post(
+                reverse("disciplinas-list"),
+                {"nome": "disciplina", "descricao": ""},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

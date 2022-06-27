@@ -16,3 +16,20 @@ class CursoAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
     ]
+
+
+class DisciplinaAccessPolicy(AccessPolicy):
+    """Define o controle de acesso para DisciplinaViewSet"""
+
+    statements = [
+        {
+            "action": ["list"],
+            "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": ["create"],
+            "principal": ["admin"],
+            "effect": "allow",
+        },
+    ]
