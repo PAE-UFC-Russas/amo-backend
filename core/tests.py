@@ -35,6 +35,13 @@ class CursoTestCase(APITestCase):
         )
         self.assertEqual(response.data, [CursoSerializer(self.curso).data])
 
+    def test_retrieve(self):
+        response = self.client.get(
+            reverse("cursos-detail", args=[1]),
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+        )
+        self.assertEqual(response.data, CursoSerializer(self.curso).data)
+
     def test_create(self):
         """Verifica a criação de Cursos."""
         response = self.client.post(
@@ -52,6 +59,10 @@ class CursoTestCase(APITestCase):
         """Verifica acesso de usuários não autenticados."""
         with self.subTest("Listar Cursos"):
             response = self.client.get(reverse("cursos-list"))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Detalhe de Curso"):
+            response = self.client.get(reverse("cursos-detail", args=[1]))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         with self.subTest("Criar Curso"):
@@ -72,6 +83,13 @@ class CursoTestCase(APITestCase):
 
     def test_user_access(self):
         """Verifica acesso de usuários comuns autenticados."""
+        with self.subTest("Ler Curso"):
+            response = self.client.get(
+                reverse("cursos-detail", args=[1]),
+                {"nome": "editado"},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with self.subTest("Criar Curso"):
             response = self.client.post(
                 reverse("cursos-list"),

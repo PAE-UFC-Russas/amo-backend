@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
 from rest_framework.response import Response
@@ -18,10 +19,16 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
     serializer_class = CursoSerializer
 
     def list(self, request):
-
         """Retorna uma lista de Cursos"""
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        """Retorna um Curso"""
+        queryset = Curso.objects.all()
+        curso = get_object_or_404(queryset, pk=pk)
+        serializer = CursoSerializer(curso)
         return Response(serializer.data)
 
     def create(self, request):

@@ -11,7 +11,7 @@ class CursoAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
-            "action": ["create", "partial_update", "destroy"],
+            "action": ["retrieve", "create", "partial_update", "destroy"],
             "principal": ["admin"],
             "effect": "allow",
         },
