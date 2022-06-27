@@ -1,19 +1,16 @@
-from rest_framework.viewsets import ViewSet
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
-from core.models import Curso, Disciplinas
+from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
+
 from core.access_policy import CursoAccessPolicy
-from accounts.models import CustomUser
-from rest_framework.decorators import action
+from core.models import Curso, Disciplinas
 from core.serializer import (
     CursoSerializer,
     DisciplinaRequestSerializer,
     DisciplinaResponseSerializer,
 )
-from drf_spectacular.utils import extend_schema
-
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class CursoViewSet(AccessViewSetMixin, ViewSet):
