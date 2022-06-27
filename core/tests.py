@@ -55,6 +55,23 @@ class CursoTestCase(APITestCase):
             json.loads(response.content),
         )
 
+    def test_delete(self):
+        """Verifica a remoção de Curso"""
+        with self.subTest("Remover um Curso"):
+            response = self.client.delete(
+                reverse("cursos-detail", args=[1]),
+                HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            self.assertEqual(Curso.objects.all().count(), 0)
+
+        with self.subTest("Remover Curso inexistente"):
+            response = self.client.delete(
+                reverse("cursos-detail", args=[100]),
+                HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_unauthenticated_access(self):
         """Verifica acesso de usuários não autenticados."""
         with self.subTest("Listar Cursos"):

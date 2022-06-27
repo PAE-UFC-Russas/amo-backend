@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
@@ -38,13 +39,15 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
             serializer.save()
         return Response(serializer.data)
 
+    @extend_schema(responses={204: None, 404: None})
     def destroy(self, request, pk=None):
+        """Remove um Curso"""
         try:
             curso = Curso.objects.get(id=pk)
             curso.delete()
-            return Response("Curso deletado")
+            return Response("", status.HTTP_204_NO_CONTENT)
         except ObjectDoesNotExist:
-            return Response("Não deletado/Não existe este curso")
+            return Response("", status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
         curso = Curso.objects.get(pk=kwargs.get("pk"))
