@@ -19,6 +19,8 @@ django==4.0.4 \
 djangorestframework==3.13.1 \
     --hash=sha256:24c4bf58ed7e85d1fe4ba250ab2da926d263cd57d64b03e8dcef0ac683f8b1aa \
     --hash=sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee
+drf-access-policy==1.1.1 \
+    --hash=sha256:24fe87b7483d0bd89d3e0a976c3b40dafe4d0a2a4608bd2342a00e81281d9292
 drf-spectacular==0.22.1 \
     --hash=sha256:866e16ddaae167a1234c76cd8c351161373551db994ce9665b347b32d5daf38b \
     --hash=sha256:17ac5e31e5d6150dd5fa10843b429202f4f38069202acc44394cc5a771de63d9
@@ -91,6 +93,9 @@ psycopg2-binary==2.9.3 \
     --hash=sha256:99485cab9ba0fa9b84f1f9e1fef106f44a46ef6afdeec8885e0b88d0772b49e8 \
     --hash=sha256:46f0e0a6b5fa5851bbd9ab1bc805eef362d3a230fbdfbc209f4a236d0a7a990d \
     --hash=sha256:accfe7e982411da3178ec690baaceaad3c278652998b2c45828aaac66cd8285f
+pyparsing==3.0.9 ; python_full_version >= "3.6.8" \
+    --hash=sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc \
+    --hash=sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb
 pyrsistent==0.18.1 ; python_version >= "3.7" \
     --hash=sha256:df46c854f490f81210870e509818b729db4488e1f30f2a1ce1698b2295a878d1 \
     --hash=sha256:5d45866ececf4a5fff8742c25722da6d4c9e180daa7b405dc0a2a2790d668c26 \

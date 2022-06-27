@@ -3,6 +3,7 @@ from django.core import mail
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
@@ -102,7 +103,7 @@ class UserRegistration(APITestCase):
         activation_token = EmailActivationToken.objects.first()
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
         response = self.client.post(
-            reverse("usuario-ativar", args=[1]),
+            reverse("usuario-ativar"),
             {"token": f"{activation_token.token}"},
         )
 
@@ -125,8 +126,64 @@ class UserRegistration(APITestCase):
 
     def test_no_auth_token(self):
         """Verifica se uma tentativa de validação sem o token de autenticação é recusada."""
-        response = self.client.post(
-            reverse("usuario-ativar", args=[1]),
-            {"token": "123456"},
-        )
+        response = self.client.post(reverse("usuario-ativar"), {"token": "123456"})
         self.assertEqual(response.status_code, 401)
+
+
+class AccessPolicyTestCase(APITestCase):
+    def setUp(self) -> None:
+        self.user = CustomUser.objects.create(
+            email="user@localhost", password=make_password("password")
+        )
+        self.token = Token.objects.create(user=self.user)
+
+    def test_unauthenticated_access(self):
+        """Verifica controle de acesso para usuários não autenticados"""
+        with self.subTest("Registrar Usuário"):
+            response = self.client.post(
+                reverse("usuario-registrar"),
+                {"email": "user2@localhost", "password": "ajfsd9p&*aa"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("Ativar email"):
+            response = self.client.post(reverse("usuario-ativar"))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        with self.subTest("Login"):
+            # A view de login é fornecida pelo Django Rest Framework, por isso
+            # não é controlada por UserViewAccessPolicy
+            response = self.client.post(
+                reverse("obtain-api-token"),
+                {"username": "user@localhost", "password": "password"},
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_access(self):
+        """Verifica controle de acesso para usuários autenticados"""
+        with self.subTest("Registrar"):
+            response = self.client.post(
+                reverse("usuario-registrar"),
+                {"email": "user1@localhost", "password": "f7aw87ho2q!"},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        with self.subTest("Ativar email"):
+            email_token = EmailActivationToken.objects.create(
+                user=self.user, email=self.user.email, token="000000"
+            )
+            response = self.client.post(
+                reverse("usuario-ativar"),
+                {"token": email_token.token},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("Login"):
+            response = self.client.post(
+                reverse("obtain-api-token"),
+                {"username": "user@localhost", "password": "password"},
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)

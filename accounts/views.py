@@ -4,16 +4,19 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
 from django.utils.timezone import now
 from drf_spectacular.utils import extend_schema
+from rest_access_policy import AccessViewSetMixin
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
+from accounts.access_policy import UserViewAccessPolicy
 from accounts.models import EmailActivationToken
 from accounts.serializer import EmailValidationTokenSerializer, UserSerializer
 
 
-class UserViewSet(ViewSet):
+class UserViewSet(AccessViewSetMixin, ViewSet):
+    access_policy = UserViewAccessPolicy
+
     @extend_schema(request=UserSerializer, responses=UserSerializer)
     @action(detail=False, methods=["post"])
     def registrar(self, request):
@@ -34,8 +37,8 @@ class UserViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(request=EmailValidationTokenSerializer)
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
-    def ativar(self, request, pk=None):
+    @action(detail=False, methods=["post"])
+    def ativar(self, request):
         try:
             token = EmailActivationToken.objects.get(
                 token=request.data["token"], email=request.user.email

@@ -1,28 +1,35 @@
-from rest_framework.viewsets import ViewSet
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
+from rest_access_policy import AccessViewSetMixin
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ViewSet
+
+from core.access_policy import CursoAccessPolicy, DisciplinaAccessPolicy
 from core.models import Curso, Disciplinas
-from accounts.models import CustomUser
-from rest_framework.decorators import action
 from core.serializer import (
     CursoSerializer,
     DisciplinaRequestSerializer,
     DisciplinaResponseSerializer,
 )
-from drf_spectacular.utils import extend_schema
-
-from django.core.exceptions import ObjectDoesNotExist
 
 
-class CursoViewSet(ViewSet):
-    permission_classes = [IsAuthenticated]
+class CursoViewSet(AccessViewSetMixin, ViewSet):
+    access_policy = CursoAccessPolicy
     serializer_class = CursoSerializer
 
     def list(self, request):
-
         """Retorna uma lista de Cursos"""
         cursos = Curso.objects.all()
         serializer = CursoSerializer(cursos, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        """Retorna um Curso"""
+        queryset = Curso.objects.all()
+        curso = get_object_or_404(queryset, pk=pk)
+        serializer = CursoSerializer(curso)
         return Response(serializer.data)
 
     def create(self, request):
@@ -32,13 +39,15 @@ class CursoViewSet(ViewSet):
             serializer.save()
         return Response(serializer.data)
 
+    @extend_schema(responses={204: None, 404: None})
     def destroy(self, request, pk=None):
+        """Remove um Curso"""
         try:
             curso = Curso.objects.get(id=pk)
             curso.delete()
-            return Response("Curso deletado")
+            return Response("", status.HTTP_204_NO_CONTENT)
         except ObjectDoesNotExist:
-            return Response("Não deletado/Não existe este curso")
+            return Response("", status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
         curso = Curso.objects.get(pk=kwargs.get("pk"))
@@ -48,8 +57,8 @@ class CursoViewSet(ViewSet):
         return Response(serializer.data)
 
 
-class DisciplinaViewSet(ViewSet):
-    # permission_classes = [IsAuthenticated]
+class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
+    access_policy = DisciplinaAccessPolicy
 
     @extend_schema(responses=DisciplinaResponseSerializer)
     def list(self, request):
