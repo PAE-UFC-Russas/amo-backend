@@ -185,6 +185,17 @@ class DisciplinaTestCase(APITestCase):
             json.loads(response.content),
         )
 
+    def test_retrieve(self):
+        """Verifica a leitura de um Disciplina"""
+        response = self.client.get(
+            reverse("disciplinas-detail", args=[1]),
+            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+        )
+        self.assertEqual(
+            DisciplinaResponseSerializer(Disciplinas.objects.get(id=1)).data,
+            json.loads(response.content),
+        )
+
     def test_relationship(self):
         """Verifica o funcionamento das relações com Curso"""
         disciplina = Disciplinas.objects.get(nome="Requisitos de Software")
@@ -216,6 +227,10 @@ class DisciplinaTestCase(APITestCase):
             response = self.client.get(reverse("disciplinas-list"))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+        with self.subTest("Ler Disciplina"):
+            response = self.client.get(reverse("disciplinas-detail", args=[1]))
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
         with self.subTest("Criar Disciplina"):
             response = self.client.post(
                 reverse("disciplinas-list"), {"nome": "disciplina", "descricao": ""}
@@ -230,6 +245,13 @@ class DisciplinaTestCase(APITestCase):
                 HTTP_AUTHORIZATION=f"Token {self.token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.subTest("Ler Disciplina"):
+            response = self.client.get(
+                reverse("disciplinas-detail", args=[1]),
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("Criar Disciplina"):
             response = self.client.post(
