@@ -28,7 +28,7 @@ class DisciplinaAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
-            "action": ["create"],
+            "action": ["create", "retrieve"],
             "principal": ["admin"],
             "effect": "allow",
         },
