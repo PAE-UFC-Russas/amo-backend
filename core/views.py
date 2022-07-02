@@ -77,9 +77,10 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
         if serializer.is_valid():
             serializer.save()
         return Response(DisciplinaResponseSerializer(serializer.instance).data)
+
     @extend_schema(
         request=DisciplinaRequestSerializer, responses=DisciplinaResponseSerializer
-    )    
+    )
     def retrieve(self, request, pk=None):
         """Retorna um Curso"""
         queryset = Disciplinas.objects.all()
@@ -96,14 +97,15 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
             return Response("", status.HTTP_204_NO_CONTENT)
         except ObjectDoesNotExist:
             return Response("", status.HTTP_404_NOT_FOUND)
+
     @extend_schema(
         request=DisciplinaRequestSerializer, responses=DisciplinaResponseSerializer
-    )    
+    )
     def partial_update(self, request, *args, **kwargs):
         disciplina = Disciplinas.objects.get(pk=kwargs.get("pk"))
-        serializer = DisciplinaRequestSerializer(disciplina, data=request.data, partial=True)
+        serializer = DisciplinaRequestSerializer(
+            disciplina, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(DisciplinaResponseSerializer(serializer.instance).data)
-
-
