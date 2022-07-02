@@ -30,4 +30,4 @@ jobs:
         pre-commit install --install-hooks
     - name: Run Pylint
       run: |
-        pre-commit run --hook-stage manual pylint --all-files
+        poetry run pre-commit run --hook-stage manual pylint --all-files
