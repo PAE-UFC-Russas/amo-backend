@@ -19,8 +19,8 @@ jobs:
         cache: poetry
     - name: Install Dependencies
       run: |
-      poetry env use "3.10"
-      poetry install --no-interaction
+        poetry env use "3.10"
+        poetry install --no-interaction
     - name: Setup pre-commit
       run: |
         pipx install pre-commit
