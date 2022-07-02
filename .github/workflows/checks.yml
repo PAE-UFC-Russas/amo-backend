@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  USE_PYTHON_VERSION: "3.10"
-
 jobs:
   pylint:
     runs-on: ubuntu-latest
@@ -18,11 +15,11 @@ jobs:
       run: pipx install poetry
     - uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.USE_PYTHON_VERSION }}
+        python-version: "3.10"
         cache: poetry
     - name: Install Dependencies
       run: |
-      poetry env use $USE_PYTHON_VERSION
+      poetry env use "3.10"
       poetry install --no-interaction
     - name: Setup pre-commit
       run: |
