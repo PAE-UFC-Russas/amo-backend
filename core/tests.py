@@ -2,13 +2,13 @@ import json
 
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
-from rest_framework.test import APITestCase
-from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
 from core.models import Curso, Disciplinas
-from core.serializer import DisciplinaResponseSerializer, CursoSerializer
+from core.serializer import CursoSerializer, DisciplinaResponseSerializer
 
 
 class CursoTestCase(APITestCase):
