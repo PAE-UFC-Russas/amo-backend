@@ -6,20 +6,10 @@ Preview: https://amo-mvp.herokuapp.com/ | API Schema: https://amo-mvp.herokuapp.
 As dependências do projeto são gerenciadas utilizando o [Poetry](https://python-poetry.org). Arquivos requirements.txt e requirements-dev.txt são gerados automaticamente para maior compatibilidade.
 #### Via Poetry
 ```bash
-# Instala o projeto e dependências para execução
-$ poetry install --no-dev
-
 # Instala o projeto e dependências para execução e desenvolvimento
 $ poetry install
 ```
-#### Via pip
-```bash
-# Instala dependências para execução
-$ pip install -r requirements.txt
- 
-# Instala dependências para desenvolvimento
-$ pip install -r requirements-dev.txt
-```
+
 
 ### Execução
 ```bash

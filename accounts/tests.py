@@ -1,3 +1,4 @@
+"""Testes do aplicativo 'accounts'."""
 from django.contrib.auth.hashers import make_password
 from django.core import mail
 from django.core.exceptions import ValidationError
@@ -15,13 +16,16 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 
 
 class UserAuthTest(APITestCase):
+    """Verifica a autenticação do usuário."""
+
     def setUp(self):
         user = CustomUser.objects.create(
             email="test@user.com", password=make_password(PASSWORD)
         )
-        token = Token.objects.create(user=user)
+        Token.objects.create(user=user)
 
     def test_get_user_api_key(self):
+        """Verifica que o processo de login retorna uma chave da API válida."""
         token = Token.objects.get(user__email="test@user.com")
         data = {"username": "test@user.com", "password": PASSWORD}
         response = self.client.post(reverse("obtain-api-token"), data, format="json")
@@ -29,7 +33,10 @@ class UserAuthTest(APITestCase):
 
 
 class CustomUserTest(TestCase):
+    """Testes relacionados a CustomUser."""
+
     def test_create_user(self):
+        """Verifica a criação de um usuário"""
         CustomUser.objects.create_user(email="usuario@test.com", password=PASSWORD)
 
         user = CustomUser.objects.first()
@@ -37,6 +44,7 @@ class CustomUserTest(TestCase):
         self.assertFalse(user.is_superuser)
 
     def test_create_superuser(self):
+        """Verifica a criação de um administrador."""
         CustomUser.objects.create_superuser(email="usuario@test.com", password=PASSWORD)
 
         user = CustomUser.objects.first()
@@ -45,7 +53,10 @@ class CustomUserTest(TestCase):
 
 
 class UserRegistration(APITestCase):
+    """Testes relacionados ao cadastro do usuário."""
+
     def test_user_registration(self):
+        """Verifica a criação de um usuário em UserViewSet"""
         response = self.client.post(
             reverse("usuario-registrar"),
             {"email": "test@user.com", "password": PASSWORD},
@@ -57,25 +68,29 @@ class UserRegistration(APITestCase):
         self.assertFalse(user.is_email_active)
 
     def test_easy_password(self):
+        """Verifica que uma senha fácil não é permitida."""
         with self.assertRaises(ValidationError):
             UserSerializer().create(
                 validated_data={"email": "test@user.com", "password": "password"}
             )
 
     def test_letters_only_password(self):
+        """Verifica que a senha não pode conter apenas letras."""
         with self.assertRaises(ValidationError):
             UserSerializer().create(
                 validated_data={"email": "test@user.com", "password": "hgfedcba"}
             )
 
     def test_numbers_only_password(self):
+        """Verifica que a senha não pode conter apenas números."""
         with self.assertRaises(ValidationError):
             UserSerializer().create(
                 validated_data={"email": "test@user.com", "password": "15798452"}
             )
 
     def test_send_registration_token(self):
-        response = self.client.post(
+        """Verifica o envio do código de ativação do email."""
+        self.client.post(
             reverse("usuario-registrar"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
@@ -130,7 +145,9 @@ class UserRegistration(APITestCase):
         self.assertEqual(response.status_code, 401)
 
 
-class AccessPolicyTestCase(APITestCase):
+class UserAccessPolicyTestCase(APITestCase):
+    """Verifica o controle de acesso para UserViewSet"""
+
     def setUp(self) -> None:
         self.user = CustomUser.objects.create(
             email="user@localhost", password=make_password("password")

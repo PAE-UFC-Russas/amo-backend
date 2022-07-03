@@ -1,3 +1,4 @@
+"""Conjunto de Views do aplicativo 'accounts'."""
 from random import randint
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,6 +16,8 @@ from accounts.serializer import EmailValidationTokenSerializer, UserSerializer
 
 
 class UserViewSet(AccessViewSetMixin, ViewSet):
+    """ViewSet para ações relacionadas ao usuário."""
+
     access_policy = UserViewAccessPolicy
 
     @extend_schema(request=UserSerializer, responses=UserSerializer)
@@ -39,6 +42,7 @@ class UserViewSet(AccessViewSetMixin, ViewSet):
     @extend_schema(request=EmailValidationTokenSerializer)
     @action(detail=False, methods=["post"])
     def ativar(self, request):
+        """Ativação do email do usuário."""
         try:
             token = EmailActivationToken.objects.get(
                 token=request.data["token"], email=request.user.email

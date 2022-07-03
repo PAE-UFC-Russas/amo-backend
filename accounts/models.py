@@ -1,10 +1,14 @@
+"""Este módulo define os modelos do aplicativo 'accounts'."""
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
+    """Define um 'manager' para utilização com CustomUser."""
+
     def create_user(self, email, password=None, **extra_fields):
+        """Cria um usuário."""
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         user = self.model(email=email, **extra_fields)
@@ -13,7 +17,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        # create superuser here
+        """Cria um administrador."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -26,6 +30,8 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser):
+    """Define um usuário customizado para utilizar o email para autenticação."""
+
     username = None
     email = models.EmailField(_("email address"), blank=False, unique=True)
     is_email_active = models.BooleanField(default=False)
@@ -39,6 +45,8 @@ class CustomUser(AbstractUser):
 
 
 class EmailActivationToken(models.Model):
+    """Token enviado ao usuário para ativação de seu email."""
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     email = models.EmailField(blank=False)
     token = models.CharField(unique=True, blank=False, max_length=6)
