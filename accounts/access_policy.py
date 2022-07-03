@@ -1,3 +1,4 @@
+"""Este módulo contem as definições de aplicativo 'accounts'."""
 from rest_access_policy import AccessPolicy
 
 

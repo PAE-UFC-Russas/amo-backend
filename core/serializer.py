@@ -1,9 +1,12 @@
+"""Este módulo contém os serializadores utilizados na aplicação 'core'."""
 from rest_framework import serializers
 
 from core.models import Curso, Disciplinas
 
 
 class CursoSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializador do modelo Curso."""
+
     nome = serializers.CharField()
     descricao = serializers.CharField()
 

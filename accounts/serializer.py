@@ -1,10 +1,13 @@
+"""Este módulo contém os serializadores utilizados na aplicação 'accounts'."""
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from accounts.models import CustomUser, EmailActivationToken
 
 
-class UserSerializer(serializers.Serializer):
+class UserSerializer(serializers.ModelSerializer):
+    """Serializador do modelo CustomUser."""
+
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
@@ -21,6 +24,8 @@ class UserSerializer(serializers.Serializer):
 
 
 class EmailValidationTokenSerializer(serializers.ModelSerializer):
+    """Serializador do modelo EmailValidationToken."""
+
     class Meta:
         model = EmailActivationToken
         fields = ["token"]

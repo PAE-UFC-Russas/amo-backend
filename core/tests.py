@@ -1,3 +1,4 @@
+"""Testes do aplicativo 'core'."""
 import json
 
 from django.contrib.auth.hashers import make_password
@@ -12,6 +13,8 @@ from core.serializer import CursoSerializer, DisciplinaResponseSerializer
 
 
 class CursoTestCase(APITestCase):
+    """Testes relacionados a CursoViewSet."""
+
     def setUp(self):
         self.user = CustomUser.objects.create(
             email="user@localhost", password=make_password("password")
@@ -36,6 +39,7 @@ class CursoTestCase(APITestCase):
         self.assertEqual(response.data, [CursoSerializer(self.curso).data])
 
     def test_retrieve(self):
+        """Verifica a visualização de um Curso"""
         response = self.client.get(
             reverse("cursos-detail", args=[1]),
             HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
@@ -71,6 +75,14 @@ class CursoTestCase(APITestCase):
                 HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class CursoAccessPolicyTestCase(APITestCase):
+    """Verifica o controle de acesso para CursoViewSet"""
+
+    def setUp(self) -> None:
+        self.user = CustomUser.objects.create(email="user@localhost", password="")
+        self.token = Token.objects.create(user=self.user)
 
     def test_unauthenticated_access(self):
         """Verifica acesso de usuários não autenticados."""
@@ -131,7 +143,9 @@ class CursoTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class DisciplinaTestCase(APITestCase):
+class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
+    """Testes relacionados a DisciplinaViewSet."""
+
     def setUp(self):
         self.user = CustomUser.objects.create(email="user@localhost", password="")
         self.token = Token.objects.create(user=self.user)
@@ -152,14 +166,14 @@ class DisciplinaTestCase(APITestCase):
 
         self.disciplina_req = Disciplinas.objects.create(
             nome="Requisitos de Software",
-            descricao="Definição de requisitos de produto, projetos, restrições, fronteiras de um sistema...",
+            descricao="Definição de requisitos de produto, projetos, restrições...",
         )
         self.disciplina_req.cursos.add(self.curso_cc)
         self.disciplina_req.save()
 
         self.disciplina_fup = Disciplinas.objects.create(
             nome="Fundamentos de Programação",
-            descricao="Algoritmos, Conceitos Fundamentais de Programação, Exceções, Controles de Fluxo...",
+            descricao="Algoritmos, Conceitos Fundamentais de Programação, Exceções...",
         )
         self.disciplina_fup.cursos.add(self.curso_cc)
         self.disciplina_fup.save()
@@ -171,8 +185,7 @@ class DisciplinaTestCase(APITestCase):
             reverse("disciplinas-list"),
             dict(
                 nome="Introdução a Ciência da Computação",
-                descricao="Introduzir a ciência da computação utilizando o seu histórico e fundamentos para dar uma "
-                "visão geral da área enquanto ciência.",
+                descricao="Introduzir a ciência da computação utilizando o seu histórico...",
                 cursos=[self.curso_cc.pk],
             ),
             HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
@@ -221,6 +234,14 @@ class DisciplinaTestCase(APITestCase):
             json.loads(response.content),
         )
 
+
+class DisciplinaAccessPolicyTestCase(APITestCase):
+    """Verifica o controle de acesso para DisciplinaViewSet"""
+
+    def setUp(self) -> None:
+        self.user = CustomUser.objects.create(email="user@localhost", password="")
+        self.token = Token.objects.create(user=self.user)
+
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
         with self.subTest("Listar Disciplinas"):
@@ -239,6 +260,7 @@ class DisciplinaTestCase(APITestCase):
 
     def test_user_access(self):
         """Verifica controle de acesso para usuários autenticados"""
+
         with self.subTest("Listar Disciplinas"):
             response = self.client.get(
                 reverse("disciplinas-list"),

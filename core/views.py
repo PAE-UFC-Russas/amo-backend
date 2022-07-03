@@ -1,3 +1,4 @@
+"""Conjunto de Views do aplicativo 'core'."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -16,6 +17,8 @@ from core.serializer import (
 
 
 class CursoViewSet(AccessViewSetMixin, ViewSet):
+    """ViewSet para ações relacionadas a cursos."""
+
     access_policy = CursoAccessPolicy
     serializer_class = CursoSerializer
 
@@ -25,7 +28,7 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
         serializer = CursoSerializer(cursos, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None):  # pylint: disable=C0103
         """Retorna um Curso"""
         queryset = Curso.objects.all()
         curso = get_object_or_404(queryset, pk=pk)
@@ -40,7 +43,7 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
         return Response(serializer.data)
 
     @extend_schema(responses={204: None, 404: None})
-    def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None):  # pylint: disable=C0103
         """Remove um Curso"""
         try:
             curso = Curso.objects.get(id=pk)
@@ -50,6 +53,7 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
             return Response("", status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
+        """Atualiza atributos de Curso"""
         curso = Curso.objects.get(pk=kwargs.get("pk"))
         serializer = CursoSerializer(curso, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -58,6 +62,8 @@ class CursoViewSet(AccessViewSetMixin, ViewSet):
 
 
 class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
+    """ViewSet para ações relacionadas a disciplinas."""
+
     access_policy = DisciplinaAccessPolicy
 
     @extend_schema(responses=DisciplinaResponseSerializer)
@@ -81,7 +87,7 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
     @extend_schema(
         request=DisciplinaRequestSerializer, responses=DisciplinaResponseSerializer
     )
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None):  # pylint: disable=C0103
         """Retorna um Curso"""
         queryset = Disciplinas.objects.all()
         disciplina = get_object_or_404(queryset, pk=pk)
@@ -89,7 +95,7 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
         return Response(DisciplinaResponseSerializer(serializer.instance).data)
 
     @extend_schema(responses={204: None, 404: None})
-    def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None):  # pylint: disable=C0103
         """Remove um Curso"""
         try:
             disciplina = Disciplinas.objects.get(id=pk)
@@ -102,6 +108,7 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
         request=DisciplinaRequestSerializer, responses=DisciplinaResponseSerializer
     )
     def partial_update(self, request, *args, **kwargs):
+        """Atualiza atributos de uma Disciplina"""
         disciplina = Disciplinas.objects.get(pk=kwargs.get("pk"))
         serializer = DisciplinaRequestSerializer(
             disciplina, data=request.data, partial=True
