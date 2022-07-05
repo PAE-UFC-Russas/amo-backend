@@ -6,7 +6,7 @@ authors = ["Juan Monteiro <juan.monteiro@jmonteiro.net>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Django = "^4.0.4"
+Django = "^4.0.6"
 djangorestframework = "^3.13.1"
 drf-spectacular = "^0.22.1"
 dj-database-url = "^0.5.0"
