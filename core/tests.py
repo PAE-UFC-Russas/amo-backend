@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
 from core.models import Curso, Disciplinas
-from core.serializer import CursoSerializer, DisciplinaResponseSerializer
+from core.serializer import CursoSerializer, DisciplinaSerializer
 
 
 class CursoTestCase(APITestCase):
@@ -192,7 +192,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         )
         self.assertEqual(Disciplinas.objects.all().count(), 3)
         self.assertEqual(
-            DisciplinaResponseSerializer(
+            DisciplinaSerializer(
                 Disciplinas.objects.get(nome="Introdução a Ciência da Computação")
             ).data,
             json.loads(response.content),
@@ -205,7 +205,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
             HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
         )
         self.assertEqual(
-            DisciplinaResponseSerializer(Disciplinas.objects.get(id=1)).data,
+            DisciplinaSerializer(Disciplinas.objects.get(id=1)).data,
             json.loads(response.content),
         )
 
@@ -230,8 +230,8 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
             )
             self.assertEqual(
                 [
-                    DisciplinaResponseSerializer(self.disciplina_req).data,
-                    DisciplinaResponseSerializer(self.disciplina_fup).data,
+                    DisciplinaSerializer(self.disciplina_req).data,
+                    DisciplinaSerializer(self.disciplina_fup).data,
                 ],
                 json.loads(response.content),
             )
@@ -242,7 +242,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                 HTTP_AUTHORIZATION=f"Token {self.token.key}",
             )
             self.assertEqual(
-                DisciplinaResponseSerializer(
+                DisciplinaSerializer(
                     Disciplinas.objects.filter(cursos__pk=1), many=True
                 ).data,
                 json.loads(response.content),
