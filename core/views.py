@@ -2,6 +2,7 @@
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_access_policy import AccessViewSetMixin
+from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
 from core.access_policy import CursoAccessPolicy, DisciplinaAccessPolicy
@@ -15,6 +16,8 @@ class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     access_policy = CursoAccessPolicy
     serializer_class = CursoSerializer
     queryset = Curso.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ["nome"]
 
 
 class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
@@ -23,5 +26,6 @@ class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0
     access_policy = DisciplinaAccessPolicy
     serializer_class = DisciplinaSerializer
     queryset = Disciplinas.objects.all()
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ["cursos"]
+    search_fields = ["nome"]
