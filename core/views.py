@@ -70,8 +70,10 @@ class DisciplinaViewSet(AccessViewSetMixin, ViewSet):
     def list(self, request):
         """Retorna uma lista de disciplinas"""
 
-        disciplinas = Disciplinas.objects.all()
-        serializer = DisciplinaResponseSerializer(disciplinas, many=True)
+        queryset = Disciplinas.objects.all()
+        if curso := self.request.query_params.get("curso"):
+            queryset = queryset.filter(curso__pk=curso)
+        serializer = DisciplinaResponseSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @extend_schema(

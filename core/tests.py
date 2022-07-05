@@ -221,18 +221,32 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         self.assertEqual(disciplina.cursos.count(), 0)
 
     def test_list(self):
-        """Verifica que a view list retorna todos os objetos"""
-        response = self.client.get(
-            reverse("disciplinas-list"),
-            HTTP_AUTHORIZATION=f"Token {self.token.key}",
-        )
-        self.assertEqual(
-            [
-                DisciplinaResponseSerializer(self.disciplina_req).data,
-                DisciplinaResponseSerializer(self.disciplina_fup).data,
-            ],
-            json.loads(response.content),
-        )
+        """Verifica que a view list retorna objetos esperados"""
+
+        with self.subTest("Todos as disciplinas"):
+            response = self.client.get(
+                reverse("disciplinas-list"),
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(
+                [
+                    DisciplinaResponseSerializer(self.disciplina_req).data,
+                    DisciplinaResponseSerializer(self.disciplina_fup).data,
+                ],
+                json.loads(response.content),
+            )
+
+        with self.subTest("Filtragem por curso"):
+            response = self.client.get(
+                reverse("disciplinas-list"),
+                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+            )
+            self.assertEqual(
+                DisciplinaResponseSerializer(
+                    Disciplinas.objects.filter(cursos__pk=1), many=True
+                ).data,
+                json.loads(response.content),
+            )
 
 
 class DisciplinaAccessPolicyTestCase(APITestCase):
