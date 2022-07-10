@@ -4,7 +4,6 @@ import json
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
@@ -23,9 +22,6 @@ class CursoTestCase(APITestCase):
             email="superuser@localhost", password=make_password("adminpassword")
         )
 
-        self.token = Token.objects.create(user=self.user)
-        self.admin_token = Token.objects.create(user=self.admin)
-
         self.curso = Curso.objects.create(
             nome="Ciência da Computação",
             descricao="Curso de Bacharelado em Ciência da Computação da UFC em Russas",
@@ -34,7 +30,8 @@ class CursoTestCase(APITestCase):
     def test_get_list(self):
         """Verifica a lista de Cursos"""
         response = self.client.get(
-            reverse("cursos-list"), HTTP_AUTHORIZATION=f"Token {self.token.key}"
+            reverse("cursos-list"),
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.data, [CursoSerializer(self.curso).data])
 
@@ -42,7 +39,7 @@ class CursoTestCase(APITestCase):
         """Verifica a visualização de um Curso"""
         response = self.client.get(
             reverse("cursos-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
         )
         self.assertEqual(response.data, CursoSerializer(self.curso).data)
 
@@ -51,7 +48,7 @@ class CursoTestCase(APITestCase):
         response = self.client.post(
             reverse("cursos-list"),
             {"nome": "curso do admin", "descricao": "curso"},
-            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
         )
         self.assertEqual(Curso.objects.all().count(), 2)
         self.assertEqual(
@@ -64,7 +61,7 @@ class CursoTestCase(APITestCase):
         with self.subTest("Remover um Curso"):
             response = self.client.delete(
                 reverse("cursos-detail", args=[1]),
-                HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
             self.assertEqual(Curso.objects.all().count(), 0)
@@ -72,6 +69,6 @@ class CursoTestCase(APITestCase):
         with self.subTest("Remover Curso inexistente"):
             response = self.client.delete(
                 reverse("cursos-detail", args=[100]),
-                HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

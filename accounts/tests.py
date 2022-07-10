@@ -19,10 +19,9 @@ class UserAuthTest(APITestCase):
     """Verifica a autenticação do usuário."""
 
     def setUp(self):
-        user = CustomUser.objects.create(
+        CustomUser.objects.create(
             email="test@user.com", password=make_password(PASSWORD)
         )
-        Token.objects.create(user=user)
 
     def test_get_user_api_key(self):
         """Verifica que o processo de login retorna uma chave da API válida."""
@@ -64,7 +63,7 @@ class UserRegistration(APITestCase):
         )
         user = CustomUser.objects.first()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(user.email, response.data["email"])
+        self.assertEqual(user.auth_token.key, response.data["token"])
         self.assertFalse(user.is_email_active)
 
     def test_easy_password(self):
@@ -114,9 +113,8 @@ class UserRegistration(APITestCase):
         self.assertFalse(user.is_email_active)
 
         # faz a ativação
-        auth_token = Token.objects.create(user=user)
         activation_token = EmailActivationToken.objects.first()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {user.auth_token.key}")
         response = self.client.post(
             reverse("usuario-ativar"),
             {"token": f"{activation_token.token}"},
@@ -132,8 +130,7 @@ class UserRegistration(APITestCase):
         user = CustomUser.objects.create_user(
             email="usuario@test.com", password=PASSWORD
         )
-        auth_token = Token.objects.create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {auth_token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {user.auth_token.key}")
         response = self.client.post(
             reverse("usuario-ativar", args=[1]), {"token": "12345hgjkhjk"}
         )
@@ -152,7 +149,6 @@ class UserAccessPolicyTestCase(APITestCase):
         self.user = CustomUser.objects.create(
             email="user@localhost", password=make_password("password")
         )
-        self.token = Token.objects.create(user=self.user)
 
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
@@ -182,7 +178,7 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("usuario-registrar"),
                 {"email": "user1@localhost", "password": "f7aw87ho2q!"},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -193,7 +189,7 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("usuario-ativar"),
                 {"token": email_token.token},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -201,6 +197,6 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("obtain-api-token"),
                 {"username": "user@localhost", "password": "password"},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)

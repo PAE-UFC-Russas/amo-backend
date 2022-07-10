@@ -6,6 +6,7 @@ from django.core.mail import EmailMessage
 from django.utils.timezone import now
 from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
@@ -20,7 +21,7 @@ class UserViewSet(AccessViewSetMixin, ViewSet):
 
     access_policy = UserViewAccessPolicy
 
-    @extend_schema(request=UserSerializer, responses=UserSerializer)
+    @extend_schema(request=UserSerializer, responses=AuthTokenSerializer)
     @action(detail=False, methods=["post"])
     def registrar(self, request):
         """Realiza o cadastro de um novo usuário."""
@@ -37,6 +38,7 @@ class UserViewSet(AccessViewSetMixin, ViewSet):
                 body=f"Seu código de ativação: {token.token}",
             )
             email.send()
+            return Response({"token": user.auth_token.key})
         return Response(serializer.data)
 
     @extend_schema(request=EmailValidationTokenSerializer)
