@@ -1,8 +1,6 @@
 """Conjunto de Views do aplicativo 'accounts'."""
-from random import randint
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage
 from django.utils.timezone import now
 from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
@@ -28,16 +26,6 @@ class UserViewSet(AccessViewSetMixin, ViewSet):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token = EmailActivationToken(
-                user=user, email=user.email, token=str(randint(0, 999999)).zfill(6)
-            )
-            token.save()
-            email = EmailMessage(
-                to=[user.email],
-                subject="Ativação do cadastro - Amebiente de Monitoria Online",
-                body=f"Seu código de ativação: {token.token}",
-            )
-            email.send()
             return Response({"token": user.auth_token.key})
         return Response(serializer.data)
 
