@@ -2,7 +2,6 @@
 import json
 
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
@@ -15,12 +14,10 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
 
     def setUp(self):
         self.user = CustomUser.objects.create(email="user@localhost", password="")
-        self.token = Token.objects.create(user=self.user)
 
         self.admin = CustomUser.objects.create_superuser(
             email="admin@localhost", password=""
         )
-        self.admin_token = Token.objects.create(user=self.admin)
 
         self.curso_cc = Curso.objects.create(
             nome="Ciência da Computação",
@@ -55,7 +52,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                 descricao="Introduzir a ciência da computação utilizando o seu histórico...",
                 cursos=[self.curso_cc.pk],
             ),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
         )
         self.assertEqual(Disciplinas.objects.all().count(), 3)
         self.assertEqual(
@@ -69,7 +66,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         """Verifica a leitura de um Disciplina"""
         response = self.client.get(
             reverse("disciplinas-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.admin.auth_token.key}",
         )
         self.assertEqual(
             DisciplinaSerializer(Disciplinas.objects.get(id=1)).data,
@@ -93,7 +90,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         with self.subTest("Todos as disciplinas"):
             response = self.client.get(
                 reverse("disciplinas-list"),
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(
                 [
@@ -106,7 +103,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         with self.subTest("Filtragem por curso"):
             response = self.client.get(
                 reverse("disciplinas-list"),
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(
                 DisciplinaSerializer(

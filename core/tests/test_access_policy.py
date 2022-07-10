@@ -1,7 +1,6 @@
 """Testes de controle de acesso no aplicativo 'core'."""
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
@@ -12,7 +11,6 @@ class CursoAccessPolicyTestCase(APITestCase):
 
     def setUp(self) -> None:
         self.user = CustomUser.objects.create(email="user@localhost", password="")
-        self.token = Token.objects.create(user=self.user)
 
     def test_unauthenticated_access(self):
         """Verifica acesso de usuários não autenticados."""
@@ -46,14 +44,14 @@ class CursoAccessPolicyTestCase(APITestCase):
             response = self.client.get(
                 reverse("cursos-detail", args=[1]),
                 {"nome": "editado"},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with self.subTest("Criar Curso"):
             response = self.client.post(
                 reverse("cursos-list"),
                 {"nome": "curso", "descricao": ""},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -61,14 +59,14 @@ class CursoAccessPolicyTestCase(APITestCase):
             response = self.client.patch(
                 reverse("cursos-detail", args=[1]),
                 {"nome": "editado"},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         with self.subTest("Remover Curso"):
             response = self.client.delete(
                 reverse("cursos-detail", args=[1]),
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -78,7 +76,6 @@ class DisciplinaAccessPolicyTestCase(APITestCase):
 
     def setUp(self) -> None:
         self.user = CustomUser.objects.create(email="user@localhost", password="")
-        self.token = Token.objects.create(user=self.user)
 
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
@@ -102,14 +99,14 @@ class DisciplinaAccessPolicyTestCase(APITestCase):
         with self.subTest("Listar Disciplinas"):
             response = self.client.get(
                 reverse("disciplinas-list"),
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Ler Disciplina"):
             response = self.client.get(
                 reverse("disciplinas-detail", args=[1]),
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -117,6 +114,6 @@ class DisciplinaAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("disciplinas-list"),
                 {"nome": "disciplina", "descricao": ""},
-                HTTP_AUTHORIZATION=f"Token {self.token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
