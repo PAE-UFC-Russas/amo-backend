@@ -1,7 +1,7 @@
 """
 APPS forum_app
 """
-from django.apps import AppConfig
+#from django.apps import AppConfig
 
 
 class ForumAmoConfig(AppConfig):
