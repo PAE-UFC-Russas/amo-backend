@@ -3,7 +3,7 @@ ADMIN forum_amo
 
 """
 
-#from django.contrib import admin
+from django.contrib import admin
 
 
 
