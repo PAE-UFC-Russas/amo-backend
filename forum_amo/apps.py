@@ -1,3 +1,6 @@
+"""
+APPS forum_app
+"""
 from django.apps import AppConfig
 
 
