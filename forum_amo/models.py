@@ -7,7 +7,7 @@ class Duvida(models.Model):
 
     """Modelo para dúvidas"""
 
-    titulo = models.CharField(max_length=None)
+    titulo = models.CharField(max_length=200)
     descricao = models.TextField(max_length=550)
     ESCOLHAS_PRIVACIDADE = ((0, 'Ocultar privacidade'),
                             (1, 'Não ocultar privacidade'),)
