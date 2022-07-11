@@ -12,7 +12,7 @@ class Duvida(models.Model):
     ESCOLHAS_PRIVACIDADE = ((0, 'Ocultar privacidade'),
                             (1, 'Não ocultar privacidade'),)
 
-    privacidade_autor = models.PositiveSmallIntegerField(max_length=1, choices=ESCOLHAS_PRIVACIDADE)
+    privacidade_autor = models.PositiveSmallIntegerField(choices=ESCOLHAS_PRIVACIDADE)
 
     
 # Create your models here.
