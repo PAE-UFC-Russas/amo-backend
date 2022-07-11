@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import CustomUser
+from core.models import Curso, Disciplinas
 
 
 class CursoAccessPolicyTestCase(APITestCase):
@@ -11,6 +12,7 @@ class CursoAccessPolicyTestCase(APITestCase):
 
     def setUp(self) -> None:
         self.user = CustomUser.objects.create(email="user@localhost", password="")
+        Curso.objects.create(nome="Título", descricao="Descrição")
 
     def test_unauthenticated_access(self):
         """Verifica acesso de usuários não autenticados."""
@@ -46,7 +48,7 @@ class CursoAccessPolicyTestCase(APITestCase):
                 {"nome": "editado"},
                 HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
         with self.subTest("Criar Curso"):
             response = self.client.post(
                 reverse("cursos-list"),
@@ -76,6 +78,7 @@ class DisciplinaAccessPolicyTestCase(APITestCase):
 
     def setUp(self) -> None:
         self.user = CustomUser.objects.create(email="user@localhost", password="")
+        Disciplinas.objects.create(nome="Título", descricao="Descrição")
 
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
@@ -108,7 +111,7 @@ class DisciplinaAccessPolicyTestCase(APITestCase):
                 reverse("disciplinas-detail", args=[1]),
                 HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Criar Disciplina"):
             response = self.client.post(
