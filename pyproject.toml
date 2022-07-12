@@ -17,6 +17,7 @@ rollbar = "^0.16.3"
 drf-access-policy = "^1.1.1"
 django-filter = "^22.1"
 django-crispy-forms = "^1.14.0"
+drf-writable-nested = "^0.6.3"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -28,6 +29,7 @@ isort = "^5.10.1"
 load-plugins = ["pylint_django"]
 django-settings-module= "monitorias.settings"
 ignore-paths = [".*/migrations/.*$"]
+disable = ["too-many-ancestors"]
 
 [tool.isort]
 profile = "black"
