@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.models import Curso
+
 
 class CustomUserManager(BaseUserManager):
     """Define um 'manager' para utilização com CustomUser."""
@@ -33,15 +35,43 @@ class CustomUser(AbstractUser):
     """Define um usuário customizado para utilizar o email para autenticação."""
 
     username = None
+    first_name = None
+    last_name = None
     email = models.EmailField(_("email address"), blank=False, unique=True)
     is_email_active = models.BooleanField(default=False)
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
     objects = CustomUserManager()
 
     def __str__(self):
         return self.email
+
+
+class Perfil(models.Model):
+    """Representa o perfil do usuário na aplicação.
+
+    Attributes:
+        usuario: Refere ao usuário dono do perfil.
+        nome_completo: Nome completo do usuário.
+        nome_exeibição: Nome que será exibido para os outros usuários.
+        data_nascimento: Data de nascimento do usuário.
+        matricula: Número de matrícula do usuário. Para alunos e no SIGAA, professores no SIGEP.
+        curso: Curso em que o aluno está matriculado. Este campo é ignorado para professores.
+    """
+
+    usuario = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="perfil"
+    )
+
+    nome_completo = models.CharField(max_length=255)
+    nome_exibicao = models.CharField(max_length=32)
+    data_nascimento = models.DateField(null=True)
+    matricula = models.CharField(max_length=6, null=True)
+    curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return self.usuario.email
 
 
 class EmailActivationToken(models.Model):

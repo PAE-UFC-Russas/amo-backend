@@ -4,7 +4,7 @@ from rest_framework import serializers
 from core.models import Curso, Disciplinas
 
 
-class CursoSerializer(serializers.HyperlinkedModelSerializer):
+class CursoSerializer(serializers.ModelSerializer):
     """Serializador do modelo Curso."""
 
     nome = serializers.CharField()
