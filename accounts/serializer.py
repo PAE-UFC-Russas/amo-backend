@@ -1,6 +1,10 @@
 """Este módulo contém os serializadores utilizados na aplicação 'accounts'."""
 from django.contrib.auth.password_validation import validate_password
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import (
+    extend_schema_field,
+    extend_schema_serializer,
+    OpenApiExample,
+)
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
 
@@ -48,10 +52,48 @@ class PerfilSerializer(WritableNestedModelSerializer):
             "nome_exibicao",
             "data_nascimento",
             "matricula",
+            "entrada",
             "curso",
         ]
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Exemplo de resposta do usuário",
+            value={
+                "id": 1,
+                "email": "jose@alu.ufc.br",
+                "perfil": {
+                    "nome_completo": "Francisco José da Silva",
+                    "nome_exibicao": "José da Silva",
+                    "data_nascimento": "2001-07-15",
+                    "matricula": "458788",
+                    "entrada": "2022.1",
+                    "curso": {
+                        "id": 1,
+                        "nome": "Ciência da Computação",
+                        "descricao": "Bacharelado em Ciência da Computação da UFC em Russas.",
+                    },
+                },
+            },
+            response_only=True,
+        ),
+        OpenApiExample(
+            "Exemplo de atualização do usuário",
+            value={
+                "perfil": {
+                    "nome_completo": "Francisco José da Silva",
+                    "nome_exibicao": "José da Silva",
+                    "data_nascimento": "2001-07-15",
+                    "matricula": "458788",
+                    "entrada": "2022.1",
+                    "curso": 1,
+                }
+            },
+        ),
+    ]
+)
 class UserSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     """Serializador do modelo CustomUser."""
 
