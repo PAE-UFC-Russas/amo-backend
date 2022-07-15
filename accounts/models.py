@@ -1,5 +1,7 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -58,6 +60,7 @@ class Perfil(models.Model):
         data_nascimento: Data de nascimento do usuário.
         matricula: Número de matrícula do usuário. Para alunos e no SIGAA, professores no SIGEP.
         curso: Curso em que o aluno está matriculado. Este campo é ignorado para professores.
+        ano_entrada: Ano e semestre de entrada do aluno no curso. Exemplo: 2022.1
     """
 
     usuario = models.OneToOneField(
@@ -69,6 +72,16 @@ class Perfil(models.Model):
     data_nascimento = models.DateField(null=True)
     matricula = models.CharField(max_length=6, null=True)
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, blank=True, null=True)
+    entrada = models.CharField(
+        max_length=6,
+        blank=True,
+        null=True,
+        validators=[
+            validators.RegexValidator(
+                regex=r"\d{4}\.[12]", message="Campo não está formatado corretamente."
+            ),
+        ],
+    )
 
     def __str__(self):
         return self.usuario.email
