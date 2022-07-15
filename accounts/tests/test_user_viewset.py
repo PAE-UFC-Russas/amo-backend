@@ -4,8 +4,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.serializer import UserSerializer
 from accounts.models import CustomUser
+from accounts.serializer import UserSerializer
 from core.models import Curso
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
@@ -47,12 +47,38 @@ class UserViewSetTest(APITestCase):
 
     def test_patch(self):
         """Verifica a atualização parcial do usuario (no perfil)"""
-        response = self.client.patch(
-            reverse("usuario-detail", args=[1]),
-            {"perfil": {"matricula": "000000"}},
-            format="json",
-            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-        )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.user.perfil.matricula, "000000")
+        with self.subTest("Atualizar matrícula"):
+            response = self.client.patch(
+                reverse("usuario-detail", args=[1]),
+                {"perfil": {"matricula": "000000"}},
+                format="json",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(self.user.perfil.matricula, "000000")
+
+        with self.subTest("Atualizar do Curso"):
+            response = self.client.patch(
+                reverse("usuario-detail", args=[1]),
+                {"perfil": {"curso": 1}},
+                format="json",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            )
+
+            self.user.refresh_from_db()
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(self.user.perfil.curso, Curso.objects.first())
+
+        with self.subTest("Atualizar data de entrada"):
+            entrada = "2020.1"
+            response = self.client.patch(
+                reverse("usuario-detail", args=[1]),
+                {"perfil": {"entrada": entrada}},
+                format="json",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(self.user.perfil.entrada, entrada)

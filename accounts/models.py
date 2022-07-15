@@ -82,8 +82,6 @@ class Perfil(models.Model):
             validators.RegexValidator(
                 regex=r"\d{4}\.[12]", message="Campo não está formatado corretamente."
             ),
-            validators.MinValueValidator(limit_value=date.today().year - 10),
-            validators.MaxValueValidator(limit_value=date.today().year),
         ],
     )
 
