@@ -80,5 +80,6 @@ class UserViewSetTest(APITestCase):
                 HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
 
+            self.user.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(self.user.perfil.entrada, entrada)

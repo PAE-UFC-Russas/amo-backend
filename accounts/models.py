@@ -1,5 +1,4 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
-from datetime import date
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core import validators
@@ -77,7 +76,6 @@ class Perfil(models.Model):
         max_length=6,
         blank=True,
         null=True,
-        default=f"{date.today().year}.1",
         validators=[
             validators.RegexValidator(
                 regex=r"\d{4}\.[12]", message="Campo não está formatado corretamente."
