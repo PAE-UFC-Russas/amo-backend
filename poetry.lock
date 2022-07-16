@@ -197,11 +197,11 @@ sidecar = ["drf-spectacular-sidecar"]
 
 [[package]]
 name = "drf-writable-nested"
-version = "0.6.3"
+version = "0.6.4"
 description = "Writable nested helpers for django-rest-framework's serializers"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "gunicorn"
@@ -521,7 +521,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "23c68d40f349bfd31663c45072369a46c22d7834b36911482f33d29ad854c931"
+content-hash = "5b3734dcc711ae117d79d1c65f1a583726bc5972c924a8a3376aa95ac7a07430"
 
 [metadata.files]
 asgiref = [
@@ -609,7 +609,7 @@ drf-spectacular = [
     {file = "drf_spectacular-0.22.1-py3-none-any.whl", hash = "sha256:17ac5e31e5d6150dd5fa10843b429202f4f38069202acc44394cc5a771de63d9"},
 ]
 drf-writable-nested = [
-    {file = "drf_writable_nested-0.6.3-py3-none-any.whl", hash = "sha256:b96d30aca953f4dba313bb5697da4022470dc63fb2dbe68c93d38d389ec63ac2"},
+    {file = "drf_writable_nested-0.6.4-py3-none-any.whl", hash = "sha256:e3224edcaaf86cc43a1e0d8e2f39aed42e651b45ab0106dadf02f07af3806626"},
 ]
 gunicorn = [
     {file = "gunicorn-20.1.0-py3-none-any.whl", hash = "sha256:9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e"},
