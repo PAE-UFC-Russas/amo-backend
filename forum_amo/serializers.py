@@ -7,4 +7,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Duvida
-        fields = ["id", "titulo", ]
+        fields = ["id", "titulo"]
