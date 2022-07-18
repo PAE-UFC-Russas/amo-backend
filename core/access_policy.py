@@ -7,12 +7,12 @@ class CursoAccessPolicy(AccessPolicy):
 
     statements = [
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
         },
         {
-            "action": ["retrieve", "create", "partial_update", "destroy"],
+            "action": ["list", "retrieve", "create", "partial_update", "destroy"],
             "principal": ["admin"],
             "effect": "allow",
         },
@@ -24,12 +24,12 @@ class DisciplinaAccessPolicy(AccessPolicy):
 
     statements = [
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": "authenticated",
             "effect": "allow",
         },
         {
-            "action": ["create", "retrieve"],
+            "action": ["list", "retrieve", "create", "partial_update", "destroy"],
             "principal": ["admin"],
             "effect": "allow",
         },

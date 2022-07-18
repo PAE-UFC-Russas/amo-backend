@@ -7,23 +7,29 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from accounts.access_policy import UserViewAccessPolicy
-from accounts.models import EmailActivationToken
-from accounts.serializer import EmailValidationTokenSerializer, UserSerializer
+from accounts.models import EmailActivationToken, CustomUser
+from accounts.serializer import (
+    EmailValidationTokenSerializer,
+    UserSerializer,
+    UserRegistrationSerializer,
+)
 
 
-class UserViewSet(AccessViewSetMixin, ViewSet):
+class UserViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas ao usuário."""
 
     access_policy = UserViewAccessPolicy
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
 
-    @extend_schema(request=UserSerializer, responses=AuthTokenSerializer)
+    @extend_schema(request=UserRegistrationSerializer, responses=AuthTokenSerializer)
     @action(detail=False, methods=["post"])
     def registrar(self, request):
         """Realiza o cadastro de um novo usuário."""
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             return Response({"token": user.auth_token.key})

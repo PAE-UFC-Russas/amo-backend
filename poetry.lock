@@ -38,7 +38,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "black"
-version = "22.3.0"
+version = "22.6.0"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
@@ -49,7 +49,7 @@ click = ">=8.0.0"
 mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
-tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
 typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
@@ -165,7 +165,7 @@ pytz = "*"
 
 [[package]]
 name = "drf-access-policy"
-version = "1.1.1"
+version = "1.1.2"
 description = "Declarative access policies/permissions modeled after AWS' IAM policies."
 category = "main"
 optional = false
@@ -194,6 +194,14 @@ uritemplate = ">=2.0.0"
 [package.extras]
 offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
+
+[[package]]
+name = "drf-writable-nested"
+version = "0.6.4"
+description = "Writable nested helpers for django-rest-framework's serializers"
+category = "main"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "gunicorn"
@@ -525,53 +533,3 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "c69dcd879c525136f9927f58a6c71e1cf03b43f859a478927926f43ebc69288f"
-
-[metadata.files]
-asgiref = []
-astroid = []
-attrs = []
-black = []
-certifi = []
-charset-normalizer = []
-click = []
-colorama = []
-dill = []
-dj-database-url = []
-django = []
-django-crispy-forms = []
-django-filter = []
-djangorestframework = []
-drf-access-policy = []
-drf-spectacular = []
-gunicorn = []
-idna = []
-inflection = []
-isort = []
-jsonschema = []
-lazy-object-proxy = []
-mccabe = []
-mypy-extensions = []
-pathspec = []
-pillow = []
-platformdirs = []
-psycopg2-binary = []
-pylint = []
-pylint-django = []
-pylint-plugin-utils = []
-pyparsing = []
-pyrsistent = []
-pytz = []
-pyyaml = []
-requests = []
-rollbar = []
-six = []
-sqlparse = []
-tomli = []
-tomlkit = []
-typing-extensions = []
-tzdata = []
-uritemplate = []
-urllib3 = []
-whitenoise = []
-wrapt = []
