@@ -10,8 +10,6 @@ class Duvida(models.Model):
 
     titulo = models.CharField(max_length=200)
     descricao = models.TextField(max_length=550)
-    privacidade_autor = models.BooleanField(default=True)
 
-
-    
-# Create your models here.
+    def __str__(self):
+        return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
