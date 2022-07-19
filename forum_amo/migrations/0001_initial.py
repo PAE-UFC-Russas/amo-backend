@@ -7,18 +7,25 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Duvida',
+            name="Duvida",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titulo', models.CharField(max_length=200)),
-                ('descricao', models.TextField(max_length=550)),
-                ('privacidade_autor', models.BooleanField(default=True)),
-                ('arquivo', models.FileField(upload_to='')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("titulo", models.CharField(max_length=200)),
+                ("descricao", models.TextField(max_length=550)),
+                ("privacidade_autor", models.BooleanField(default=True)),
+                ("arquivo", models.FileField(upload_to="")),
             ],
         ),
     ]

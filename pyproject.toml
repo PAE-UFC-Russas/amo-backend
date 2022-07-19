@@ -18,6 +18,7 @@ drf-access-policy = "^1.1.2"
 django-filter = "^22.1"
 django-crispy-forms = "^1.14.0"
 drf-writable-nested = "^0.6.4"
+black = "^22.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

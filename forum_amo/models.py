@@ -4,6 +4,7 @@ Models para o app forum_app
 
 from django.db import models
 
+
 class Duvida(models.Model):
 
     """Modelo para dúvidas"""
