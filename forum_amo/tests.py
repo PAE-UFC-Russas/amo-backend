@@ -1,0 +1,3 @@
+"""
+TESTS forum_app
+"""

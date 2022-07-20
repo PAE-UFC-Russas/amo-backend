@@ -23,11 +23,13 @@ from rest_framework.authtoken import views as auth_views
 
 from accounts.views import UserViewSet
 from core.views import CursoViewSet, DisciplinaViewSet
+from forum_amo.views import DuvidaViewSet
 
 router = routers.DefaultRouter()
 router.register(r"cursos", CursoViewSet, basename="cursos")
 router.register(r"disciplinas", DisciplinaViewSet, basename="disciplinas")
 router.register(r"usuario", UserViewSet, basename="usuario")
+router.register(r"duvidas", DuvidaViewSet, basename="duvidas")
 
 
 urlpatterns = [

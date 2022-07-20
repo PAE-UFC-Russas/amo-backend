@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "core",
     "django_filters",
     "drf_spectacular",
+    "forum_amo",
 ]
 
 MIDDLEWARE = [
