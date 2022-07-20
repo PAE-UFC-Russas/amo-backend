@@ -7,7 +7,7 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
 
 from accounts.access_policy import UserViewAccessPolicy
 from accounts.models import EmailActivationToken, CustomUser
@@ -50,3 +50,16 @@ class UserViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
         request.user.is_email_active = True
         request.user.save()
         return Response(None, 200)
+
+
+class CurrentUserUpdateView(
+    AccessViewSetMixin, mixins.UpdateModelMixin, GenericViewSet
+):
+    """Possibilita a atualização do perfil do usuário atual."""
+
+    access_policy = UserViewAccessPolicy
+    serializer_class = UserSerializer
+    queryset = CustomUser.objects.all()
+
+    def get_object(self):
+        return CustomUser.objects.get(pk=self.request.user.pk)

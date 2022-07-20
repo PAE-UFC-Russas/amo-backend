@@ -83,3 +83,15 @@ class UserViewSetTest(APITestCase):
             self.user.refresh_from_db()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(self.user.perfil.entrada, entrada)
+
+        with self.subTest("Atualizar nome/self"):
+            response = self.client.patch(
+                reverse("usuario-detail", args=["eu"]),
+                {"perfil": {"nome_completo": "Nome do Usuário"}},
+                format="json",
+                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            )
+
+            self.user.refresh_from_db()
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(self.user.perfil.nome_completo, "Nome do Usuário")
