@@ -6,13 +6,13 @@ from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
 from forum_amo.models import Duvida
-from forum_amo.serializers import FileSerializer
+from forum_amo.serializers import DuvidaSerializer
 
 
 class DuvidaViewSet(ModelViewSet):
     """ViewSet referente ao modelo de dúvidas do fórum"""
 
-    serializer_class = FileSerializer
+    serializer_class = DuvidaSerializer
     queryset = Duvida.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["titulo"]

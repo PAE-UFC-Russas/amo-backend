@@ -4,7 +4,7 @@ from rest_framework import serializers
 from forum_amo.models import Duvida
 
 
-class FileSerializer(serializers.ModelSerializer):
+class DuvidaSerializer(serializers.ModelSerializer):
     """Serializer para arquivos"""
 
     titulo = serializers.CharField(max_length=200)
@@ -12,4 +12,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Duvida
-        fields = ["id", "titulo"]
+        fields = ["id", "titulo", "descricao"]
