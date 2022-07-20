@@ -21,7 +21,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitVie
 from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
 
-from accounts.views import UserViewSet
+from accounts.views import UserViewSet, CurrentUserUpdateView
 from core.views import CursoViewSet, DisciplinaViewSet
 from forum_amo.views import DuvidaViewSet
 
@@ -35,6 +35,11 @@ router.register(r"duvidas", DuvidaViewSet, basename="duvidas")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("usuario/login/", auth_views.obtain_auth_token, name="obtain-api-token"),
+    path(  # precisa incluir antes do router para funcionar
+        "usuario/eu/",
+        CurrentUserUpdateView.as_view({"patch": "partial_update"}),
+        name="usuario_atual",
+    ),
     path("", include(router.urls)),
     # documentação/drf_spectacular
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
