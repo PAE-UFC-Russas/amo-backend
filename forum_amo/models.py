@@ -10,7 +10,8 @@ class Duvida(models.Model):
     """Modelo para dúvidas"""
 
     titulo = models.CharField(max_length=200)
-    descricao = models.TextField(max_length=550)
+    descricao = models.CharField(max_length=550)
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
+
