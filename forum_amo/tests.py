@@ -27,3 +27,11 @@ class DuvidaTestes(APITestCase):
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
+    def test_buscar_duvida(self):
+        response = self.client.get(
+            reverse("duvidas-detail", args=[1]),
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+        )
+        print(response.data)
+        self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
+
