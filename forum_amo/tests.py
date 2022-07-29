@@ -9,6 +9,7 @@ from accounts.models import CustomUser
 
 from rest_framework.test import APIRequestFactory
 from django.test import Client
+from rest_framework import status
 
 
 class DuvidaTestes(APITestCase):
@@ -33,7 +34,6 @@ class DuvidaTestes(APITestCase):
         self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
 
     def test_criar_duvida(self):
-        c = Client()
         dados = [DuvidaSerializer(self.duvida).data.pop("id")]
         response = self.client.post(
             reverse("duvidas-list"),
@@ -43,17 +43,12 @@ class DuvidaTestes(APITestCase):
                 "descricao": "Probabilidade e Estatística",
             },
         )
-        assert response.status_code == 201
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_buscar_duvida(self):
+        response = self.client.get(reverse("duvidas-detail", args=[1]))
 
-        response = self.client.get(reverse("duvidas-list", args=[1]))
-        print(response.status_code)
-        """
-        response = self.client.get(
-            reverse("duvidas-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-        )
-        """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         # print(response.data)
         # self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
