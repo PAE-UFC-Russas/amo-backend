@@ -8,9 +8,14 @@ from rest_framework.viewsets import ModelViewSet
 from forum_amo.models import Duvida
 from forum_amo.serializers import DuvidaSerializer
 
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class DuvidaViewSet(ModelViewSet):
     """ViewSet referente ao modelo de dúvidas do fórum"""
+
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     serializer_class = DuvidaSerializer
     queryset = Duvida.objects.all()
