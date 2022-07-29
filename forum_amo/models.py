@@ -14,4 +14,3 @@ class Duvida(models.Model):
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
-
