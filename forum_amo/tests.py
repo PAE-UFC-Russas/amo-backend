@@ -12,6 +12,8 @@ from forum_amo.serializers import DuvidaSerializer
 
 from accounts.models import CustomUser
 
+from rest_framework.authtoken.models import Token
+
 
 class DuvidaTestes(APITestCase):
     """
@@ -46,6 +48,7 @@ class DuvidaTestes(APITestCase):
                 "titulo": "Recursão",
                 "descricao": "FUP",
             },
+            HTTP_AUTHORIZATION = f"Token {self.admin.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -61,10 +64,10 @@ class DuvidaTestes(APITestCase):
 
     def test_deletar_duvida(self):
         """Testa a remoção de uma dúvida (dúvida existente)"""
-        response = self.client.delete(reverse("duvidas-detail", args=[1]))
+        response = self.client.delete(reverse("duvidas-detail", args=[1]), HTTP_AUTHORIZATION = f"Token {self.admin.auth_token.key}",)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_deletar_duvida_nao_existente(self):
         """Testa a remoção de uma dúvida (dúvida não existente)"""
-        response = self.client.delete(reverse("duvidas-detail", args=[16]))
+        response = self.client.delete(reverse("duvidas-detail", args=[16]), HTTP_AUTHORIZATION = f"Token {self.admin.auth_token.key}",)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
