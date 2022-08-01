@@ -13,7 +13,6 @@ from forum_amo.serializers import DuvidaSerializer
 class DuvidaViewSet(ModelViewSet):
     """ViewSet referente ao modelo de dúvidas do fórum"""
 
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     serializer_class = DuvidaSerializer

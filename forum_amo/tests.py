@@ -39,7 +39,6 @@ class DuvidaTestes(APITestCase):
 
     def test_criar_duvida(self):
         """Teste a criação de uma nova dúvida"""
-        self.client.force_login(self.user)
         response = self.client.post(
             reverse("duvidas-list"),
             {
@@ -47,6 +46,7 @@ class DuvidaTestes(APITestCase):
                 "titulo": "Recursão",
                 "descricao": "FUP",
             },
+            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -62,16 +62,16 @@ class DuvidaTestes(APITestCase):
 
     def test_deletar_duvida(self):
         """Testa a remoção de uma dúvida (dúvida existente)"""
-        self.client.force_login(self.user)
         response = self.client.delete(
             reverse("duvidas-detail", args=[1]),
+            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_deletar_duvida_nao_existente(self):
         """Testa a remoção de uma dúvida (dúvida não existente)"""
-        self.client.force_login(self.user)
         response = self.client.delete(
             reverse("duvidas-detail", args=[16]),
+            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
