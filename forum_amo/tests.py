@@ -46,7 +46,7 @@ class DuvidaTestes(APITestCase):
                 "titulo": "Recursão",
                 "descricao": "FUP",
             },
-            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -64,7 +64,7 @@ class DuvidaTestes(APITestCase):
         """Testa a remoção de uma dúvida (dúvida existente)"""
         response = self.client.delete(
             reverse("duvidas-detail", args=[1]),
-            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -72,6 +72,6 @@ class DuvidaTestes(APITestCase):
         """Testa a remoção de uma dúvida (dúvida não existente)"""
         response = self.client.delete(
             reverse("duvidas-detail", args=[16]),
-            HTTP_AUTHORIZATION = f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
