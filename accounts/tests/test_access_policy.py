@@ -22,10 +22,10 @@ class UserAccessPolicyTestCase(APITestCase):
         """Verifica controle de acesso para usuários não autenticados"""
         with self.subTest("Registrar Usuário"):
             response = self.client.post(
-                reverse("usuario-registrar"),
-                {"email": "user2@localhost", "password": "ajfsd9p&*aa"},
+                reverse("registrar-list"),
+                {"email": "user2@pae.localhost", "password": "ajfsd9p&*aa"},
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest("Ativar email"):
             response = self.client.post(reverse("usuario-ativar"))
@@ -60,7 +60,7 @@ class UserAccessPolicyTestCase(APITestCase):
         """Verifica controle de acesso para usuários autenticados"""
         with self.subTest("Registrar"):
             response = self.client.post(
-                reverse("usuario-registrar"),
+                reverse("registrar-list"),
                 {"email": "user1@localhost", "password": "f7aw87ho2q!"},
                 HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )

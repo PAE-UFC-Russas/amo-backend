@@ -1,46 +1,96 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
+import marshmallow
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.timezone import now
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_access_policy import AccessViewSetMixin
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
-
-from accounts.access_policy import UserViewAccessPolicy
-from accounts.models import EmailActivationToken, CustomUser
+from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet, ViewSet
+from accounts.utils import sanitization_utils
+from accounts import account_management_service, errors, access_policy, models
 from accounts.serializer import (
     EmailValidationTokenSerializer,
     UserSerializer,
-    UserRegistrationSerializer,
 )
+
+
+class UserRegistration(AccessViewSetMixin, ViewSet):
+    """ViewSet para ações relacionadas ao cadastro do usuário."""
+
+    access_policy = access_policy.AccountRegistrationAccessPolicy
+
+    @extend_schema(
+        tags=["Autenticação"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email_str": {"type": "string", "example": "aluno@alu.ufc.br"},
+                    "password_str": {
+                        "type": "string",
+                        "example": "supersecurepassword1",
+                    },
+                },
+            }
+        },
+        responses={
+            (201, "application/json"): OpenApiResponse(
+                description="Registro efetuado com sucesso.",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "auth_token": {
+                                    "type": "string",
+                                    "example": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
+                                },
+                            },
+                        }
+                    },
+                },
+            )
+        },
+    )
+    def create(self, request):
+        """Realiza o cadastro do usuário."""
+        unsafe_email = request.data.get("email", "")
+        unsafe_password = request.data.get("password", "")
+
+        sanitized_email = sanitization_utils.strip_xss(unsafe_email)
+
+        try:
+            _, token_str = account_management_service.create_account(
+                sanitized_email, unsafe_password
+            )
+        except errors.EmailAddressAlreadyExistsError as e:
+            response = {
+                "error": {"message": e.message, "error_code": e.internal_error_code}
+            }
+            return Response(data=response, status=e.http_error_code)
+        except marshmallow.exceptions.ValidationError as e:
+            return Response(data={"error": {"message": e.messages}}, status=422)
+
+        response = {"data": {"auth_token": token_str}}
+        return Response(data=response, status=201)
 
 
 class UserViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas ao usuário."""
 
-    access_policy = UserViewAccessPolicy
-    queryset = CustomUser.objects.all()
+    access_policy = access_policy.UserViewAccessPolicy
+    queryset = models.CustomUser.objects.all()
     serializer_class = UserSerializer
-
-    @extend_schema(request=UserRegistrationSerializer, responses=AuthTokenSerializer)
-    @action(detail=False, methods=["post"])
-    def registrar(self, request):
-        """Realiza o cadastro de um novo usuário."""
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({"token": user.auth_token.key})
-        return Response(serializer.data)
 
     @extend_schema(request=EmailValidationTokenSerializer)
     @action(detail=False, methods=["post"])
     def ativar(self, request):
         """Ativação do email do usuário."""
         try:
-            token = EmailActivationToken.objects.get(
+            token = models.EmailActivationToken.objects.get(
                 token=request.data["token"], email=request.user.email
             )
         except ObjectDoesNotExist:
@@ -57,9 +107,9 @@ class CurrentUserUpdateView(
 ):
     """Possibilita a atualização do perfil do usuário atual."""
 
-    access_policy = UserViewAccessPolicy
+    access_policy = access_policy.UserViewAccessPolicy
     serializer_class = UserSerializer
-    queryset = CustomUser.objects.all()
+    queryset = models.CustomUser.objects.all()
 
     def get_object(self):
-        return CustomUser.objects.get(pk=self.request.user.pk)
+        return models.CustomUser.objects.get(pk=self.request.user.pk)

@@ -16,7 +16,7 @@ class UserViewSetTest(APITestCase):
 
     def setUp(self) -> None:
         self.client.post(
-            reverse("usuario-registrar"),
+            reverse("registrar-list"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
         )

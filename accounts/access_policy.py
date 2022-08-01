@@ -2,6 +2,18 @@
 from rest_access_policy import AccessPolicy
 
 
+class AccountRegistrationAccessPolicy(AccessPolicy):
+    """Define o controle de acesso para a view de cadastro do usuário."""
+
+    statements = [
+        {
+            "action": ["create"],
+            "principal": "anonymous",
+            "effect": "allow",
+        },
+    ]
+
+
 class UserViewAccessPolicy(AccessPolicy):
     """Define o controle de acesso para UserViewSet"""
 
