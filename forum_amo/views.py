@@ -6,8 +6,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
-from forum_amo.models import Duvida
-from forum_amo.serializers import DuvidaSerializer
+from forum_amo.models import Duvida, Resposta
+from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
 
 
 class DuvidaViewSet(ModelViewSet):
@@ -19,3 +19,14 @@ class DuvidaViewSet(ModelViewSet):
     queryset = Duvida.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["titulo"]
+
+
+class RespostaViewSet(ModelViewSet):
+    """ViewSet referente ao modelo de respostas do fórum"""
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    serializer_class = RespostaSerializer
+    queryset = Resposta.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ["duvida_id"]
