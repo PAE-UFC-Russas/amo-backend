@@ -28,7 +28,7 @@ class UserAccessPolicyTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest("Ativar email"):
-            response = self.client.post(reverse("usuario-ativar"))
+            response = self.client.post(reverse("registrar-confirmar-email"))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         with self.subTest("Login"):
@@ -71,11 +71,11 @@ class UserAccessPolicyTestCase(APITestCase):
                 user=self.user, email=self.user.email, token="000000"
             )
             response = self.client.post(
-                reverse("usuario-ativar"),
+                reverse("registrar-confirmar-email"),
                 {"token": email_token.token},
                 HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.subTest("Login"):
             response = self.client.post(

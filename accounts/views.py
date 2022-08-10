@@ -1,19 +1,21 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
 import marshmallow
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.timezone import now
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_access_policy import AccessViewSetMixin
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet, ViewSet
-from accounts.utils import sanitization_utils
-from accounts import account_management_service, errors, access_policy, models
-from accounts.serializer import (
-    EmailValidationTokenSerializer,
-    UserSerializer,
+
+from accounts import (
+    account_management_service,
+    errors,
+    access_policy,
+    models,
+    serializer,
 )
+from accounts.utils import sanitization_utils
 
 
 class UserRegistration(AccessViewSetMixin, ViewSet):
@@ -22,7 +24,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
     access_policy = access_policy.AccountRegistrationAccessPolicy
 
     @extend_schema(
-        tags=["Autenticação"],
+        tags=["Cadastro do Usuário"],
         request={
             "application/json": {
                 "type": "object",
@@ -77,29 +79,90 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         response = {"data": {"auth_token": token_str}}
         return Response(data=response, status=201)
 
+    @extend_schema(
+        tags=["Cadastro do Usuário"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {"token": {"type": "string", "example": "157543"}},
+            }
+        },
+        responses={
+            (204, "application/json"): {},
+            (404, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": errors.EmailConfirmationCodeNotFound.message,
+                            },
+                            "codigo": {
+                                "type": "integer",
+                                "example": errors.EmailConfirmationCodeNotFound.internal_error_code,
+                            },
+                        },
+                    }
+                },
+            },
+            (409, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": errors.EmailConfirmationCodeExpired.message,
+                            },
+                            "codigo": {
+                                "type": "integer",
+                                "example": errors.EmailConfirmationCodeExpired.internal_error_code,
+                            },
+                        },
+                    }
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=False)
+    def confirmar_email(self, request):
+        """Realiza a confirmação do email do usuário."""
+        unsafe_activation_code = request.data.get("token", "")
+
+        sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
+
+        try:
+            account_management_service.confirm_email(
+                sanitized_activation_code, request.user
+            )
+        except errors.EmailConfirmationCodeNotFound as e:
+            return Response(
+                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except errors.EmailConfirmationCodeExpired as e:
+            return Response(
+                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+                status=status.HTTP_409_CONFLICT,
+            )
+        except errors.EmailConfirmationConflict as e:
+            return Response(
+                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class UserViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas ao usuário."""
 
     access_policy = access_policy.UserViewAccessPolicy
     queryset = models.CustomUser.objects.all()
-    serializer_class = UserSerializer
-
-    @extend_schema(request=EmailValidationTokenSerializer)
-    @action(detail=False, methods=["post"])
-    def ativar(self, request):
-        """Ativação do email do usuário."""
-        try:
-            token = models.EmailActivationToken.objects.get(
-                token=request.data["token"], email=request.user.email
-            )
-        except ObjectDoesNotExist:
-            return Response(None, 404)
-        token.activated_at = now()
-        token.save()
-        request.user.is_email_active = True
-        request.user.save()
-        return Response(None, 200)
+    serializer_class = serializer.UserSerializer
 
 
 class CurrentUserUpdateView(
@@ -108,7 +171,7 @@ class CurrentUserUpdateView(
     """Possibilita a atualização do perfil do usuário atual."""
 
     access_policy = access_policy.UserViewAccessPolicy
-    serializer_class = UserSerializer
+    serializer_class = serializer.UserSerializer
     queryset = models.CustomUser.objects.all()
 
     def get_object(self):

@@ -80,13 +80,13 @@ class UserRegistration(APITestCase):
         activation_token = EmailActivationToken.objects.first()
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {user.auth_token.key}")
         response = self.client.post(
-            reverse("usuario-ativar"),
+            reverse("registrar-confirmar-email"),
             {"token": f"{activation_token.token}"},
         )
 
         # verifica se foi ativado com sucesso
         user.refresh_from_db()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertTrue(user.is_email_active)
 
     def test_no_email_token(self):
@@ -96,11 +96,13 @@ class UserRegistration(APITestCase):
         )
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {user.auth_token.key}")
         response = self.client.post(
-            reverse("usuario-ativar", args=[1]), {"token": "12345hgjkhjk"}
+            reverse("registrar-confirmar-email", args=[1]), {"token": "12345hgjkhjk"}
         )
         self.assertEqual(response.status_code, 404)
 
     def test_no_auth_token(self):
         """Verifica se uma tentativa de validação sem o token de autenticação é recusada."""
-        response = self.client.post(reverse("usuario-ativar"), {"token": "123456"})
+        response = self.client.post(
+            reverse("registrar-confirmar-email"), {"token": "123456"}
+        )
         self.assertEqual(response.status_code, 401)

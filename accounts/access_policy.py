@@ -6,11 +6,8 @@ class AccountRegistrationAccessPolicy(AccessPolicy):
     """Define o controle de acesso para a view de cadastro do usuário."""
 
     statements = [
-        {
-            "action": ["create"],
-            "principal": "anonymous",
-            "effect": "allow",
-        },
+        {"action": "create", "principal": "anonymous", "effect": "allow"},
+        {"action": "confirmar_email", "principal": "authenticated", "effect": "allow"},
     ]
 
 

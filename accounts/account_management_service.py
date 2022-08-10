@@ -1,10 +1,14 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
+from datetime import timedelta
+
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from accounts import schema, errors
-from accounts.models import CustomUser
+from accounts.models import CustomUser, EmailActivationToken
 
 
 def create_account(sanitized_email_str: str, unsafe_password_str: str):
@@ -38,6 +42,34 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
     auth_token_model = get_user_token(user=user_model)
 
     return user_model, auth_token_model.key
+
+
+def confirm_email(activation_code: str, user: CustomUser):
+    """Realiza a confirmação do e-mail de um usuário."""
+
+    try:
+        activation_code_model = EmailActivationToken.objects.get(
+            token=activation_code, user=user
+        )
+    except ObjectDoesNotExist as error:
+        raise errors.EmailConfirmationCodeNotFound() from error
+
+    if activation_code_model.created_at + timedelta(hours=24) <= timezone.now():
+        raise errors.EmailConfirmationCodeExpired()
+
+    if (
+        user.is_email_active
+        or activation_code_model.email != user.email
+        or activation_code_model.activated_at is not None
+    ):
+        raise errors.EmailConfirmationConflict()
+
+    with transaction.atomic():
+        activation_code_model.activated_at = timezone.now()
+        activation_code_model.save()
+
+        user.is_email_active = True
+        user.save()
 
 
 def get_user_token(user):
