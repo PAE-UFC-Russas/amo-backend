@@ -1,7 +1,6 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 from datetime import timedelta
 
-from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils import timezone
@@ -34,7 +33,7 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
 
     with transaction.atomic():
         user_model = CustomUser.objects.create_user(
-            email=sanitized_email_str, password=make_password(unsafe_password_str)
+            email=sanitized_email_str, password=unsafe_password_str
         )
         user_model.full_clean()
         user_model.save()
