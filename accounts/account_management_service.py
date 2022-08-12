@@ -1,7 +1,8 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 from datetime import timedelta
+from random import randint
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core import exceptions, mail
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -38,9 +39,27 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
         user_model.full_clean()
         user_model.save()
 
+    send_email_confirmation_token(user_instance=user_model)
+
     auth_token_model = get_user_token(user=user_model)
 
     return user_model, auth_token_model.key
+
+
+def send_email_confirmation_token(user_instance):
+    """Envia token de confirmação do e-mail para o usuário."""
+
+    token = EmailActivationToken.objects.create(
+        user=user_instance,
+        email=user_instance.email,
+        token=str(randint(0, 999999)).zfill(6),
+    )
+
+    mail.EmailMessage(
+        to=[user_instance.email],
+        subject="Ativação do cadastro - Ambiente de Monitoria Online",
+        body=f"Seu código de ativação: {token.token}",
+    ).send()
 
 
 def confirm_email(activation_code: str, user: CustomUser):
@@ -50,7 +69,7 @@ def confirm_email(activation_code: str, user: CustomUser):
         activation_code_model = EmailActivationToken.objects.get(
             token=activation_code, user=user
         )
-    except ObjectDoesNotExist as error:
+    except exceptions.ObjectDoesNotExist as error:
         raise errors.EmailConfirmationCodeNotFound() from error
 
     if activation_code_model.created_at + timedelta(hours=24) <= timezone.now():
