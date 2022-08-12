@@ -1,10 +1,10 @@
 """Testes de controle de acesso do aplicativo 'accounts'."""
 
-from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts import account_management_service
 from accounts.models import CustomUser, EmailActivationToken
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
@@ -14,8 +14,8 @@ class UserAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para UserViewSet"""
 
     def setUp(self) -> None:
-        self.user = CustomUser.objects.create(
-            email="user@localhost", password=make_password("password")
+        self.user, self.token = account_management_service.create_account(
+            sanitized_email_str="user@localhost", unsafe_password_str=PASSWORD
         )
 
     def test_unauthenticated_access(self):
@@ -36,7 +36,7 @@ class UserAccessPolicyTestCase(APITestCase):
             # não é controlada por UserViewAccessPolicy
             response = self.client.post(
                 reverse("obtain-api-token"),
-                {"username": "user@localhost", "password": "password"},
+                {"username": "user@localhost", "password": PASSWORD},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -62,7 +62,7 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("registrar-list"),
                 {"email": "user1@localhost", "password": "f7aw87ho2q!"},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -73,22 +73,22 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.post(
                 reverse("registrar-confirmar-email"),
                 {"token": email_token.token},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.subTest("Login"):
             response = self.client.post(
                 reverse("obtain-api-token"),
-                {"username": "user@localhost", "password": "password"},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                {"username": "user@localhost", "password": PASSWORD},
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Listar"):
             response = self.client.get(
                 reverse("usuario-list"),
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -96,7 +96,7 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.get(
                 reverse("usuario-list"),
                 args=[1],
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 

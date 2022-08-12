@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from accounts import account_management_service
 from accounts.models import CustomUser, EmailActivationToken
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
@@ -91,10 +92,10 @@ class UserRegistration(APITestCase):
 
     def test_no_email_token(self):
         """Verifica que erro é retornado em uma tentativa sem o token de confirmação."""
-        user = CustomUser.objects.create_user(
-            email="usuario@test.com", password=PASSWORD
+        _, token = account_management_service.create_account(
+            sanitized_email_str="usuario@test.com", unsafe_password_str=PASSWORD
         )
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {user.auth_token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
         response = self.client.post(
             reverse("registrar-confirmar-email", args=[1]), {"token": "12345hgjkhjk"}
         )
