@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from accounts import schema, errors
-from accounts.models import CustomUser, EmailActivationToken
+from accounts.models import CustomUser, EmailActivationToken, Perfil
 
 
 def create_account(sanitized_email_str: str, unsafe_password_str: str):
@@ -38,6 +38,8 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
         )
         user_model.full_clean()
         user_model.save()
+
+        Perfil.objects.create(usuario=user_model)
 
     send_email_confirmation_token(user_instance=user_model)
 
