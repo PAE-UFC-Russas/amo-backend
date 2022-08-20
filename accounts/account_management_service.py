@@ -11,12 +11,15 @@ from accounts import schema, errors
 from accounts.models import CustomUser, EmailActivationToken, Perfil
 
 
-def create_account(sanitized_email_str: str, unsafe_password_str: str):
+def create_account(
+    sanitized_email_str: str, unsafe_password_str: str, admin: bool = False
+):
     """Realiza a criação de um usuário.
 
     Args:
         sanitized_email_str: e-mail informado pelo usuário.
         unsafe_password_str: senha informada pelo usuário.
+        admin: booleano informando se usuário deve ser administrador
 
     Returns:
         Retorna uma tupla contendo uma instância de Usuário e seu Token de autenticação.
@@ -33,9 +36,14 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
         raise errors.EmailAddressAlreadyExistsError()
 
     with transaction.atomic():
-        user_model = CustomUser.objects.create_user(
-            email=sanitized_email_str, password=unsafe_password_str
-        )
+        if admin:
+            user_model = CustomUser.objects.create_superuser(
+                email=sanitized_email_str, password=unsafe_password_str
+            )
+        else:
+            user_model = CustomUser.objects.create_user(
+                email=sanitized_email_str, password=unsafe_password_str
+            )
         user_model.full_clean()
         user_model.save()
 
