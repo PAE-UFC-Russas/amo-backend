@@ -18,6 +18,8 @@ drf-access-policy = "^1.1.2"
 django-filter = "^22.1"
 django-crispy-forms = "^1.14.0"
 drf-writable-nested = "^0.6.4"
+marshmallow = "^3.17.0"
+bleach = "^5.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
@@ -30,6 +32,9 @@ load-plugins = ["pylint_django"]
 django-settings-module= "monitorias.settings"
 ignore-paths = [".*/migrations/.*$"]
 disable = ["too-many-ancestors"]
+good-names = [
+    "e",
+]
 
 [tool.isort]
 profile = "black"
