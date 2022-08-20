@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts import account_management_service
-from accounts.models import CustomUser, EmailActivationToken
+from accounts.models import EmailActivationToken
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
 
@@ -101,25 +101,27 @@ class UserAccessPolicyTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar usuário"):
-            user_ = CustomUser.objects.create(
-                email="user_patch@localhost", password=PASSWORD
+            user, token = account_management_service.create_account(
+                sanitized_email_str="user_patch@localhost",
+                unsafe_password_str=PASSWORD,
             )
             response = self.client.patch(
-                reverse("usuario-detail", args=[user_.pk]),
+                reverse("usuario-detail", args=[user.pk]),
                 {"perfil": {"matricula": "321123"}},
                 format="json",
-                HTTP_AUTHORIZATION=f"Token {user_.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar outro usuário"):
-            user_ = CustomUser.objects.create(
-                email="user_patch2@localhost", password=PASSWORD
+            user, token = account_management_service.create_account(
+                sanitized_email_str="user_patch2@localhost",
+                unsafe_password_str=PASSWORD,
             )
             response = self.client.patch(
                 reverse("usuario-detail", args=[2]),
                 {"perfil": {"matricula": "000002"}},
                 format="json",
-                HTTP_AUTHORIZATION=f"Token {user_.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {token}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
