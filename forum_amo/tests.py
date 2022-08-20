@@ -17,11 +17,12 @@ class DuvidaTestes(APITestCase):
 
     def setUp(self) -> None:
         _, self.user_token = create_account(
-            sanitized_email_str="user@localhost", unsafe_password_str="password1!"
+            sanitized_email_str="johndoe@localhost.com",
+            unsafe_password_str="password123",
         )
         _, self.admin_token = create_account(
-            sanitized_email_str="superuser@localhost",
-            unsafe_password_str="adminpassword1!",
+            sanitized_email_str="superjohndoe@localhost.com",
+            unsafe_password_str="superpassword123",
             admin=True,
         )
         self.duvida = Duvida.objects.create(
