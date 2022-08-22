@@ -2,15 +2,12 @@
 TESTS forum_app
 """
 from django.urls import reverse
-
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
+from accounts.account_management_service import create_account
 from forum_amo.models import Duvida
-
 from forum_amo.serializers import DuvidaSerializer
-
-from accounts.models import CustomUser
 
 
 class DuvidaTestes(APITestCase):
@@ -19,11 +16,14 @@ class DuvidaTestes(APITestCase):
     """
 
     def setUp(self) -> None:
-        self.user = CustomUser.objects.create(
-            email="johndoe@localhost.com", password="password123"
+        _, self.user_token = create_account(
+            sanitized_email_str="johndoe@localhost.com",
+            unsafe_password_str="password123",
         )
-        self.admin = CustomUser.objects.create_superuser(
-            email="superjohndoe@localhost.com", password="superpassword123"
+        _, self.admin_token = create_account(
+            sanitized_email_str="superjohndoe@localhost.com",
+            unsafe_password_str="superpassword123",
+            admin=True,
         )
         self.duvida = Duvida.objects.create(
             titulo="Distribuição Exponencial", descricao="Probabilidade e Estatística"
@@ -46,7 +46,7 @@ class DuvidaTestes(APITestCase):
                 "titulo": "Recursão",
                 "descricao": "FUP",
             },
-            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -64,7 +64,7 @@ class DuvidaTestes(APITestCase):
         """Testa a remoção de uma dúvida (dúvida existente)"""
         response = self.client.delete(
             reverse("duvidas-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -72,6 +72,6 @@ class DuvidaTestes(APITestCase):
         """Testa a remoção de uma dúvida (dúvida não existente)"""
         response = self.client.delete(
             reverse("duvidas-detail", args=[16]),
-            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+            HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
