@@ -4,6 +4,7 @@ from random import randint
 
 from django.core import exceptions, mail
 from django.db import transaction
+from django.forms.models import model_to_dict
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
@@ -54,6 +55,22 @@ def create_account(
     auth_token_model = get_user_token(user=user_model)
 
     return user_model, auth_token_model.key
+
+
+def get_user_profile(user_instance: CustomUser):
+    """Retorna o perfil de um usuário."""
+
+    profile = model_to_dict(user_instance.perfil)
+    if profile["curso"]:
+        profile["curso"] = user_instance.perfil.curso.nome
+
+    allowed_fields = ["nome_exibicao", "entrada", "curso"]
+
+    for key in list(profile.keys()):
+        if key not in allowed_fields:
+            profile.pop(key)
+
+    return profile
 
 
 def send_email_confirmation_token(user_instance):

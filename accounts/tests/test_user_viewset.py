@@ -43,7 +43,12 @@ class UserViewSetTest(APITestCase):
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
 
-        self.assertEqual(response.data, UserSerializer(self.user).data)
+        self.assertIn("perfil", response.data)
+
+        perfil = response.data["perfil"]
+        self.assertIn("nome_exibicao", perfil)
+        self.assertIn("entrada", perfil)
+        self.assertIn("curso", perfil)
 
     def test_patch(self):
         """Verifica a atualização parcial do usuario (no perfil)"""
