@@ -175,7 +175,6 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
 class UserViewSet(
     AccessViewSetMixin,
     mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,
@@ -248,15 +247,63 @@ class UserViewSet(
 
         return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        tags=["Usuário"],
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "perfil": {
+                        "type": "object",
+                        "properties": {
+                            "nome_exibição": {
+                                "type": "string",
+                                "example": "Francisco Silva",
+                            },
+                            "curso": {
+                                "type": "string",
+                                "example": "Ciência da Computação",
+                            },
+                            "entrada": {"type": "string", "example": "2022.1"},
+                        },
+                    }
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "nome_completo": {
+                                "type": "array",
+                                "example": ["This field cannot be blank."],
+                            }
+                        },
+                    }
+                },
+            },
+        },
+    )
+    def partial_update(self, request, pk=None):
+        """Realiza a atualização dos valores do perfil do usuário."""
+        user = request.user if pk == "eu" else self.get_object()
+        try:
+            perfil = account_management_service.update_user_profile(
+                user.perfil, request.data.get("perfil")
+            )
+        except exceptions.ValidationError as e:
+            return Response(
+                data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-class CurrentUserUpdateView(
-    AccessViewSetMixin, mixins.UpdateModelMixin, GenericViewSet
-):
-    """Possibilita a atualização do perfil do usuário atual."""
-
-    access_policy = access_policy.UserViewAccessPolicy
-    serializer_class = serializer.UserSerializer
-    queryset = models.CustomUser.objects.all()
-
-    def get_object(self):
-        return models.CustomUser.objects.get(pk=self.request.user.pk)
+        return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)

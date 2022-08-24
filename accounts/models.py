@@ -60,7 +60,7 @@ class Perfil(models.Model):
         data_nascimento: Data de nascimento do usuário.
         matricula: Número de matrícula do usuário. Para alunos e no SIGAA, professores no SIGEP.
         curso: Curso em que o aluno está matriculado. Este campo é ignorado para professores.
-        ano_entrada: Ano e semestre de entrada do aluno no curso. Exemplo: 2022.1
+        entrada: Ano e semestre de entrada do aluno no curso. Exemplo: 2022.1
     """
 
     usuario = models.OneToOneField(

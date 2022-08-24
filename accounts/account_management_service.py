@@ -57,7 +57,7 @@ def create_account(
     return user_model, auth_token_model.key
 
 
-def get_user_profile(user_instance: CustomUser):
+def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
 
     profile = model_to_dict(user_instance.perfil)
@@ -71,6 +71,33 @@ def get_user_profile(user_instance: CustomUser):
             profile.pop(key)
 
     return profile
+
+
+def update_user_profile(perfil: Perfil, data: dict) -> dict:
+    """Atualiza o perfil do usuário."""
+    allowed_keys = [
+        "nome_completo",
+        "nome_exibicao",
+        "data_nascimento",
+        "matricula",
+        "entrada",
+        "curso",
+    ]
+
+    with transaction.atomic():
+        if "curso" in allowed_keys:
+            allowed_keys.remove("curso")
+            if "curso" in data.keys():
+                perfil.curso_id = data["curso"]
+
+        for key, value in data.items():
+            if key in allowed_keys:
+                setattr(perfil, key, value)
+
+        perfil.full_clean()
+        perfil.save()
+
+    return get_user_profile(perfil.usuario)
 
 
 def send_email_confirmation_token(user_instance):
