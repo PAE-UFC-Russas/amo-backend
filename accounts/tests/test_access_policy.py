@@ -112,10 +112,10 @@ class UserAccessPolicyTestCase(APITestCase):
                 reverse("usuario-detail", args=["eu"]),
                 {
                     "perfil": {
-                        "nome_completo": "Usuário da Silva",
-                        "nome_exibicao": "Usuário",
+                        "nome_completo": "Novo Usuário",
+                        "nome_exibicao": "Novo",
                         "data_nascimento": "2000-12-30",
-                        "matricula": "321123",
+                        "matricula": "000000",
                         "curso": 1,
                         "ano_entrada": "2022.1",
                     }
