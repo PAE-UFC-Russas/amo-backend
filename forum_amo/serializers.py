@@ -29,22 +29,15 @@ class DuvidaSerializer(serializers.ModelSerializer):
 class RespostaSerializer(serializers.ModelSerializer):
     """Serializer para respostas"""
 
-    autor = AutorSerializer(read_only=True)
-    duvida = DuvidaSerializer(read_only=True)
-    resposta = serializers.CharField(max_length=750)
-    data_criada = serializers.DateTimeField()
-
     class Meta:
         model = Resposta
         queryset = Resposta.objects.all()
         fields = ["id", "duvida", "resposta", "data_criada", "autor"]
 
     def create(self, validated_data):
-        print(validated_data)
         nova_resposta = Resposta.objects.create(
-            autor=self.context["request"].user.id,
-            duvida_id=validated_data["duvida"],
+            autor_id=self.context["request"].user.id,
+            duvida_id=validated_data["duvida"].id,
             resposta=validated_data["resposta"],
-            data_criada=validated_data["data_criada"],
         )
         return nova_resposta
