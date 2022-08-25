@@ -118,9 +118,9 @@ EMAIL_USE_SSL = "True" == os.getenv(key="EMAIL_USE_SSL", default=None)
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "pt-br"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Fortaleza"
 
 USE_I18N = True
 
