@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from accounts import account_management_service
 from accounts.models import EmailActivationToken
+from core.models import Curso
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
 
@@ -17,6 +18,8 @@ class UserAccessPolicyTestCase(APITestCase):
         self.user, self.token = account_management_service.create_account(
             sanitized_email_str="user@localhost", unsafe_password_str=PASSWORD
         )
+
+        Curso.objects.create(nome="Computação", descricao="Computação")
 
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
@@ -101,20 +104,29 @@ class UserAccessPolicyTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar usuário"):
-            user, token = account_management_service.create_account(
+            _, token = account_management_service.create_account(
                 sanitized_email_str="user_patch@localhost",
                 unsafe_password_str=PASSWORD,
             )
             response = self.client.patch(
-                reverse("usuario-detail", args=[user.pk]),
-                {"perfil": {"matricula": "321123"}},
+                reverse("usuario-detail", args=["eu"]),
+                {
+                    "perfil": {
+                        "nome_completo": "Novo Usuário",
+                        "nome_exibicao": "Novo",
+                        "data_nascimento": "2000-12-30",
+                        "matricula": "000000",
+                        "curso": 1,
+                        "ano_entrada": "2022.1",
+                    }
+                },
                 format="json",
                 HTTP_AUTHORIZATION=f"Token {token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar outro usuário"):
-            user, token = account_management_service.create_account(
+            _, token = account_management_service.create_account(
                 sanitized_email_str="user_patch2@localhost",
                 unsafe_password_str=PASSWORD,
             )

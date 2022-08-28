@@ -1,12 +1,19 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
 import marshmallow
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from django.core import exceptions
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+    extend_schema_view,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet, ViewSet
+from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
 from accounts import (
     account_management_service,
@@ -157,22 +164,146 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
+@extend_schema_view(
+    create=extend_schema(tags=["Usuário"]),
+    list=extend_schema(tags=["Usuário"]),
+    details=extend_schema(tags=["Usuário"]),
+    update=extend_schema(tags=["Usuário"]),
+    partial_update=extend_schema(tags=["Usuário"]),
+    destroy=extend_schema(tags=["Usuário"]),
+)
+class UserViewSet(
+    AccessViewSetMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):  # pylint: disable=R0901
     """ViewSet para ações relacionadas ao usuário."""
 
     access_policy = access_policy.UserViewAccessPolicy
     queryset = models.CustomUser.objects.all()
     serializer_class = serializer.UserSerializer
 
+    @extend_schema(
+        tags=["Usuário"],
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "perfil": {
+                        "type": "object",
+                        "properties": {
+                            "nome_exibição": {
+                                "type": "string",
+                                "example": "Francisco Silva",
+                            },
+                            "curso": {
+                                "type": "string",
+                                "example": "Ciência da Computação",
+                            },
+                            "entrada": {"type": "string", "example": "2022.1"},
+                        },
+                    }
+                },
+            },
+            (404, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": "Usuário não encontrado.",
+                            }
+                        },
+                    }
+                },
+            },
+        },
+    )
+    def retrieve(self, request, pk=None):
+        """Retorna o perfil de um usuário."""
+        try:
+            user_model = (
+                request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
+            )
 
-class CurrentUserUpdateView(
-    AccessViewSetMixin, mixins.UpdateModelMixin, GenericViewSet
-):
-    """Possibilita a atualização do perfil do usuário atual."""
+            perfil = account_management_service.get_user_profile(user_model)
+        except exceptions.ObjectDoesNotExist:
+            return Response(
+                data={"erro": {"mensagem": "Usuário não encontrado."}}, status=404
+            )
 
-    access_policy = access_policy.UserViewAccessPolicy
-    serializer_class = serializer.UserSerializer
-    queryset = models.CustomUser.objects.all()
+        return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
 
-    def get_object(self):
-        return models.CustomUser.objects.get(pk=self.request.user.pk)
+    @extend_schema(
+        tags=["Usuário"],
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "perfil": {
+                        "type": "object",
+                        "properties": {
+                            "nome_exibição": {
+                                "type": "string",
+                                "example": "Francisco Silva",
+                            },
+                            "curso": {
+                                "type": "string",
+                                "example": "Ciência da Computação",
+                            },
+                            "entrada": {"type": "string", "example": "2022.1"},
+                        },
+                    }
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "nome_completo": {
+                                "type": "array",
+                                "example": ["This field cannot be blank."],
+                            }
+                        },
+                    }
+                },
+            },
+        },
+    )
+    def partial_update(self, request, pk=None):
+        """Realiza a atualização dos valores do perfil do usuário."""
+        user = request.user if pk == "eu" else self.get_object()
+        try:
+            perfil = account_management_service.update_user_profile(
+                user.perfil, request.data.get("perfil")
+            )
+        except exceptions.ValidationError as e:
+            return Response(
+                data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)

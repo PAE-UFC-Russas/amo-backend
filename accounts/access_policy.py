@@ -38,4 +38,5 @@ class UserViewAccessPolicy(AccessPolicy):
 
         Esta verificação impede que um usuário edite os dados de outro.
         """
-        return request.user == view.get_object()
+
+        return view.kwargs.get("pk") == "eu"
