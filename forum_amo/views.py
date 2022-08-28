@@ -41,3 +41,4 @@ class RespostaViewSet(ModelViewSet):
     queryset = Resposta.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["duvida_id"]
+    filterset_fields = ["duvida"]
