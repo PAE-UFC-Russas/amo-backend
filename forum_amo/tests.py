@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.account_management_service import create_account
+from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
 
@@ -25,8 +26,13 @@ class DuvidaTestes(APITestCase):
             unsafe_password_str="superpassword123",
             admin=True,
         )
+        disciplina = Disciplinas.objects.create(
+            nome="teste", descricao="descrição teste"
+        )
         self.duvida = Duvida.objects.create(
-            titulo="Distribuição Exponencial", descricao="Probabilidade e Estatística"
+            titulo="Distribuição Exponencial",
+            descricao="Probabilidade e Estatística",
+            disciplina=disciplina,
         )
 
     def test_listar_duvidas(self):
@@ -41,11 +47,7 @@ class DuvidaTestes(APITestCase):
         """Teste a criação de uma nova dúvida"""
         response = self.client.post(
             reverse("duvidas-list"),
-            {
-                "id": "2",
-                "titulo": "Recursão",
-                "descricao": "FUP",
-            },
+            {"id": "2", "titulo": "Recursão", "descricao": "FUP", "disciplina": 1},
             HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -87,8 +89,11 @@ class RespostaTestes(APITestCase):
             sanitized_email_str="johndoe@localhost.com",
             unsafe_password_str="password123",
         )
+        disciplina = Disciplinas.objects.create(nome="IHC", descricao="teste")
         self.duvida = Duvida.objects.create(
-            titulo="Distribuição Exponencial", descricao="Probabilidade e Estatística"
+            titulo="Distribuição Exponencial",
+            descricao="Probabilidade e Estatística",
+            disciplina=disciplina,
         )
         self.resposta = Resposta.objects.create(
             autor=self.user, duvida=self.duvida, resposta="Esforce-se mais"
