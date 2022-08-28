@@ -3,6 +3,7 @@
 from rest_framework import serializers
 
 from accounts.models import CustomUser
+from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 
 
@@ -19,11 +20,14 @@ class DuvidaSerializer(serializers.ModelSerializer):
 
     titulo = serializers.CharField(max_length=200)
     descricao = serializers.CharField(max_length=550)
+    disciplina = serializers.PrimaryKeyRelatedField(
+        read_only=False, queryset=Disciplinas.objects.all()
+    )
 
     class Meta:
         model = Duvida
         queryset = Duvida.objects.all()
-        fields = ["id", "titulo", "descricao", "data"]
+        fields = ["id", "titulo", "descricao", "data", "disciplina"]
 
 
 class RespostaSerializer(serializers.ModelSerializer):

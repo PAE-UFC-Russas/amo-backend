@@ -5,6 +5,7 @@ Models para o app forum_app
 from django.db import models
 
 from accounts.models import CustomUser
+from core.models import Disciplinas
 
 
 class Duvida(models.Model):
@@ -14,6 +15,7 @@ class Duvida(models.Model):
     titulo = models.CharField(max_length=200)
     descricao = models.TextField(max_length=550)
     data = models.DateTimeField(auto_now=True)
+    disciplina = models.ForeignKey(Disciplinas, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
