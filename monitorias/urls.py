@@ -22,7 +22,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
 
 
-from accounts.views import UserViewSet, CurrentUserUpdateView, UserRegistration
+from accounts.views import UserViewSet, UserRegistration
 from core.views import CursoViewSet, DisciplinaViewSet
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
@@ -37,11 +37,6 @@ router.register(r"respostas", RespostaViewSet, basename="respostas")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("usuario/login/", auth_views.obtain_auth_token, name="obtain-api-token"),
-    path(  # precisa incluir antes do router para funcionar
-        "usuario/eu/",
-        CurrentUserUpdateView.as_view({"patch": "partial_update"}),
-        name="usuario_atual",
-    ),
     # path("registrar", UserRegistration, name="registrar"),
     path("", include(router.urls)),
     # documentação/drf_spectacular
