@@ -39,6 +39,8 @@ class RespostaViewSet(ModelViewSet):
 
     serializer_class = RespostaSerializer
     queryset = Resposta.objects.all()
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ["duvida_id"]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ["resposta"]
     filterset_fields = ["duvida"]
+    ordering_fields = ["data"]
+    ordering = ["data"]
