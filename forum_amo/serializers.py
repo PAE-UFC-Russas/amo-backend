@@ -23,7 +23,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Duvida
         queryset = Duvida.objects.all()
-        fields = ["id", "titulo", "descricao"]
+        fields = ["id", "titulo", "descricao", "data"]
 
 
 class RespostaSerializer(serializers.ModelSerializer):
