@@ -27,9 +27,7 @@ class Resposta(models.Model):
     autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     duvida = models.ForeignKey(Duvida, on_delete=models.CASCADE)
     resposta = models.TextField(max_length=750)
-    data_criada = models.DateTimeField(auto_now=True)
+    data = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (
-            f"Dúvida_id: {self.duvida}.Data: {self.data_criada} Autor_id: {self.autor}"
-        )
+        return f"Dúvida_id: {self.duvida}.Data: {self.data} Autor_id: {self.autor}"

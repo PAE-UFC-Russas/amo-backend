@@ -36,7 +36,7 @@ class RespostaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resposta
         queryset = Resposta.objects.all()
-        fields = ["id", "duvida", "resposta", "data_criada", "autor"]
+        fields = ["id", "duvida", "resposta", "data", "autor"]
 
     def create(self, validated_data):
         nova_resposta = Resposta.objects.create(
