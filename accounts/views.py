@@ -36,8 +36,8 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             "application/json": {
                 "type": "object",
                 "properties": {
-                    "email_str": {"type": "string", "example": "aluno@alu.ufc.br"},
-                    "password_str": {
+                    "email": {"type": "string", "example": "aluno@alu.ufc.br"},
+                    "password": {
                         "type": "string",
                         "example": "supersecurepassword1",
                     },
