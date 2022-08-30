@@ -48,8 +48,11 @@ class RespostaViewSet(ModelViewSet):
     ordering = ["data"]
 
     def destroy(self, request, pk=None):  # pylint: disable=W0221
-        resposta = Resposta.objects.get(id=pk)
+        try:
+            resposta = Resposta.objects.get(id=pk)
+        except Resposta.DoesNotExist:
+            return Response("", status.HTTP_404_NOT_FOUND)
         if request.user.id == resposta.autor.id:
             resposta.delete()
-            return Response("", status.HTTP_200_OK)
+            return Response("", status.HTTP_204_NO_CONTENT)
         return Response("", status.HTTP_401_UNAUTHORIZED)
