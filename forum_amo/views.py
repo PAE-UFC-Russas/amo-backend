@@ -3,12 +3,12 @@ View forum_app
 """
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from forum_amo.access_policy import RespostaAccessPolicy
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
 
@@ -34,11 +34,10 @@ class DuvidaViewSet(ModelViewSet):
     ordering = ["data"]
 
 
-class RespostaViewSet(ModelViewSet):
+class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
     """ViewSet referente ao modelo de respostas do fórum"""
 
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
+    access_policy = RespostaAccessPolicy
     serializer_class = RespostaSerializer
     queryset = Resposta.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -46,13 +45,3 @@ class RespostaViewSet(ModelViewSet):
     filterset_fields = ["duvida"]
     ordering_fields = ["data"]
     ordering = ["data"]
-
-    def destroy(self, request, pk=None):  # pylint: disable=W0221
-        try:
-            resposta = Resposta.objects.get(id=pk)
-        except Resposta.DoesNotExist:
-            return Response("", status.HTTP_404_NOT_FOUND)
-        if request.user.id == resposta.autor.id:
-            resposta.delete()
-            return Response("", status.HTTP_204_NO_CONTENT)
-        return Response("", status.HTTP_401_UNAUTHORIZED)
