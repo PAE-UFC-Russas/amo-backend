@@ -16,6 +16,7 @@ class Duvida(models.Model):
     descricao = models.TextField(max_length=550)
     data = models.DateTimeField(auto_now=True)
     disciplina = models.ForeignKey(Disciplinas, on_delete=models.CASCADE)
+    autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
