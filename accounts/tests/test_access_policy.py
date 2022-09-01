@@ -1,11 +1,12 @@
 """Testes de controle de acesso do aplicativo 'accounts'."""
 
-from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import CustomUser, EmailActivationToken
+from accounts import account_management_service
+from accounts.models import EmailActivationToken
+from core.models import Curso
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
 
@@ -14,21 +15,23 @@ class UserAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para UserViewSet"""
 
     def setUp(self) -> None:
-        self.user = CustomUser.objects.create(
-            email="user@localhost", password=make_password("password")
+        self.user, self.token = account_management_service.create_account(
+            sanitized_email_str="user@localhost", unsafe_password_str=PASSWORD
         )
+
+        Curso.objects.create(nome="Computação", descricao="Computação")
 
     def test_unauthenticated_access(self):
         """Verifica controle de acesso para usuários não autenticados"""
         with self.subTest("Registrar Usuário"):
             response = self.client.post(
-                reverse("usuario-registrar"),
-                {"email": "user2@localhost", "password": "ajfsd9p&*aa"},
+                reverse("registrar-list"),
+                {"email": "user2@pae.localhost", "password": "ajfsd9p&*aa"},
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with self.subTest("Ativar email"):
-            response = self.client.post(reverse("usuario-ativar"))
+            response = self.client.post(reverse("registrar-confirmar-email"))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         with self.subTest("Login"):
@@ -36,7 +39,7 @@ class UserAccessPolicyTestCase(APITestCase):
             # não é controlada por UserViewAccessPolicy
             response = self.client.post(
                 reverse("obtain-api-token"),
-                {"username": "user@localhost", "password": "password"},
+                {"username": "user@localhost", "password": PASSWORD},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -60,9 +63,9 @@ class UserAccessPolicyTestCase(APITestCase):
         """Verifica controle de acesso para usuários autenticados"""
         with self.subTest("Registrar"):
             response = self.client.post(
-                reverse("usuario-registrar"),
+                reverse("registrar-list"),
                 {"email": "user1@localhost", "password": "f7aw87ho2q!"},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -71,24 +74,24 @@ class UserAccessPolicyTestCase(APITestCase):
                 user=self.user, email=self.user.email, token="000000"
             )
             response = self.client.post(
-                reverse("usuario-ativar"),
+                reverse("registrar-confirmar-email"),
                 {"token": email_token.token},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.subTest("Login"):
             response = self.client.post(
                 reverse("obtain-api-token"),
-                {"username": "user@localhost", "password": "password"},
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                {"username": "user@localhost", "password": PASSWORD},
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Listar"):
             response = self.client.get(
                 reverse("usuario-list"),
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -96,30 +99,41 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.get(
                 reverse("usuario-list"),
                 args=[1],
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar usuário"):
-            user_ = CustomUser.objects.create(
-                email="user_patch@localhost", password=PASSWORD
+            _, token = account_management_service.create_account(
+                sanitized_email_str="user_patch@localhost",
+                unsafe_password_str=PASSWORD,
             )
             response = self.client.patch(
-                reverse("usuario-detail", args=[user_.pk]),
-                {"perfil": {"matricula": "321123"}},
+                reverse("usuario-detail", args=["eu"]),
+                {
+                    "perfil": {
+                        "nome_completo": "Novo Usuário",
+                        "nome_exibicao": "Novo",
+                        "data_nascimento": "2000-12-30",
+                        "matricula": "000000",
+                        "curso": 1,
+                        "ano_entrada": "2022.1",
+                    }
+                },
                 format="json",
-                HTTP_AUTHORIZATION=f"Token {user_.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {token}",
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.subTest("Atualizar outro usuário"):
-            user_ = CustomUser.objects.create(
-                email="user_patch2@localhost", password=PASSWORD
+            _, token = account_management_service.create_account(
+                sanitized_email_str="user_patch2@localhost",
+                unsafe_password_str=PASSWORD,
             )
             response = self.client.patch(
                 reverse("usuario-detail", args=[2]),
                 {"perfil": {"matricula": "000002"}},
                 format="json",
-                HTTP_AUTHORIZATION=f"Token {user_.auth_token.key}",
+                HTTP_AUTHORIZATION=f"Token {token}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

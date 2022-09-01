@@ -2,6 +2,15 @@
 from rest_access_policy import AccessPolicy
 
 
+class AccountRegistrationAccessPolicy(AccessPolicy):
+    """Define o controle de acesso para a view de cadastro do usuário."""
+
+    statements = [
+        {"action": "create", "principal": "anonymous", "effect": "allow"},
+        {"action": "confirmar_email", "principal": "authenticated", "effect": "allow"},
+    ]
+
+
 class UserViewAccessPolicy(AccessPolicy):
     """Define o controle de acesso para UserViewSet"""
 
@@ -29,4 +38,5 @@ class UserViewAccessPolicy(AccessPolicy):
 
         Esta verificação impede que um usuário edite os dados de outro.
         """
-        return request.user == view.get_object()
+
+        return view.kwargs.get("pk") == "eu"

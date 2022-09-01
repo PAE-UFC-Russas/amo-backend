@@ -1,5 +1,5 @@
 """Testes sobre UserViewSet do aplicativo 'accounts'."""
-
+from datetime import date
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -16,7 +16,7 @@ class UserViewSetTest(APITestCase):
 
     def setUp(self) -> None:
         self.client.post(
-            reverse("usuario-registrar"),
+            reverse("registrar-list"),
             {"email": "test@user.com", "password": PASSWORD},
             format="json",
         )
@@ -43,55 +43,36 @@ class UserViewSetTest(APITestCase):
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
 
-        self.assertEqual(response.data, UserSerializer(self.user).data)
+        self.assertIn("perfil", response.data)
 
-    def test_patch(self):
-        """Verifica a atualização parcial do usuario (no perfil)"""
+        perfil = response.data["perfil"]
+        self.assertIn("nome_exibicao", perfil)
+        self.assertIn("entrada", perfil)
+        self.assertIn("curso", perfil)
 
-        with self.subTest("Atualizar matrícula"):
-            response = self.client.patch(
-                reverse("usuario-detail", args=[1]),
-                {"perfil": {"matricula": "000000"}},
-                format="json",
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-            )
+    def test_update(self):
+        """Verifica a atualização do usuario (no perfil)"""
 
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(self.user.perfil.matricula, "000000")
+        response = self.client.patch(
+            reverse("usuario-detail", args=["eu"]),
+            {
+                "perfil": {
+                    "nome_completo": "Usuário da Silva",
+                    "nome_exibicao": "Usuário",
+                    "data_nascimento": "2000-12-30",
+                    "matricula": "000000",
+                    "curso": 1,
+                    "entrada": "2022.1",
+                }
+            },
+            format="json",
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
+        )
 
-        with self.subTest("Atualizar do Curso"):
-            response = self.client.patch(
-                reverse("usuario-detail", args=[1]),
-                {"perfil": {"curso": 1}},
-                format="json",
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-            )
-
-            self.user.refresh_from_db()
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(self.user.perfil.curso, Curso.objects.first())
-
-        with self.subTest("Atualizar data de entrada"):
-            entrada = "2020.1"
-            response = self.client.patch(
-                reverse("usuario-detail", args=[1]),
-                {"perfil": {"entrada": entrada}},
-                format="json",
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-            )
-
-            self.user.refresh_from_db()
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(self.user.perfil.entrada, entrada)
-
-        with self.subTest("Atualizar nome/self"):
-            response = self.client.patch(
-                reverse("usuario-detail", args=["eu"]),
-                {"perfil": {"nome_completo": "Nome do Usuário"}},
-                format="json",
-                HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
-            )
-
-            self.user.refresh_from_db()
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(self.user.perfil.nome_completo, "Nome do Usuário")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.perfil.nome_completo, "Usuário da Silva")
+        self.assertEqual(self.user.perfil.nome_exibicao, "Usuário")
+        self.assertEqual(self.user.perfil.data_nascimento, date(2000, 12, 30))
+        self.assertEqual(self.user.perfil.matricula, "000000")
+        self.assertEqual(self.user.perfil.curso_id, 1)
+        self.assertEqual(self.user.perfil.entrada, "2022.1")
