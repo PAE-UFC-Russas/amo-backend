@@ -33,6 +33,7 @@ class DuvidaTestes(APITestCase):
             titulo="Distribuição Exponencial",
             descricao="Probabilidade e Estatística",
             disciplina=disciplina,
+            autor_id=1,
         )
 
     def test_listar_duvidas(self):
@@ -47,7 +48,11 @@ class DuvidaTestes(APITestCase):
         """Teste a criação de uma nova dúvida"""
         response = self.client.post(
             reverse("duvidas-list"),
-            {"id": "2", "titulo": "Recursão", "descricao": "FUP", "disciplina": 1},
+            {
+                "titulo": "Recursão",
+                "descricao": "FUP",
+                "disciplina": 1,
+            },
             HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -94,6 +99,7 @@ class RespostaTestes(APITestCase):
             titulo="Distribuição Exponencial",
             descricao="Probabilidade e Estatística",
             disciplina=disciplina,
+            autor=self.user,
         )
         self.resposta = Resposta.objects.create(
             autor=self.user, duvida=self.duvida, resposta="Esforce-se mais"
