@@ -23,11 +23,12 @@ class DuvidaSerializer(serializers.ModelSerializer):
     disciplina = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Disciplinas.objects.all()
     )
+    resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Duvida
         queryset = Duvida.objects.all()
-        fields = ["id", "titulo", "descricao", "data", "disciplina"]
+        fields = ["id", "titulo", "descricao", "data", "disciplina", "resposta_correta"]
 
 
 class RespostaSerializer(serializers.ModelSerializer):

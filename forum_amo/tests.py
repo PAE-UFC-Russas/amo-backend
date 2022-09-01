@@ -5,10 +5,11 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.account_management_service import create_account
+from accounts.account_management_service import create_account, CustomUser
 from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
+from utils import test_utils
 
 
 class DuvidaTestes(APITestCase):
@@ -159,3 +160,29 @@ class RespostaTestes(APITestCase):
         self.assertEqual(
             RespostaSerializer(respostas).data, RespostaSerializer(self.resposta).data
         )
+
+
+class RespostaCorretaTest(APITestCase):
+    """Valida que é possível marcar uma resposta como correta."""
+
+    def setUp(self) -> None:
+        test_utils.db_create()
+
+    def test_resposta_correta(self):
+        """Verifica que o usuário pode selecionar e remover uma resposta como correta."""
+        usuario = CustomUser.objects.first()
+        duvida = Duvida.objects.first()
+        resposta = Resposta.objects.first()
+        self.assertIsNone(duvida.resposta_correta_id)
+
+        url = reverse("duvidas-correta", args=[duvida.pk])
+        self.client.post(
+            url, {"id": resposta.pk}, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.resposta_correta_id, resposta.pk)
+
+        self.client.delete(url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}")
+        duvida.refresh_from_db()
+        self.assertIsNone(duvida.resposta_correta_id)
