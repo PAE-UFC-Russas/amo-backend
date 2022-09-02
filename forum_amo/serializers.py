@@ -1,14 +1,13 @@
 """Serializer do model duvida"""
 
 from rest_framework import serializers
-
-from accounts.models import CustomUser
 from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
+from accounts.models import CustomUser
 
 
 class AutorSerializer(serializers.ModelSerializer):
-    """Serializer para exibir autor na dúvida e na resposta"""
+    """Serializer para exibir autor na dúvida"""
 
     class Meta:
         model = CustomUser
@@ -16,7 +15,7 @@ class AutorSerializer(serializers.ModelSerializer):
 
 
 class DuvidaSerializer(serializers.ModelSerializer):
-    """Serializer para dúvidas"""
+    """Serializer para arquivos"""
 
     titulo = serializers.CharField(max_length=200)
     descricao = serializers.CharField(max_length=550)
@@ -24,11 +23,22 @@ class DuvidaSerializer(serializers.ModelSerializer):
         read_only=False, queryset=Disciplinas.objects.all()
     )
     resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
+    autor = AutorSerializer(read_only=True)
+
+    def create(self, validated_data):
+        nova_duvida = Duvida.objects.create(
+            titulo=validated_data["titulo"],
+            descricao=validated_data["descricao"],
+            disciplina_id=validated_data["disciplina"].pk,
+            autor_id=self.context["request"].user.id,
+        )
+
+        return nova_duvida
 
     class Meta:
         model = Duvida
         queryset = Duvida.objects.all()
-        fields = ["id", "titulo", "descricao", "data", "disciplina", "resposta_correta"]
+        fields = ["id", "titulo", "descricao", "autor", "data", "disciplina", "resposta_correta"]
 
 
 class RespostaSerializer(serializers.ModelSerializer):

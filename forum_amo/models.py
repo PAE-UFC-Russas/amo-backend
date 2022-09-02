@@ -19,6 +19,7 @@ class Duvida(models.Model):
     resposta_correta = models.ForeignKey(
         "Resposta", on_delete=models.SET_NULL, null=True, related_name="+"
     )
+    autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
