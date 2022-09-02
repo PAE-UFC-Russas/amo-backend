@@ -39,7 +39,7 @@ class DuvidaTestes(APITestCase):
     def test_listar_duvidas(self):
         """Testa o listamento de todas as dúvidas já criadas"""
         response = self.client.get(
-            reverse("duvidas-list"),
+            reverse("duvidas-list"), HTTP_AUTHORIZATION=f"Token {self.user_token}"
         )
         self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -63,7 +63,10 @@ class DuvidaTestes(APITestCase):
 
     def test_buscar_duvida(self):
         """Testa a busca de uma dúvida por meio do id"""
-        response = self.client.get(reverse("duvidas-detail", args=[1]))
+        response = self.client.get(
+            reverse("duvidas-detail", args=[1]),
+            HTTP_AUTHORIZATION=f"Token {self.user_token}",
+        )
         self.assertEqual(response.data, (DuvidaSerializer(self.duvida).data))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -109,6 +112,7 @@ class RespostaTestes(APITestCase):
         """Testa o listamento de todas as respostas já criadas"""
         response = self.client.get(
             reverse("respostas-list"),
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
         )
         self.assertEqual(response.data, [RespostaSerializer(self.resposta).data])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -138,7 +142,10 @@ class RespostaTestes(APITestCase):
 
     def test_buscar_resposta(self):
         """Testa a busca de uma resposta por meio do id"""
-        response = self.client.get(reverse("respostas-detail", args=[1]))
+        response = self.client.get(
+            reverse("respostas-detail", args=[1]),
+            HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
+        )
         self.assertEqual(response.data, (RespostaSerializer(self.resposta).data))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
