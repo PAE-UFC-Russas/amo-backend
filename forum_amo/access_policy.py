@@ -28,7 +28,7 @@ class DuvidaAccessPolicy(AccessPolicy):
     "Restrições de acesso para o modelo de duvidas"
     statements = [
         {
-            "action": ["destroy", "partial_update"],
+            "action": ["destroy", "partial_update", "correta"],
             "principal": "authenticated",
             "effect": "allow",
             "condition": "is_author",

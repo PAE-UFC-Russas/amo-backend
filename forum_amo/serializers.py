@@ -22,6 +22,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     disciplina = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Disciplinas.objects.all()
     )
+    resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
     autor = AutorSerializer(read_only=True)
 
     def create(self, validated_data):
@@ -37,7 +38,15 @@ class DuvidaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Duvida
         queryset = Duvida.objects.all()
-        fields = ["id", "titulo", "descricao", "autor", "data", "disciplina"]
+        fields = [
+            "id",
+            "titulo",
+            "descricao",
+            "autor",
+            "data",
+            "disciplina",
+            "resposta_correta",
+        ]
 
 
 class RespostaSerializer(serializers.ModelSerializer):
