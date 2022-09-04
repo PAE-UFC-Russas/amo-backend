@@ -186,16 +186,23 @@ class RespostaCorretaTest(APITestCase):
         usuario = CustomUser.objects.first()
         duvida = Duvida.objects.first()
         resposta = Resposta.objects.first()
+        url = reverse("duvidas-correta", args=[duvida.pk])
+
+        # Verifica o estado inicial, que a dúvida não tem uma resposta correta
         self.assertIsNone(duvida.resposta_correta_id)
 
-        url = reverse("duvidas-correta", args=[duvida.pk])
-        self.client.post(
+        # Seleciona uma resposta como correta
+        http_response = self.client.post(
             url, {"id": resposta.pk}, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
         )
-
+        self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
         duvida.refresh_from_db()
         self.assertEqual(duvida.resposta_correta_id, resposta.pk)
 
-        self.client.delete(url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}")
+        # "Desmarca" uma resposta como correta
+        http_response = self.client.delete(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
         duvida.refresh_from_db()
         self.assertIsNone(duvida.resposta_correta_id)

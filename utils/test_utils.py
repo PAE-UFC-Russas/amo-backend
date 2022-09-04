@@ -27,6 +27,7 @@ def db_create() -> None:
         disciplina_id=1,
         titulo="Prova1 ",
         descricao="Quais tópicos cairão na prova 1?",
+        autor_id=1,
     )
     forum_models.Resposta.objects.create(
         duvida_id=1,

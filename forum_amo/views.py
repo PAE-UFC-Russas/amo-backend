@@ -5,13 +5,11 @@ from django import http
 from django.core import exceptions
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-
 from drf_spectacular.utils import extend_schema
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import response, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
