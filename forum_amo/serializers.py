@@ -4,14 +4,18 @@ from rest_framework import serializers
 from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 from accounts.models import CustomUser
+from accounts.serializer import PerfilSerializer
 
 
 class AutorSerializer(serializers.ModelSerializer):
     """Serializer para exibir autor na dúvida"""
 
+    id = serializers.IntegerField()
+    perfil = PerfilSerializer(read_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ["id", "first_name", "last_name", "email"]
+        fields = ["id", "perfil"]
 
 
 class DuvidaSerializer(serializers.ModelSerializer):
@@ -51,6 +55,8 @@ class DuvidaSerializer(serializers.ModelSerializer):
 
 class RespostaSerializer(serializers.ModelSerializer):
     """Serializer para respostas"""
+
+    autor = AutorSerializer(read_only=True)
 
     class Meta:
         model = Resposta
