@@ -5,14 +5,20 @@ from django import http
 from django.core import exceptions
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import response, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+import forum_amo.forum_service
 from forum_amo.access_policy import DuvidaAccessPolicy, RespostaAccessPolicy
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
@@ -110,3 +116,69 @@ class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
     filterset_fields = ["duvida"]
     ordering_fields = ["data"]
     ordering = ["data"]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "example": 1},
+                    "duvida": {"type": "integer", "example": 1},
+                    "data": {
+                        "type": "string",
+                        "example": "2022-09-01T19:31:10.716357-03:00",
+                    },
+                    "resposta": {
+                        "type": "string",
+                        "example": "Tem o passo a passo no capítulo 2 do livro.",
+                    },
+                    "autor": {
+                        "type": "object",
+                        "properties": {
+                            "nome_exibição": {
+                                "type": "string",
+                                "example": "Francisco Silva",
+                            },
+                            "curso": {
+                                "type": "string",
+                                "example": "Ciência da Computação",
+                            },
+                            "entrada": {"type": "string", "example": "2022.1"},
+                        },
+                    },
+                },
+            },
+            (404, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": "Resposta não encontrada.",
+                            }
+                        },
+                    }
+                },
+            },
+        },
+    )
+    def retrieve(self, request, *args, pk=None, **kwargs):
+        try:
+            resposta = forum_amo.forum_service.get_resposta(pk)
+        except exceptions.ObjectDoesNotExist:
+            return Response(
+                data={"erro": {"mensagem": "Resposta não encontrada."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(resposta, status=200)
