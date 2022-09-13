@@ -1,6 +1,7 @@
 """
 TESTS forum_app
 """
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -147,7 +148,21 @@ class RespostaTestes(APITestCase):
             reverse("respostas-detail", args=[1]),
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
         )
-        self.assertEqual(response.data, (RespostaSerializer(self.resposta).data))
+
+        self.assertEqual(
+            response.data,
+            {
+                "id": self.resposta.id,
+                "duvida": self.resposta.duvida_id,
+                "data": self.resposta.data.astimezone(),
+                "resposta": self.resposta.resposta,
+                "autor": {
+                    "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
+                    "curso": self.resposta.autor.perfil.curso_id,
+                    "entrada": self.resposta.autor.perfil.entrada,
+                },
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_deletar_resposta(self):
