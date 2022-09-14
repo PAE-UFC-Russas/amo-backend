@@ -18,7 +18,7 @@ drf-access-policy = "^1.1.2"
 django-filter = "^22.1"
 django-crispy-forms = "^1.14.0"
 drf-writable-nested = "^0.7.0"
-marshmallow = "^3.17.0"
+marshmallow = "^3.17.1"
 bleach = "^5.0.1"
 
 [tool.poetry.dev-dependencies]
