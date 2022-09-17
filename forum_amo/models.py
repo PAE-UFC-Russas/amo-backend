@@ -35,3 +35,10 @@ class Resposta(models.Model):
 
     def __str__(self):
         return f"Dúvida_id: {self.duvida}.Data: {self.data} Autor_id: {self.autor}"
+
+
+class VotoDuvida(models.Model):
+    "Modelo para usuários poderem votar nas dúvidas"
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    duvida = models.ForeignKey(Duvida, on_delete=models.CASCADE)
+    data_criada = models.DateTimeField(auto_now_add=True)
