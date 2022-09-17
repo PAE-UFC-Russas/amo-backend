@@ -39,6 +39,6 @@ class Resposta(models.Model):
 
 class VotoDuvida(models.Model):
     "Modelo para usuários poderem votar nas dúvidas"
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     duvida = models.ForeignKey(Duvida, on_delete=models.CASCADE)
     data_criada = models.DateTimeField(auto_now_add=True)

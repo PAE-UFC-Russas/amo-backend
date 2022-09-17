@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from accounts.serializer import UserSerializer
 from core.models import Disciplinas
-from forum_amo.models import Duvida, Resposta
+from forum_amo.models import Duvida, Resposta, VotoDuvida
 
 
 class DuvidaSerializer(serializers.ModelSerializer):
@@ -59,3 +59,23 @@ class RespostaSerializer(serializers.ModelSerializer):
             resposta=validated_data["resposta"],
         )
         return nova_resposta
+
+
+class VotoDuvidaSerializer(serializers.ModelSerializer):
+    """Serializer para voto em dúvidas"""
+
+    usuario = UserSerializer(read_only=True)
+
+    class Meta:
+        model = VotoDuvida
+        queryset = VotoDuvida.objects.all()
+        fields = ["id", "usuario", "duvida"]
+
+    def create(self, validated_data):
+
+        voto = VotoDuvida.objects.create(
+            usuario_id=self.context["request"].user.id,
+            duvida_id=validated_data["duvida"].id,
+            data_criada=validated_data["data_criada"],
+        )
+        return voto
