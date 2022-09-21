@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from accounts import schema, errors
+from accounts import errors, schema
 from accounts.models import CustomUser, EmailActivationToken, Perfil
 
 
@@ -61,10 +61,11 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
 
     profile = model_to_dict(user_instance.perfil)
+    profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["nome_exibicao", "entrada", "curso"]
+    allowed_fields = ["nome_exibicao", "entrada", "curso", "cargos"]
 
     for key in list(profile.keys()):
         if key not in allowed_fields:

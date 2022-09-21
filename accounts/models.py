@@ -46,6 +46,11 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
+    @property
+    def cargos(self):
+        """Retorna a lista de cargos do usuário."""
+        return [group.name for group in self.groups.all()]
+
     def __str__(self):
         return self.email
 
