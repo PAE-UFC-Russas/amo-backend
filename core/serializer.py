@@ -1,7 +1,18 @@
 """Este módulo contém os serializadores utilizados na aplicação 'core'."""
 from rest_framework import serializers
 
+from accounts.models import Perfil
 from core.models import Curso, Disciplinas
+
+
+class MonitorSerializer(serializers.ModelSerializer):
+    """Define um serializer para exibição de monitores de disciplinas."""
+
+    nome_exibicao = serializers.CharField(source="perfil.nome_exibicao")
+
+    class Meta:
+        model = Perfil
+        fields = ["id", "nome_exibicao"]
 
 
 class CursoSerializer(serializers.ModelSerializer):
@@ -25,8 +36,10 @@ class DisciplinaSerializer(serializers.ModelSerializer):
     nome = serializers.CharField()
     descricao = serializers.CharField()
     cursos = CursoSerializer(many=True, read_only=True)
+    monitores = MonitorSerializer(read_only=True, many=True)
+    professores = MonitorSerializer(read_only=True, many=True)
 
     class Meta:
         model = Disciplinas
         queryset = Disciplinas.objects.all()
-        fields = ["id", "nome", "descricao", "cursos"]
+        fields = ["id", "nome", "descricao", "cursos", "monitores", "professores"]
