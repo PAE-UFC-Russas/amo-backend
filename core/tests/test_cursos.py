@@ -13,6 +13,8 @@ from core.serializer import CursoSerializer
 class CursoTestCase(APITestCase):
     """Testes relacionados a CursoViewSet."""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self):
         _, self.user_token = create_account(
             sanitized_email_str="user@localhost", unsafe_password_str="password1!"

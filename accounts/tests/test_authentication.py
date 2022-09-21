@@ -11,6 +11,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 class UserAuthTest(APITestCase):
     """Verifica a autenticação do usuário."""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self):
         _, self.token = account_management_service.create_account(
             sanitized_email_str="test@user.com",

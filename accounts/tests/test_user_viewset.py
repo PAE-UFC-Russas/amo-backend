@@ -1,5 +1,6 @@
 """Testes sobre UserViewSet do aplicativo 'accounts'."""
 from datetime import date
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -13,6 +14,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 
 class UserViewSetTest(APITestCase):
     """Testes relacionados a UserViewSet"""
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         self.client.post(

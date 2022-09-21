@@ -14,6 +14,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 class UserAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para UserViewSet"""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self) -> None:
         self.user, self.token = account_management_service.create_account(
             sanitized_email_str="user@localhost", unsafe_password_str=PASSWORD

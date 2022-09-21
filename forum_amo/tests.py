@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.account_management_service import create_account, CustomUser
+from accounts.account_management_service import CustomUser, create_account
 from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
@@ -17,6 +17,8 @@ class DuvidaTestes(APITestCase):
     """
     Classe de testes para a viewset do modelo de dúvidas
     """
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         _, self.user_token = create_account(
@@ -94,6 +96,8 @@ class RespostaTestes(APITestCase):
     Classe de testes para a viewset do modelo de Respostas.
     """
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self) -> None:
         self.user, _ = create_account(
             sanitized_email_str="johndoe@localhost.com",
@@ -160,6 +164,7 @@ class RespostaTestes(APITestCase):
                     "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
                     "curso": self.resposta.autor.perfil.curso_id,
                     "entrada": self.resposta.autor.perfil.entrada,
+                    "cargos": ["aluno"],
                 },
             },
         )
@@ -192,6 +197,8 @@ class RespostaTestes(APITestCase):
 
 class RespostaCorretaTest(APITestCase):
     """Valida que é possível marcar uma resposta como correta."""
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         test_utils.db_create()
