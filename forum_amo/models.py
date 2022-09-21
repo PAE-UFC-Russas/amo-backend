@@ -43,3 +43,8 @@ class VotoDuvida(models.Model):
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     duvida = models.ForeignKey(Duvida, on_delete=models.CASCADE)
     data_criada = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["usuario", "duvida"], name="voto_unico")
+        ]

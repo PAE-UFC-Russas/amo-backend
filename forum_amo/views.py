@@ -3,6 +3,7 @@ View forum_app
 """
 from django import http
 from django.core import exceptions
+from django.db import IntegrityError
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
@@ -48,9 +49,11 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
         """Permite votar em um dúvida"""
         if request.method == "POST":
             dados = {"duvida": pk, "usuario": request.user}
-            serializer = VotoDuvidaSerializer(data=dados)
-            serializer.is_valid(raise_exception=True)
-            serializer.create(dados)
+            serializer = VotoDuvidaSerializer()
+            try:
+                serializer.create(dados)
+            except IntegrityError:
+                return Response(status=status.HTTP_409_CONFLICT)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 

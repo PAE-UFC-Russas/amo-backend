@@ -76,7 +76,6 @@ class VotoDuvidaSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         with transaction.atomic():
-
             voto = VotoDuvida.objects.create(
                 usuario_id=validated_data["usuario"].id,
                 duvida_id=validated_data["duvida"],
