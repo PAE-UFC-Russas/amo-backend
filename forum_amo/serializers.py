@@ -1,5 +1,6 @@
 """Serializer do model duvida"""
 
+from django.db import transaction
 from rest_framework import serializers
 
 from accounts.serializer import UserSerializer
@@ -17,6 +18,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     )
     resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
     autor = UserSerializer(read_only=True)
+    votos = serializers.IntegerField(read_only=True)
 
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(
@@ -39,6 +41,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             "data",
             "disciplina",
             "resposta_correta",
+            "votos",
         ]
 
 
@@ -72,10 +75,14 @@ class VotoDuvidaSerializer(serializers.ModelSerializer):
         fields = ["id", "usuario", "duvida"]
 
     def create(self, validated_data):
+        with transaction.atomic():
 
-        voto = VotoDuvida.objects.create(
-            usuario_id=self.context["request"].user.id,
-            duvida_id=validated_data["duvida"].id,
-            data_criada=validated_data["data_criada"],
-        )
+            voto = VotoDuvida.objects.create(
+                usuario_id=validated_data["usuario"].id,
+                duvida_id=validated_data["duvida"],
+            )
+            duvida = Duvida.objects.get(pk=validated_data["duvida"])
+            duvida.votos += 1
+            duvida.save()
+
         return voto
