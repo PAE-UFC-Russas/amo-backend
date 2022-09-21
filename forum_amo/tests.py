@@ -161,6 +161,7 @@ class RespostaTestes(APITestCase):
                 "data": self.resposta.data.astimezone(),
                 "resposta": self.resposta.resposta,
                 "autor": {
+                    "id": self.resposta.autor_id,
                     "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
                     "curso": self.resposta.autor.perfil.curso_id,
                     "entrada": self.resposta.autor.perfil.entrada,
