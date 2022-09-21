@@ -10,6 +10,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 class CustomUserTest(TestCase):
     """Testes relacionados a CustomUser."""
 
+    fixtures = ["groups.yaml"]
+
     def test_create_user(self):
         """Verifica a criação de um usuário"""
         CustomUser.objects.create_user(email="usuario@test.com", password=PASSWORD)

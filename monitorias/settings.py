@@ -47,6 +47,7 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    "fixtures",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -147,6 +148,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+FIXTURE_DIRS = ["fixtures"]
 
 # https://docs.rollbar.com/docs
 ROLLBAR = {
