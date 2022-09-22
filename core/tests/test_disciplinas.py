@@ -102,7 +102,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                     DisciplinaSerializer(self.disciplina_req).data,
                     DisciplinaSerializer(self.disciplina_fup).data,
                 ],
-                json.loads(response.content),
+                json.loads(response.content)["results"],
             )
 
         with self.subTest("Filtragem por curso"):
@@ -114,5 +114,5 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                 DisciplinaSerializer(
                     Disciplinas.objects.filter(cursos__pk=1), many=True
                 ).data,
-                json.loads(response.content),
+                json.loads(response.content)["results"],
             )

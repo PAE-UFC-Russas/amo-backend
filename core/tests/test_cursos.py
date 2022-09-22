@@ -36,7 +36,9 @@ class CursoTestCase(APITestCase):
             reverse("cursos-list"),
             HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
-        self.assertEqual(response.data, [CursoSerializer(self.curso).data])
+        self.assertEqual(
+            json.loads(response.content)["results"], [CursoSerializer(self.curso).data]
+        )
 
     def test_retrieve(self):
         """Verifica a visualização de um Curso"""
