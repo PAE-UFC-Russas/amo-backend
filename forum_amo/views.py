@@ -17,7 +17,7 @@ from rest_framework.viewsets import ModelViewSet
 
 import forum_amo.forum_service
 from forum_amo.access_policy import DuvidaAccessPolicy, RespostaAccessPolicy
-from forum_amo.models import Duvida, Resposta
+from forum_amo.models import Duvida, Resposta, VotoDuvida
 from forum_amo.serializers import (
     DuvidaSerializer,
     RespostaSerializer,
@@ -54,7 +54,13 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                 serializer.create(dados)
             except IntegrityError:
                 return Response(status=status.HTTP_409_CONFLICT)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == "DELETE":
+            dados = {"duvida": pk, "usuario": request.user}
+            serializer = VotoDuvidaSerializer()
+            try:
+                serializer.destroy(dados)
+            except VotoDuvida.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(

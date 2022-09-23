@@ -85,3 +85,15 @@ class VotoDuvidaSerializer(serializers.ModelSerializer):
             duvida.save()
 
         return voto
+
+    def destroy(self, validated_data):
+        "Exclui o voto de um usuário em uma dúvida"
+        with transaction.atomic():
+            voto = VotoDuvida.objects.get(
+                usuario=validated_data["usuario"].id,
+                duvida=validated_data["duvida"],
+            )
+            voto.delete()
+            duvida = Duvida.objects.get(pk=validated_data["duvida"])
+            duvida.votos -= 1
+            duvida.save()
