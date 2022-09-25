@@ -22,6 +22,10 @@ def db_create() -> None:
         sanitized_email_str="test_user@localhost", unsafe_password_str="PASWORD1!"
     )
 
+    account_management_service.create_account(
+        sanitized_email_str="test2_user@localhost", unsafe_password_str="PASWORD12!"
+    )
+
     # Fórum
     forum_models.Duvida.objects.create(
         disciplina_id=1,
