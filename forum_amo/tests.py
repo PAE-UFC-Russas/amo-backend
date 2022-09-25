@@ -6,7 +6,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.account_management_service import create_account, CustomUser
+from accounts.account_management_service import CustomUser, create_account
 from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta
 from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
@@ -221,3 +221,7 @@ class RespostaCorretaTest(APITestCase):
         self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
         duvida.refresh_from_db()
         self.assertIsNone(duvida.resposta_correta_id)
+
+
+class VotarNaDuvidaTest(APITestCase):
+    """Assegura que é possivel votar e remover o voto de uma dúvida"""

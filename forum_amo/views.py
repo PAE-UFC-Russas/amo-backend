@@ -52,6 +52,7 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
             serializer = VotoDuvidaSerializer()
             try:
                 serializer.create(dados)
+                return Response(status=status.HTTP_202_ACCEPTED)
             except IntegrityError:
                 return Response(status=status.HTTP_409_CONFLICT)
         if request.method == "DELETE":
@@ -59,6 +60,7 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
             serializer = VotoDuvidaSerializer()
             try:
                 serializer.destroy(dados)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             except VotoDuvida.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_404_NOT_FOUND)
