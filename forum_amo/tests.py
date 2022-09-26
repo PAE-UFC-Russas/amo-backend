@@ -241,6 +241,8 @@ class RespostaCorretaTest(APITestCase):
 class VotarNaDuvidaTest(APITestCase):
     """Assegura que é possivel votar e remover o voto de uma dúvida"""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self) -> None:
         test_utils.db_create()
 
