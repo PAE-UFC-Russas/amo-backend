@@ -1,6 +1,7 @@
 """
 TESTS forum_app
 """
+import json
 
 from django.urls import reverse
 from rest_framework import status
@@ -17,6 +18,8 @@ class DuvidaTestes(APITestCase):
     """
     Classe de testes para a viewset do modelo de dúvidas
     """
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         _, self.user_token = create_account(
@@ -43,7 +46,10 @@ class DuvidaTestes(APITestCase):
         response = self.client.get(
             reverse("duvidas-list"), HTTP_AUTHORIZATION=f"Token {self.user_token}"
         )
-        self.assertEqual(response.data, [DuvidaSerializer(self.duvida).data])
+        self.assertEqual(
+            json.loads(response.content)["results"],
+            [DuvidaSerializer(self.duvida).data],
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_criar_duvida(self):
@@ -94,6 +100,8 @@ class RespostaTestes(APITestCase):
     Classe de testes para a viewset do modelo de Respostas.
     """
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self) -> None:
         self.user, _ = create_account(
             sanitized_email_str="johndoe@localhost.com",
@@ -116,7 +124,10 @@ class RespostaTestes(APITestCase):
             reverse("respostas-list"),
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
         )
-        self.assertEqual(response.data, [RespostaSerializer(self.resposta).data])
+        self.assertEqual(
+            json.loads(response.content)["results"],
+            [RespostaSerializer(self.resposta).data],
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_criar_resposta(self):
@@ -157,9 +168,11 @@ class RespostaTestes(APITestCase):
                 "data": self.resposta.data.astimezone(),
                 "resposta": self.resposta.resposta,
                 "autor": {
+                    "id": self.resposta.autor_id,
                     "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
                     "curso": self.resposta.autor.perfil.curso_id,
                     "entrada": self.resposta.autor.perfil.entrada,
+                    "cargos": ["aluno"],
                 },
             },
         )
@@ -192,6 +205,8 @@ class RespostaTestes(APITestCase):
 
 class RespostaCorretaTest(APITestCase):
     """Valida que é possível marcar uma resposta como correta."""
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         test_utils.db_create()

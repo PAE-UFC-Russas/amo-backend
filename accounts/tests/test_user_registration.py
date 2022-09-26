@@ -14,6 +14,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 class UserRegistration(APITestCase):
     """Testes relacionados ao cadastro do usuário."""
 
+    fixtures = ["groups.yaml"]
+
     def test_user_registration(self):
         """Verifica a criação de um usuário em UserViewSet"""
         response = self.client.post(

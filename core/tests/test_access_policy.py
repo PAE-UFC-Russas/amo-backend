@@ -10,6 +10,8 @@ from core.models import Curso, Disciplinas
 class CursoAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para CursoViewSet"""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self) -> None:
         self.user, self.token = account_management_service.create_account(
             sanitized_email_str="user@localhost", unsafe_password_str="password1"
@@ -77,6 +79,8 @@ class CursoAccessPolicyTestCase(APITestCase):
 
 class DisciplinaAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para DisciplinaViewSet"""
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         self.user, self.token = account_management_service.create_account(

@@ -1,6 +1,6 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
 
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -18,6 +18,7 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self.db)
+        user.groups.add(Group.objects.get(name="aluno"))
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
@@ -45,6 +46,11 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+
+    @property
+    def cargos(self):
+        """Retorna a lista de cargos do usuário."""
+        return [group.name for group in self.groups.all()]
 
     def __str__(self):
         return self.email

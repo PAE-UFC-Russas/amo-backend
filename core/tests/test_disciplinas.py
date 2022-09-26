@@ -12,6 +12,8 @@ from core.serializer import DisciplinaSerializer
 class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
     """Testes relacionados a DisciplinaViewSet."""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self):
         _, self.user_token = create_account(
             sanitized_email_str="user@localhost", unsafe_password_str="password1!"
@@ -100,7 +102,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                     DisciplinaSerializer(self.disciplina_req).data,
                     DisciplinaSerializer(self.disciplina_fup).data,
                 ],
-                json.loads(response.content),
+                json.loads(response.content)["results"],
             )
 
         with self.subTest("Filtragem por curso"):
@@ -112,5 +114,5 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                 DisciplinaSerializer(
                     Disciplinas.objects.filter(cursos__pk=1), many=True
                 ).data,
-                json.loads(response.content),
+                json.loads(response.content)["results"],
             )

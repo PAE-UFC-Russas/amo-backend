@@ -1,5 +1,7 @@
 """Testes sobre UserViewSet do aplicativo 'accounts'."""
+import json
 from datetime import date
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -13,6 +15,8 @@ PASSWORD = "M@vr8RjZS8LqrjhV"
 
 class UserViewSetTest(APITestCase):
     """Testes relacionados a UserViewSet"""
+
+    fixtures = ["groups.yaml"]
 
     def setUp(self) -> None:
         self.client.post(
@@ -34,7 +38,9 @@ class UserViewSetTest(APITestCase):
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
         )
 
-        self.assertEqual(response.data, [UserSerializer(self.user).data])
+        self.assertEqual(
+            json.loads(response.content)["results"], [UserSerializer(self.user).data]
+        )
 
     def test_retrieve(self):
         """Verifica a visualização de um usuário"""

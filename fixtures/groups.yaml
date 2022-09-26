@@ -1,0 +1,15 @@
+- model: auth.group
+  pk: 1
+  fields:
+    name: aluno
+    permissions: []
+- model: auth.group
+  pk: 2
+  fields:
+    name: monitor
+    permissions: []
+- model: auth.group
+  pk: 3
+  fields:
+    name: professor
+    permissions: []

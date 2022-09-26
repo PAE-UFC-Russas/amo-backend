@@ -19,6 +19,12 @@ class Disciplinas(models.Model):
     descricao = models.TextField()
 
     cursos = models.ManyToManyField(Curso)
+    monitores = models.ManyToManyField(
+        "accounts.CustomUser", related_name="monitoria", blank=True
+    )
+    professores = models.ManyToManyField(
+        "accounts.CustomUser", related_name="disciplinas", blank=True
+    )
 
     def __str__(self):
         return f"Disciplina: {self.nome}"

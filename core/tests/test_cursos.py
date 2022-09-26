@@ -13,6 +13,8 @@ from core.serializer import CursoSerializer
 class CursoTestCase(APITestCase):
     """Testes relacionados a CursoViewSet."""
 
+    fixtures = ["groups.yaml"]
+
     def setUp(self):
         _, self.user_token = create_account(
             sanitized_email_str="user@localhost", unsafe_password_str="password1!"
@@ -34,7 +36,9 @@ class CursoTestCase(APITestCase):
             reverse("cursos-list"),
             HTTP_AUTHORIZATION=f"Token {self.user_token}",
         )
-        self.assertEqual(response.data, [CursoSerializer(self.curso).data])
+        self.assertEqual(
+            json.loads(response.content)["results"], [CursoSerializer(self.curso).data]
+        )
 
     def test_retrieve(self):
         """Verifica a visualização de um Curso"""
