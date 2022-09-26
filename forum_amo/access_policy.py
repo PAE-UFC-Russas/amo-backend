@@ -34,7 +34,7 @@ class DuvidaAccessPolicy(AccessPolicy):
             "condition": "is_author",
         },
         {
-            "action": ["list", "retrieve", "create"],
+            "action": ["list", "retrieve", "create", "votar"],
             "principal": "authenticated",
             "effect": "allow",
         },

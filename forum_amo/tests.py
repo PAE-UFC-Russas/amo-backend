@@ -236,3 +236,94 @@ class RespostaCorretaTest(APITestCase):
         self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
         duvida.refresh_from_db()
         self.assertIsNone(duvida.resposta_correta_id)
+
+
+class VotarNaDuvidaTest(APITestCase):
+    """Assegura que é possivel votar e remover o voto de uma dúvida"""
+
+    fixtures = ["groups.yaml"]
+
+    def setUp(self) -> None:
+        test_utils.db_create()
+
+    def test_votar_remove_duvida(self):
+        """Testa o voto e a remoção da dúvida"""
+        usuario = CustomUser.objects.first()
+        duvida = Duvida.objects.first()
+        url = reverse("duvidas-votar", args=[duvida.pk])
+
+        self.assertEqual(duvida.votos, 0)
+
+        response = self.client.post(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 1)
+
+        response = self.client.delete(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 0)
+
+    def test_voto_ja_existe(self):
+        """Testa o usuário votar novamente em uma dúvida"""
+        usuario = CustomUser.objects.first()
+        duvida = Duvida.objects.first()
+        url = reverse("duvidas-votar", args=[duvida.pk])
+
+        self.assertEqual(duvida.votos, 0)
+
+        response = self.client.post(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 1)
+
+        response = self.client.post(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 1)
+
+    def test_remover_voto_nao_existente(self):
+        """Testa remover um voto que não existe"""
+        usuario = CustomUser.objects.first()
+        duvida = Duvida.objects.first()
+        url = reverse("duvidas-votar", args=[duvida.pk])
+
+        self.assertEqual(duvida.votos, 0)
+
+        response = self.client.delete(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 0)
+
+    def test_outro_user_deleta_votos_de_outrem(self):
+        """Testa se outro usuário que não votou pode remover votos de outrem"""
+        usuario = CustomUser.objects.first()
+        usuario_intruso = CustomUser.objects.get(pk=2)
+        duvida = Duvida.objects.first()
+        url = reverse("duvidas-votar", args=[duvida.pk])
+
+        self.assertEqual(duvida.votos, 0)
+
+        response = self.client.post(
+            url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 1)
+
+        response = self.client.delete(
+            url, HTTP_AUTHORIZATION=f"Token {usuario_intruso.auth_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        duvida.refresh_from_db()
+        self.assertEqual(duvida.votos, 1)

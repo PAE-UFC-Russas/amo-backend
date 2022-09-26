@@ -3,25 +3,26 @@ View forum_app
 """
 from django import http
 from django.core import exceptions
+from django.db import IntegrityError
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import (
-    extend_schema,
-    OpenApiParameter,
-    OpenApiTypes,
-)
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import response, status
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 import forum_amo.forum_service
 from forum_amo.access_policy import DuvidaAccessPolicy, RespostaAccessPolicy
-from forum_amo.models import Duvida, Resposta
-from forum_amo.serializers import DuvidaSerializer, RespostaSerializer
+from forum_amo.models import Duvida, Resposta, VotoDuvida
+from forum_amo.serializers import (
+    DuvidaSerializer,
+    RespostaSerializer,
+    VotoDuvidaSerializer,
+)
 
 
 class DuvidaFilter(filters.FilterSet):
@@ -42,6 +43,27 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
     search_fields = ["titulo"]
     ordering_fields = ["data"]
     ordering = ["data"]
+
+    @action(methods=["POST", "DELETE"], detail=True)
+    def votar(self, request: Request, pk=None):
+        """Permite votar em um dúvida"""
+        if request.method == "POST":
+            dados = {"duvida": pk, "usuario": request.user}
+            serializer = VotoDuvidaSerializer()
+            try:
+                serializer.create(dados)
+                return Response(status=status.HTTP_202_ACCEPTED)
+            except IntegrityError:
+                return Response(status=status.HTTP_409_CONFLICT)
+        if request.method == "DELETE":
+            dados = {"duvida": pk, "usuario": request.user}
+            serializer = VotoDuvidaSerializer()
+            try:
+                serializer.destroy(dados)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except VotoDuvida.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(
         request={

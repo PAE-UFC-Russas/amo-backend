@@ -1,10 +1,11 @@
 """Serializer do model duvida"""
 
+from django.db import transaction
 from rest_framework import serializers
 
 from accounts.serializer import UserSerializer
 from core.models import Disciplinas
-from forum_amo.models import Duvida, Resposta
+from forum_amo.models import Duvida, Resposta, VotoDuvida
 
 
 class DuvidaSerializer(serializers.ModelSerializer):
@@ -17,6 +18,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     )
     resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
     autor = UserSerializer(read_only=True)
+    votos = serializers.IntegerField(read_only=True)
 
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(
@@ -39,6 +41,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             "data",
             "disciplina",
             "resposta_correta",
+            "votos",
         ]
 
 
@@ -59,3 +62,38 @@ class RespostaSerializer(serializers.ModelSerializer):
             resposta=validated_data["resposta"],
         )
         return nova_resposta
+
+
+class VotoDuvidaSerializer(serializers.ModelSerializer):
+    """Serializer para voto em dúvidas"""
+
+    usuario = UserSerializer(read_only=True)
+
+    class Meta:
+        model = VotoDuvida
+        queryset = VotoDuvida.objects.all()
+        fields = ["id", "usuario", "duvida"]
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            voto = VotoDuvida.objects.create(
+                usuario_id=validated_data["usuario"].id,
+                duvida_id=validated_data["duvida"],
+            )
+            duvida = Duvida.objects.get(pk=validated_data["duvida"])
+            duvida.votos += 1
+            duvida.save()
+
+        return voto
+
+    def destroy(self, validated_data):
+        "Exclui o voto de um usuário em uma dúvida"
+        with transaction.atomic():
+            voto = VotoDuvida.objects.get(
+                usuario=validated_data["usuario"].id,
+                duvida=validated_data["duvida"],
+            )
+            voto.delete()
+            duvida = Duvida.objects.get(pk=validated_data["duvida"])
+            duvida.votos -= 1
+            duvida.save()
