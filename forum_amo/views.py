@@ -41,7 +41,7 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = DuvidaFilter
     search_fields = ["titulo"]
-    ordering_fields = ["data"]
+    ordering_fields = ["data", "votos"]
     ordering = ["data"]
 
     @action(methods=["POST", "DELETE"], detail=True)
