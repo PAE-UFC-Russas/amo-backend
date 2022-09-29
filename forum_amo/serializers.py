@@ -8,6 +8,24 @@ from core.models import Disciplinas
 from forum_amo.models import Duvida, Resposta, VotoDuvida
 
 
+class DuvidaVotouField(serializers.Field):
+    """Campo para informar se o usuário atual votou na dúvida."""
+
+    def get_attribute(self, instance):
+        try:
+            return VotoDuvida.objects.filter(
+                usuario=self.context["request"].user, duvida=instance
+            ).exists()
+        except KeyError:
+            return False
+
+    def to_representation(self, value):
+        return value
+
+    def to_internal_value(self, data):
+        raise NotImplementedError
+
+
 class DuvidaSerializer(serializers.ModelSerializer):
     """Serializer para arquivos"""
 
@@ -19,6 +37,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
     autor = UserSerializer(read_only=True)
     votos = serializers.IntegerField(read_only=True)
+    votou = DuvidaVotouField(read_only=True)
 
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(
@@ -42,6 +61,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             "disciplina",
             "resposta_correta",
             "votos",
+            "votou",
         ]
 
 
