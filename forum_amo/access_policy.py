@@ -31,7 +31,7 @@ class DuvidaAccessPolicy(AccessPolicy):
             "action": ["destroy", "partial_update", "correta"],
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "is_author",
+            "condition": "has_perm",
         },
         {
             "action": ["list", "retrieve", "create", "votar"],
@@ -40,7 +40,11 @@ class DuvidaAccessPolicy(AccessPolicy):
         },
     ]
 
-    def is_author(self, request, view, action) -> bool:  # pylint: disable=W0613
+    def has_perm(self, request, view, action) -> bool:  # pylint: disable=W0613
         """Função que verifica se asserta que apenas o dono da dúvida pode excluí-la"""
         duvida = view.get_object()
-        return request.user == duvida.autor
+        return (
+            request.user == duvida.autor
+            or request.user.groups.filter(name="monitor").exists()
+            or request.user.groups.filter(name="professor").exists()
+        )
