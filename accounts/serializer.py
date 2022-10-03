@@ -1,9 +1,9 @@
 """Este módulo contém os serializadores utilizados na aplicação 'accounts'."""
 from django.contrib.auth.password_validation import validate_password
 from drf_spectacular.utils import (
+    OpenApiExample,
     extend_schema_field,
     extend_schema_serializer,
-    OpenApiExample,
 )
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
@@ -99,10 +99,11 @@ class UserSerializer(WritableNestedModelSerializer, serializers.ModelSerializer)
 
     email = serializers.EmailField(read_only=True)
     perfil = PerfilSerializer()
+    cargos = serializers.StringRelatedField(many=True, source="groups", read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ["id", "email", "perfil"]
+        fields = ["id", "email", "perfil", "cargos"]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
