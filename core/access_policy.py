@@ -68,9 +68,9 @@ class AgendamentoAccessPolicy(AccessPolicy):
     def scope_queryset(cls, request, qs):
         """Filtra os resultados para controlar o acesso aos agendamentos.
 
-        Por padrão filtra a lista de agendamentos para que o usuário atual tenha acesso
-        apenas a seus agendamentos. Porém quando a busca é filtrada por disciplina, e o
-        usuário é monitor, verificamos se é monitor da disciplina atual."""
+        - Alunos tem acesso apenas a seus agendamentos.
+        - Monitores tem acesso a todos os agendamentos das disciplinas que são monitores.
+        - Professores podem ver todos os agendamentos de todas as disciplinas."""
         if disciplina_id := request.query_params.get("disciplina", None):
             if (
                 request.user.groups.filter(name__in=["monitor"]).exists()
@@ -78,6 +78,9 @@ class AgendamentoAccessPolicy(AccessPolicy):
                     pk=disciplina_id, monitores=request.user
                 ).exists()
             ):
+                return qs
+
+            if request.user.groups.filter(name__in=["professor"]).exists():
                 return qs
 
         return qs.filter(solicitante=request.user)
