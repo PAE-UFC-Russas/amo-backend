@@ -1,7 +1,8 @@
 """Este módulo configura o admin para o aplicativo 'core'."""
 from django.contrib import admin
 
-from core.models import Curso, Disciplinas
+from core import models
 
-admin.site.register(Curso)
-admin.site.register(Disciplinas)
+admin.site.register(models.Curso)
+admin.site.register(models.Disciplinas)
+admin.site.register(models.Agendamento)
