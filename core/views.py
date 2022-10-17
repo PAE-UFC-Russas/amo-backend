@@ -4,8 +4,7 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
-from core import filters
-from core.access_policy import CursoAccessPolicy, DisciplinaAccessPolicy
+from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas
 from core.serializer import (
     AgendamentoRequestSerializer,
@@ -18,7 +17,7 @@ from core.serializer import (
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
 
-    access_policy = CursoAccessPolicy
+    access_policy = access_policy.CursoAccessPolicy
     serializer_class = CursoSerializer
     queryset = Curso.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -28,7 +27,7 @@ class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
 class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a disciplinas."""
 
-    access_policy = DisciplinaAccessPolicy
+    access_policy = access_policy.DisciplinaAccessPolicy
     serializer_class = DisciplinaSerializer
     queryset = Disciplinas.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -36,9 +35,10 @@ class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0
     search_fields = ["nome"]
 
 
-class AgendamentoViewSet(ModelViewSet):
+class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     """Ações do agendamento de atendimento."""
 
+    access_policy = access_policy.AgendamentoAccessPolicy
     serializer_class = AgendamentoSerializer
     filterset_class = filters.AgendamentoFilter
     queryset = Agendamento.objects.all()
