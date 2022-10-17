@@ -1,13 +1,18 @@
 """Conjunto de Views do aplicativo 'core'."""
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_access_policy import AccessViewSetMixin
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
+from core import filters
 from core.access_policy import CursoAccessPolicy, DisciplinaAccessPolicy
-from core.models import Curso, Disciplinas
-from core.serializer import CursoSerializer, DisciplinaSerializer
+from core.models import Agendamento, Curso, Disciplinas
+from core.serializer import (
+    AgendamentoRequestSerializer,
+    AgendamentoSerializer,
+    CursoSerializer,
+    DisciplinaSerializer,
+)
 
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
@@ -29,3 +34,23 @@ class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ["cursos"]
     search_fields = ["nome"]
+
+
+class AgendamentoViewSet(ModelViewSet):
+    """Ações do agendamento de atendimento."""
+
+    serializer_class = AgendamentoSerializer
+    filterset_class = filters.AgendamentoFilter
+    queryset = Agendamento.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ["assunto", "descricao"]
+    ordering = ["data"]
+    ordering_fields = ["data"]
+
+    def perform_create(self, serializer):
+        """Salva o agendamento adicionando o usuário atual como solicitante."""
+        serializer.save(solicitante=self.request.user)
+
+    def get_request_serializer(self):
+        """Altera o serializer nas requisições."""
+        return AgendamentoRequestSerializer
