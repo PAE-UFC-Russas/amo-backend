@@ -63,3 +63,21 @@ class AgendamentoAccessPolicy(AccessPolicy):
     def is_monitor(self, request, view, action):  # pylint: disable=unused-argument
         """Verifica se o usuário atual é monitor da disciplina."""
         return models.Disciplinas.objects.filter(monitores=request.user).exists()
+
+    @classmethod
+    def scope_queryset(cls, request, qs):
+        """Filtra os resultados para controlar o acesso aos agendamentos.
+
+        Por padrão filtra a lista de agendamentos para que o usuário atual tenha acesso
+        apenas a seus agendamentos. Porém quando a busca é filtrada por disciplina, e o
+        usuário é monitor, verificamos se é monitor da disciplina atual."""
+        if disciplina_id := request.query_params.get("disciplina", None):
+            if (
+                request.user.groups.filter(name__in=["monitor"]).exists()
+                and models.Disciplinas.objects.filter(
+                    pk=disciplina_id, monitores=request.user
+                ).exists()
+            ):
+                return qs
+
+        return qs.filter(solicitante=request.user)
