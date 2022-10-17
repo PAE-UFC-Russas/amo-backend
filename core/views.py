@@ -54,3 +54,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     def get_request_serializer(self):
         """Altera o serializer nas requisições."""
         return AgendamentoRequestSerializer
+
+    def get_queryset(self):
+        """Passa o controle sobre a queryset para o módulo de controle de acesso."""
+        return self.access_policy.scope_queryset(self.request, self.queryset)
