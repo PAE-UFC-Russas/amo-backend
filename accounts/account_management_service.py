@@ -65,7 +65,10 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos"]
+    if profile["foto"]:
+        profile["foto"] = user_instance.perfil.foto.file.url
+
+    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
 
     for key in list(profile.keys()):
         if key not in allowed_fields:
