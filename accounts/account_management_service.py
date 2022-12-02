@@ -2,14 +2,17 @@
 from datetime import timedelta
 from random import randint
 
+from django.conf import settings
 from django.core import exceptions, mail
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from accounts import errors, schema
+from accounts import schema
 from accounts.models import CustomUser, EmailActivationToken, Perfil
+from core import errors, models
 
 
 def create_account(
@@ -65,7 +68,10 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos"]
+    if profile["foto"]:
+        profile["foto"] = user_instance.perfil.foto.arquivo.url
+
+    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
 
     for key in list(profile.keys()):
         if key not in allowed_fields:
@@ -99,6 +105,31 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         perfil.save()
 
     return get_user_profile(perfil.usuario)
+
+
+def update_user_profile_picture(profile: Perfil, file_instance: InMemoryUploadedFile):
+    """Atualiza a foto de perfil do usuário."""
+
+    if file_instance.size > settings.UPLOAD_MAX_FILE_SIZE:
+        raise errors.FileUploadTooLarge()
+
+    file_extension_str = file_instance.name.split(".")[-1]
+    allowed_file_extensions = ["jpeg", "jpg", "png"]
+    if file_extension_str not in allowed_file_extensions:
+        raise errors.FileUploadUnsupportedMediaType()
+
+    with transaction.atomic():
+        if profile.foto_id:
+            arquivo = profile.foto
+            arquivo.delete()
+
+        arquivo = models.Arquivo()
+        file_instance.name = f"{arquivo.pk}.{file_extension_str}"
+        arquivo.arquivo = file_instance
+        arquivo.save()
+
+        profile.foto = arquivo
+        profile.save()
 
 
 def send_email_confirmation_token(user_instance):

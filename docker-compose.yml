@@ -1,4 +1,4 @@
-version: 3
+version: "3.1"
 services:
   smtp:
     image: docker.io/rnwood/smtp4dev:latest
@@ -8,5 +8,14 @@ services:
       - '1430:143' # IMAP
     volumes:
       - smpt-data:/smtp4dev
+  minio:
+    image: quay.io/minio/minio
+    command: server --console-address ":9001" /data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio-data:/data
 volumes:
-  smpt-data:
+  smpt-data: {}
+  minio-data: {}

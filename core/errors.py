@@ -28,3 +28,17 @@ class EmailConfirmationConflict(Exception):
 
     message = "Não foi possível processar a confirmação."
     internal_error_code = 4009003
+
+
+class FileUploadTooLarge(Exception):
+    """Indica que o tamanho dos arquivos enviados é maior que o limite."""
+
+    message = "Arquivo maior que o tamanho limite."
+    internal_error_code = 413001
+
+
+class FileUploadUnsupportedMediaType(Exception):
+    """Indica que o arquivo enviado é de um tipo não aceito."""
+
+    message = "Tipo de arquivo não aceito."
+    internal_error_code = 415001

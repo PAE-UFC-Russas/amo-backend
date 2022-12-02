@@ -27,7 +27,7 @@ class UserViewAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
-            "action": ["ativar", "list", "retrieve"],
+            "action": ["ativar", "list", "retrieve", "foto"],
             "principal": "authenticated",
             "effect": "allow",
         },

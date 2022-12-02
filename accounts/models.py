@@ -88,6 +88,9 @@ class Perfil(models.Model):
             ),
         ],
     )
+    foto = models.OneToOneField(
+        "core.Arquivo", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def __str__(self):
         return self.usuario.email

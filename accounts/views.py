@@ -3,26 +3,21 @@
 import marshmallow
 from django.core import exceptions
 from drf_spectacular.utils import (
-    extend_schema,
-    OpenApiResponse,
-    extend_schema_view,
     OpenApiParameter,
+    OpenApiResponse,
     OpenApiTypes,
+    extend_schema,
+    extend_schema_view,
 )
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
+from rest_framework.viewsets import GenericViewSet, ViewSet, mixins
 
-from accounts import (
-    account_management_service,
-    errors,
-    access_policy,
-    models,
-    serializer,
-)
+from accounts import access_policy, account_management_service, models, serializer
 from accounts.utils import sanitization_utils
+from core import errors
 
 
 class UserRegistration(AccessViewSetMixin, ViewSet):
@@ -307,3 +302,69 @@ class UserViewSet(
             )
 
         return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["Usuário"],
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "foto": {
+                        "type": "string",
+                        "format": "binary",
+                        "description": "Arquivo a ser utilizado como foto de perfil.",
+                    }
+                },
+            }
+        },
+        responses={
+            (204, "application/json"): {},
+            (413, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": "Entidade maior que o tamanho limite.",
+                            }
+                        },
+                    }
+                },
+            },
+            (415, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {
+                        "type": "object",
+                        "properties": {
+                            "mensagem": {
+                                "type": "string",
+                                "example": "Tipo de arquivo não aceito.",
+                            }
+                        },
+                    }
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=False)
+    def foto(self, request):
+        """Atualiza a foto de perfil."""
+
+        try:
+            account_management_service.update_user_profile_picture(
+                profile=request.user.perfil, file_instance=request.FILES["foto"]
+            )
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except errors.FileUploadTooLarge as e:
+            return Response(
+                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
+        except errors.FileUploadUnsupportedMediaType as e:
+            return Response(
+                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+                status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            )

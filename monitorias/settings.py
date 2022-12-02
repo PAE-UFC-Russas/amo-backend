@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "storages",
     "accounts",
     "core",
     "django_filters",
@@ -161,5 +162,22 @@ ROLLBAR = {
     "suppress_reinit_warning": True,
     "enabled": not DEBUG,
 }
+
+# Storage backend configuration
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+
+DEFAULT_FILE_STORAGE = os.getenv(
+    "STORAGE_BACKEND", default="storages.backends.s3boto3.S3Boto3Storage"
+)
+AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
+AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+# Upload de arquivos
+
+# O tamanho só é verificado após o recebeimento do arquivo, por isto é indicado que
+# também seja verificado antes da requisição chegar a aplicação, por exemplo, em um proxy reverso.
+UPLOAD_MAX_FILE_SIZE = 10485760  # 10mb
 
 rollbar.init(**ROLLBAR)

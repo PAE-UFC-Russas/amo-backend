@@ -1,4 +1,6 @@
 """Este módulo define os modelos do aplicativo 'core'."""
+import uuid
+
 from django.db import models
 
 TIPOS_AGENDAMENTO = [
@@ -11,6 +13,16 @@ STATUS_AGENDAMENTO = [
     ("aguardando", "Aguardando Confirmação"),
     ("cancelado", "Cancelado"),
 ]
+
+
+class CriacaoModificacaoMixin(models.Model):
+    """Mixin para salvar a data e hora de criação e última alteração de modelos."""
+
+    class Meta:
+        abstract = True
+
+    criado_em = models.DateTimeField(auto_now_add=True)
+    alterado_em = models.DateTimeField(auto_now=True)
 
 
 class Curso(models.Model):
@@ -53,3 +65,14 @@ class Agendamento(models.Model):
     data = models.DateTimeField()
     assunto = models.TextField()
     descricao = models.TextField()
+
+
+class Arquivo(CriacaoModificacaoMixin, models.Model):
+    """Representação de um arquivo."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    arquivo = models.FileField()
+
+    def delete(self, *args, **kwargs):
+        self.arquivo.delete()
+        super().delete(*args, **kwargs)

@@ -173,6 +173,7 @@ class RespostaTestes(APITestCase):
                     "curso": self.resposta.autor.perfil.curso_id,
                     "entrada": self.resposta.autor.perfil.entrada,
                     "cargos": ["aluno"],
+                    "foto": None,
                 },
             },
         )
