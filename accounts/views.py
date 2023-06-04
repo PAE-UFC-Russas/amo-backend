@@ -86,6 +86,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         response = {"data": {"auth_token": token_str}}
         return Response(data=response, status=201)
 
+
 """
     @extend_schema(
         tags=["Cadastro do Usuário"],
@@ -164,6 +165,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 """
+
 
 @extend_schema_view(
     create=extend_schema(tags=["Usuário"]),

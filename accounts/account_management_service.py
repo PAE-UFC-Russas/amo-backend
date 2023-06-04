@@ -3,7 +3,8 @@ from datetime import timedelta
 from random import randint
 
 from django.core import exceptions
-#mail
+
+# mail
 from django.db import transaction
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -51,7 +52,7 @@ def create_account(
 
         Perfil.objects.create(usuario=user_model)
 
-    #send_email_confirmation_token(user_instance=user_model)
+    # send_email_confirmation_token(user_instance=user_model)
 
     auth_token_model = get_user_token(user=user_model)
 
@@ -101,6 +102,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
     return get_user_profile(perfil.usuario)
 
+
 """
 def send_email_confirmation_token(user_instance):
     Envia token de confirmação do e-mail para o usuário.
@@ -145,6 +147,7 @@ def confirm_email(activation_code: str, user: CustomUser):
         user.is_email_active = True
         user.save()
 """
+
 
 def get_user_token(user):
     """Busca ou cria um Token de autenticação do usuário.
