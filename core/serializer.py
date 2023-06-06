@@ -2,11 +2,11 @@
 from rest_framework import serializers
 
 from accounts.models import Perfil
-from core.models import Curso, Disciplinas
+from core.models import Agendamento, Curso, Disciplinas
 
 
-class MonitorSerializer(serializers.ModelSerializer):
-    """Define um serializer para exibição de monitores de disciplinas."""
+class UsuarioBasicoSerializer(serializers.ModelSerializer):
+    """Define um serializer para exibição apenas do nome e id do usuário."""
 
     nome_exibicao = serializers.CharField(source="perfil.nome_exibicao")
 
@@ -36,10 +36,29 @@ class DisciplinaSerializer(serializers.ModelSerializer):
     nome = serializers.CharField()
     descricao = serializers.CharField()
     cursos = CursoSerializer(many=True, read_only=True)
-    monitores = MonitorSerializer(read_only=True, many=True)
-    professores = MonitorSerializer(read_only=True, many=True)
+    monitores = UsuarioBasicoSerializer(read_only=True, many=True)
+    professores = UsuarioBasicoSerializer(read_only=True, many=True)
 
     class Meta:
         model = Disciplinas
         queryset = Disciplinas.objects.all()
         fields = ["id", "nome", "descricao", "cursos", "monitores", "professores"]
+
+
+class AgendamentoRequestSerializer(serializers.ModelSerializer):
+    """Serializer utilizado nas requisições que envolvem o agendamento."""
+
+    class Meta:
+        model = Agendamento
+        fields = "__all__"
+
+
+class AgendamentoSerializer(serializers.ModelSerializer):
+    """Serializer para controle de agendamentos."""
+
+    status = serializers.CharField(read_only=True)
+    solicitante = UsuarioBasicoSerializer(read_only=True)
+
+    class Meta:
+        model = Agendamento
+        fields = "__all__"

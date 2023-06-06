@@ -6,3 +6,4 @@ from core.models import Arquivo, Curso, Disciplinas
 admin.site.register(Curso)
 admin.site.register(Disciplinas)
 admin.site.register(Arquivo)
+
