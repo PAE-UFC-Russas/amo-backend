@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "storages",
+    #"storages",
     "accounts",
     "core",
     "django_filters",
@@ -133,6 +133,7 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "/static/"
+MEDIA_ROOT = "imagens/"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
@@ -157,7 +158,9 @@ FIXTURE_DIRS = ["fixtures"]
 # Storage backend configuration (django-storages/S3)
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+#Sobre o código, abaixo tenho que falar com o Juan sobre.
+'''
+DEFAULT_FILE_STORAGE = "imagens/"
 AWS_S3_ACCESS_KEY_ID = "amo-dev"
 AWS_S3_SECRET_ACCESS_KEY = "ky%SfT&9bvk3EgXN"
 AWS_STORAGE_BUCKET_NAME = "amo-dev"
@@ -173,3 +176,4 @@ ROLLBAR = {
 }
 
 rollbar.init(**ROLLBAR)
+'''
