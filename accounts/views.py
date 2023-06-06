@@ -86,6 +86,8 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         response = {"data": {"auth_token": token_str}}
         return Response(data=response, status=201)
 
+
+"""
     @extend_schema(
         tags=["Cadastro do Usuário"],
         request={
@@ -136,7 +138,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
     )
     @action(methods=["POST"], detail=False)
     def confirmar_email(self, request):
-        """Realiza a confirmação do email do usuário."""
+        Realiza a confirmação do email do usuário.
         unsafe_activation_code = request.data.get("token", "")
 
         sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
@@ -162,6 +164,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+"""
 
 
 @extend_schema_view(
