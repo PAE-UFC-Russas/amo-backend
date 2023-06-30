@@ -31,11 +31,11 @@ class UserAccessPolicyTestCase(APITestCase):
                 {"email": "user2@pae.localhost", "password": "ajfsd9p&*aa"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
+        """ 
         with self.subTest("Ativar email"):
             response = self.client.post(reverse("registrar-confirmar-email"))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
+        """
         with self.subTest("Login"):
             # A view de login é fornecida pelo Django Rest Framework, por isso
             # não é controlada por UserViewAccessPolicy
@@ -70,7 +70,7 @@ class UserAccessPolicyTestCase(APITestCase):
                 HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
+        """
         with self.subTest("Ativar email"):
             email_token = EmailActivationToken.objects.create(
                 user=self.user, email=self.user.email, token="000000"
@@ -81,7 +81,7 @@ class UserAccessPolicyTestCase(APITestCase):
                 HTTP_AUTHORIZATION=f"Token {self.token}",
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
+        """
         with self.subTest("Login"):
             response = self.client.post(
                 reverse("obtain-api-token"),
