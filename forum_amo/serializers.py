@@ -31,6 +31,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
 
     titulo = serializers.CharField(max_length=200)
     descricao = serializers.CharField(max_length=550)
+    imagem = serializers.ImageField()
     disciplina = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Disciplinas.objects.all()
     )
@@ -44,6 +45,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             titulo=validated_data["titulo"],
             descricao=validated_data["descricao"],
             disciplina_id=validated_data["disciplina"].pk,
+            imagem = validated_data["imagem"],
             autor_id=self.context["request"].user.id,
         )
 
@@ -58,6 +60,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             "descricao",
             "autor",
             "data",
+            "imagem",
             "disciplina",
             "resposta_correta",
             "votos",
@@ -69,17 +72,18 @@ class RespostaSerializer(serializers.ModelSerializer):
     """Serializer para respostas"""
 
     autor = UserSerializer(read_only=True)
-
+    imagem = serializers.ImageField()
     class Meta:
         model = Resposta
         queryset = Resposta.objects.all()
-        fields = ["id", "duvida", "resposta", "data", "autor"]
+        fields = ["id", "duvida", "resposta", "data", "autor", "imagem"]
 
     def create(self, validated_data):
         nova_resposta = Resposta.objects.create(
             autor_id=self.context["request"].user.id,
             duvida_id=validated_data["duvida"].id,
             resposta=validated_data["resposta"],
+            imagem=validated_data["imagem"]
         )
         return nova_resposta
 

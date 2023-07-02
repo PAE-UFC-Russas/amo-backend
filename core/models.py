@@ -1,4 +1,6 @@
 """Este módulo define os modelos do aplicativo 'core'."""
+import uuid
+
 from django.db import models
 
 TIPOS_AGENDAMENTO = [
@@ -11,6 +13,16 @@ STATUS_AGENDAMENTO = [
     ("aguardando", "Aguardando Confirmação"),
     ("cancelado", "Cancelado"),
 ]
+
+
+class CreateModificationMixin(models.Model):
+    """Classe base para salvar data e hora de criação/modificação"""
+
+    class Meta:
+        abstract = True
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
 
 class Curso(models.Model):
@@ -40,6 +52,12 @@ class Disciplinas(models.Model):
     def __str__(self):
         return f"Disciplina: {self.nome}"
 
+
+class Arquivo(CreateModificationMixin, models.Model):
+    """Representação de um arquivo, possibilita relacionamento entre outros modelos e arquivos."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    file = models.FileField()
 
 class Agendamento(models.Model):
     """Representa um adentamento para atendimento."""

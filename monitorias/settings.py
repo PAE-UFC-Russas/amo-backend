@@ -32,7 +32,7 @@ else:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['174.129.219.95', "127.0.0.1"]
 
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    #"storages",
     "accounts",
     "core",
     "django_filters",
@@ -132,6 +133,7 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "/static/"
+MEDIA_ROOT = "imagens/"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
@@ -153,6 +155,17 @@ REST_FRAMEWORK = {
 
 FIXTURE_DIRS = ["fixtures"]
 
+# Storage backend configuration (django-storages/S3)
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+
+#Sobre o código, abaixo tenho que falar com o Juan sobre.
+'''
+DEFAULT_FILE_STORAGE = "imagens/"
+AWS_S3_ACCESS_KEY_ID = "amo-dev"
+AWS_S3_SECRET_ACCESS_KEY = "ky%SfT&9bvk3EgXN"
+AWS_STORAGE_BUCKET_NAME = "amo-dev"
+AWS_S3_ENDPOINT_URL = "http://localhost:9000"
+
 # https://docs.rollbar.com/docs
 ROLLBAR = {
     "access_token": "cd05d027472f40898ca9021789476e39",
@@ -163,3 +176,4 @@ ROLLBAR = {
 }
 
 rollbar.init(**ROLLBAR)
+'''
