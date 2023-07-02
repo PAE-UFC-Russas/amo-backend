@@ -18,7 +18,14 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self.db)
-        user.groups.add(Group.objects.get(name="aluno"))
+
+        #Essa linha, quando não há nenhum usuário registrado, retorna um erro «Group matching does not exit"
+        #Ao invés disso, utilizei a função Group.objects.get_or_create()
+        #user.groups.add(Group.objects.get(name="aluno"))
+
+        group,_=(Group.objects.get_or_create(name="aluno"))
+        user.groups.add(group)
+
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
@@ -87,6 +94,9 @@ class Perfil(models.Model):
                 regex=r"\d{4}\.[12]", message="Campo não está formatado corretamente."
             ),
         ],
+    )
+    foto = models.OneToOneField(
+        "core.Arquivo", on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def __str__(self):

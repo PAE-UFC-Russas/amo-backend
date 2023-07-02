@@ -50,7 +50,7 @@ def create_account(
 
         Perfil.objects.create(usuario=user_model)
 
-    send_email_confirmation_token(user_instance=user_model)
+    #send_email_confirmation_token(user_instance=user_model)
 
     auth_token_model = get_user_token(user=user_model)
 
@@ -65,7 +65,10 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos"]
+    if profile["foto"]:
+        profile["foto"] = user_instance.perfil.foto.file.url
+
+    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
 
     for key in list(profile.keys()):
         if key not in allowed_fields:
@@ -83,6 +86,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "matricula",
         "entrada",
         "curso",
+        "foto"
     ]
 
     with transaction.atomic():
@@ -100,7 +104,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
     return get_user_profile(perfil.usuario)
 
-
+'''
 def send_email_confirmation_token(user_instance):
     """Envia token de confirmação do e-mail para o usuário."""
 
@@ -144,7 +148,7 @@ def confirm_email(activation_code: str, user: CustomUser):
         user.is_email_active = True
         user.save()
 
-
+'''
 def get_user_token(user):
     """Busca ou cria um Token de autenticação do usuário.
 
