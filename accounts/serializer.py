@@ -44,6 +44,7 @@ class PerfilSerializer(WritableNestedModelSerializer):
     """Serializador do modelo Perfil."""
 
     curso = CursoRelatedField()
+    foto = serializers.ImageField()
 
     class Meta:
         model = Perfil
@@ -54,6 +55,7 @@ class PerfilSerializer(WritableNestedModelSerializer):
             "matricula",
             "entrada",
             "curso",
+            "foto"
         ]
 
 

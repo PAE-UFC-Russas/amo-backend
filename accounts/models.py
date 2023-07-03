@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Curso
-
+from monitorias.settings import MEDIA_ROOT
 
 class CustomUserManager(BaseUserManager):
     """Define um 'manager' para utilização com CustomUser."""
@@ -78,7 +78,7 @@ class Perfil(models.Model):
     usuario = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="perfil"
     )
-
+    foto = models.ImageField(blank=True, null=True, upload_to= MEDIA_ROOT)
     nome_completo = models.CharField(max_length=255)
     nome_exibicao = models.CharField(max_length=32)
     data_nascimento = models.DateField(null=True)

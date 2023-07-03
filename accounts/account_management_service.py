@@ -85,7 +85,10 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "matricula",
         "entrada",
         "curso",
+        "foto"
     ]
+    print(perfil)
+    print(data)
 
     with transaction.atomic():
         if "curso" in allowed_keys:
@@ -95,6 +98,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
         for key, value in data.items():
             if key in allowed_keys:
+                print(key, value)
                 setattr(perfil, key, value)
 
         perfil.full_clean()
