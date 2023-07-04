@@ -21,7 +21,7 @@ class CustomUserManager(BaseUserManager):
         # Essa linha, quando não há nenhum usuário registrado,
         # retorna um erro «Group matching does not exit"
         # Ao invés disso, utilizei a função Group.objects.get_or_create()
-        user.groups.add(Group.objects.get(name="aluno"))
+        #user.groups.add(Group.objects.get_or_create(name="aluno"))
         group, _ = Group.objects.get_or_create(name="aluno")
         user.groups.add(group)
 
