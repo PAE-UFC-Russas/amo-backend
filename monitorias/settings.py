@@ -24,7 +24,7 @@ if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
     DEBUG = False
     ALLOWED_HOSTS = os.getenv("DJANGO_HOSTS").split(";")
-    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+    DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
 else:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = ("django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu",)
@@ -37,12 +37,14 @@ else:
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR + "db.sqlite3",
-        }
-    }
+    DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
+    
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR + "db.sqlite3",
+    #     }
+    # }
 
 # Application definition
 
