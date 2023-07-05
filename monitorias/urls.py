@@ -25,6 +25,9 @@ from accounts.views import UserRegistration, UserViewSet
 from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 router = routers.DefaultRouter()
 router.register(r"registrar", UserRegistration, basename="registrar")
 router.register(r"cursos", CursoViewSet, basename="cursos")
@@ -50,3 +53,5 @@ urlpatterns = [
     ),
     path("api-auth/", include("rest_framework.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

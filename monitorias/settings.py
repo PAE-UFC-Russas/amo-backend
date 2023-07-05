@@ -37,14 +37,14 @@ else:
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-    DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
+    #DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
     
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.sqlite3",
-    #         "NAME": BASE_DIR + "db.sqlite3",
-    #     }
-    # }
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR + "db.sqlite3",
+        }
+    }
 
 # Application definition
 
@@ -138,6 +138,7 @@ STATIC_URL = "/static/"
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 MEDIA_ROOT = "imagens"
+MEDIA_URL = "/imagens/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
