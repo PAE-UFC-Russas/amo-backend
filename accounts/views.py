@@ -310,14 +310,16 @@ class UserViewSet(
             perfil = account_management_service.update_user_profile(
                 user.perfil, request.data
             )
-            if 'foto' in request.data:
-                foto =  "foto atualizada com sucesso"
+            if "foto" in request.data:
+                foto = "foto atualizada com sucesso"
             else:
                 foto = ""
-        #return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
+        # return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
         except exceptions.ValidationError as e:
             return Response(
                 data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        return Response(data={"perfil": perfil, "foto":foto}, status=status.HTTP_200_OK)
+        return Response(
+            data={"perfil": perfil, "foto": foto}, status=status.HTTP_200_OK
+        )

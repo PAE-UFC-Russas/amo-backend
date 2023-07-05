@@ -85,7 +85,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "matricula",
         "entrada",
         "curso",
-        "foto"
+        "foto",
     ]
     print(perfil)
     print(data)

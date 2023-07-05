@@ -55,7 +55,7 @@ class PerfilSerializer(WritableNestedModelSerializer):
             "matricula",
             "entrada",
             "curso",
-            "foto"
+            "foto",
         ]
 
 
