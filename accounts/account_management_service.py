@@ -1,17 +1,18 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
-#from datetime import timedelta
-#from random import randint
+# from datetime import timedelta
+# from random import randint
 
-#from django.core import exceptions
+# from django.core import exceptions
 
 # mail
 from django.db import transaction
 from django.forms.models import model_to_dict
-#from django.utils import timezone
+
+# from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from accounts import errors, schema
-from accounts.models import CustomUser, Perfil#, EmailActivationToken
+from accounts.models import CustomUser, Perfil  # , EmailActivationToken
 
 
 def create_account(

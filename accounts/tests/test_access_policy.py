@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts import account_management_service
-#from accounts.models import EmailActivationToken
+
+# from accounts.models import EmailActivationToken
 from core.models import Curso
 
 PASSWORD = "M@vr8RjZS8LqrjhV"

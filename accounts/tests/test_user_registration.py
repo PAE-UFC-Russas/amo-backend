@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 # from accounts import account_management_service
-from accounts.models import CustomUser#, EmailActivationToken
+from accounts.models import CustomUser  # , EmailActivationToken
 
 PASSWORD = "M@vr8RjZS8LqrjhV"
 
@@ -54,8 +54,6 @@ class UserRegistration(APITestCase):
             "Senha deve conter pelo menos uma letra.",
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
-
-
 
     # def test_send_registration_token(self):
     #     """Verifica o envio do código de ativação do email."""
