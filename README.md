@@ -1,6 +1,6 @@
 # Ambiente de Monitoria Online - Backend
-
-Preview: https://amo-mvp.herokuapp.com/ | API Schema: https://amo-mvp.herokuapp.com/api/schema/openapi/
+##API hospedada no [Render](https://render.com/)
+Preview: https://amo-backend.onrender.com/ | API Schema: https://amo-backend.onrender.com/api/schema/openapi/
 ## Como executar
 ### Dependências
 As dependências do projeto são gerenciadas utilizando o [Poetry](https://python-poetry.org). Arquivos requirements.txt e requirements-dev.txt são gerados automaticamente para maior compatibilidade.
