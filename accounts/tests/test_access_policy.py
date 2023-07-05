@@ -110,14 +110,12 @@ class UserAccessPolicyTestCase(APITestCase):
             response = self.client.patch(
                 reverse("usuario-detail", args=["eu"]),
                 {
-                    "perfil": {
-                        "nome_completo": "Novo Usuário",
-                        "nome_exibicao": "Novo",
-                        "data_nascimento": "2000-12-30",
-                        "matricula": "000000",
-                        "curso": 1,
-                        "ano_entrada": "2022.1",
-                    }
+                    "nome_completo": "Novo Usuário",
+                    "nome_exibicao": "Novo",
+                    "data_nascimento": "2000-12-30",
+                    "matricula": "000000",
+                    "curso": 1,
+                    "ano_entrada": "2022.1",
                 },
                 format="json",
                 HTTP_AUTHORIZATION=f"Token {token}",
