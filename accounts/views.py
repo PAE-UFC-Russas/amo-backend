@@ -239,8 +239,7 @@ class UserViewSet(
         try:
             user_model = (
                 request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
-            )
-
+            )   
             perfil = account_management_service.get_user_profile(user_model)
         except exceptions.ObjectDoesNotExist:
             return Response(
