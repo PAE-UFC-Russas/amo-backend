@@ -19,11 +19,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
+ALLOWED_HOSTS = []
 if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
     DEBUG = False
-    ALLOWED_HOSTS = os.getenv("DJANGO_HOSTS").split(";")
+    ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS").split(";"))
     DATABASES = {
         "default": dj_database_url.config(
             # pylint: disable=C0301
@@ -39,7 +39,7 @@ else:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = ["174.129.219.95", "127.0.0.1", "amo-backend.onrender.com"]
+    ALLOWED_HOSTS.append("127.0.0.1")
 
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

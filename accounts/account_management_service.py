@@ -13,7 +13,7 @@ from rest_framework.authtoken.models import Token
 
 from accounts import errors, schema
 from accounts.models import CustomUser, Perfil  # , EmailActivationToken
-
+from monitorias.settings import ALLOWED_HOSTS
 
 def create_account(
     sanitized_email_str: str, unsafe_password_str: str, admin: bool = False
@@ -64,7 +64,8 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
 
     profile = model_to_dict(user_instance.perfil)
-    profile["foto"] =  "http://127.0.0.1:8000/" + str(user_instance.perfil.foto)
+    print(user_instance.perfil.foto.url)
+    profile["foto"] =  ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
     profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
@@ -88,8 +89,8 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "curso",
         "foto",
     ]
-    print(perfil)
-    print(data)
+
+    print(perfil.foto.url)
 
     with transaction.atomic():
         if "curso" in allowed_keys:
@@ -99,7 +100,6 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
         for key, value in data.items():
             if key in allowed_keys:
-                print(key, value)
                 setattr(perfil, key, value)
 
         perfil.full_clean()
