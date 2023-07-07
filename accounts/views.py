@@ -259,6 +259,28 @@ class UserViewSet(
                 description="id do usuário ou 'eu', como atalho para o usuário atual.",
             )
         ],
+        request={
+                "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
+                    "password": {
+                        "type": "string",
+                        "example": "supersecurepassword1",
+                    },
+                    "nome_exibicao": {"type":"string", "example":"David Gilmour"},
+                    "data_nascimento": {"type": "string", "example": "1948-06-20"},
+
+                    "matricula": {"type": "string", "example": "123456"},
+
+                    "entrada": {"type": "string", "example": "2021.1"},
+
+                    "curso": {"type": "integer", "example": "1"},
+                    "foto": {"type": "file"}
+                
+                },
+            }
+        },
         responses={
             (200, "application/json"): {
                 "type": "object",
@@ -266,6 +288,9 @@ class UserViewSet(
                     "perfil": {
                         "type": "object",
                         "properties": {
+
+                            "id": {"type": "integer", "example":"1"},
+                            "foto": {"type": "file", "example":"192.168.0.1/imagens/foto.jpg"},
                             "nome_exibição": {
                                 "type": "string",
                                 "example": "Francisco Silva",
@@ -275,6 +300,8 @@ class UserViewSet(
                                 "example": "Ciência da Computação",
                             },
                             "entrada": {"type": "string", "example": "2022.1"},
+
+                            "cargos": {"type": "list", "example": "[]"},
                         },
                     }
                 },
@@ -287,7 +314,7 @@ class UserViewSet(
                         "properties": {
                             "nome_completo": {
                                 "type": "array",
-                                "example": ["This field cannot be blank."],
+                                "example": ["Este campo não pode estar vazio!"],
                             }
                         },
                     }
@@ -308,10 +335,6 @@ class UserViewSet(
             perfil = account_management_service.update_user_profile(
                 user.perfil, request.data
             )
-            if "foto" in request.data:
-                foto = "foto atualizada com sucesso"
-            else:
-                foto = ""
         # return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
         except exceptions.ValidationError as e:
             return Response(
@@ -319,5 +342,5 @@ class UserViewSet(
             )
 
         return Response(
-            data={"perfil": perfil, "foto": foto}, status=status.HTTP_200_OK
+            data={"perfil": perfil}, status=status.HTTP_200_OK
         )
