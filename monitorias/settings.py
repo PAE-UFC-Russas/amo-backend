@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALLOWED_HOSTS = []
 if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = False
+    DEBUG = True
     ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
     DATABASES = {
         "default": dj_database_url.config(
