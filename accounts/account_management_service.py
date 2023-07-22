@@ -71,7 +71,7 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
+    allowed_fields = ["id", "nome_completo", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
     for key in list(profile.keys()):
         if key not in allowed_fields:
             profile.pop(key)
@@ -89,8 +89,6 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "curso",
         "foto",
     ]
-
-    print(perfil.foto.url)
 
     with transaction.atomic():
         if "curso" in allowed_keys:
