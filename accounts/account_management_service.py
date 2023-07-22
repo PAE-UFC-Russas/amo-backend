@@ -1,17 +1,19 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
-from datetime import timedelta
-from random import randint
+# from datetime import timedelta
+# from random import randint
 
-from django.core import exceptions
+# from django.core import exceptions
 
 # mail
 from django.db import transaction
 from django.forms.models import model_to_dict
-from django.utils import timezone
+
+# from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from accounts import errors, schema
-from accounts.models import CustomUser, EmailActivationToken, Perfil
+from accounts.models import CustomUser, Perfil  # , EmailActivationToken
+from monitorias.settings import ALLOWED_HOSTS
 
 
 def create_account(
@@ -63,16 +65,24 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
 
     profile = model_to_dict(user_instance.perfil)
+    profile["foto"] = ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
+
     profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_exibicao", "entrada", "curso", "cargos"]
-
+    allowed_fields = [
+        "id",
+        "nome_completo",
+        "nome_exibicao",
+        "entrada",
+        "curso",
+        "cargos",
+        "foto",
+    ]
     for key in list(profile.keys()):
         if key not in allowed_fields:
             profile.pop(key)
-
     return profile
 
 
@@ -85,6 +95,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "matricula",
         "entrada",
         "curso",
+        "foto",
     ]
 
     with transaction.atomic():
@@ -103,50 +114,48 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
     return get_user_profile(perfil.usuario)
 
 
-"""
-def send_email_confirmation_token(user_instance):
-    Envia token de confirmação do e-mail para o usuário.
+# def send_email_confirmation_token(user_instance):
+#     Envia token de confirmação do e-mail para o usuário.
 
-    token = EmailActivationToken.objects.create(
-        user=user_instance,
-        email=user_instance.email,
-        token=str(randint(0, 999999)).zfill(6),
-    )
+#     token = EmailActivationToken.objects.create(
+#         user=user_instance,
+#         email=user_instance.email,
+#         token=str(randint(0, 999999)).zfill(6),
+#     )
 
-    mail.EmailMessage(
-        to=[user_instance.email],
-        subject="Ativação do cadastro - Ambiente de Monitoria Online",
-        body=f"Seu código de ativação: {token.token}",
-    ).send()
+#     mail.EmailMessage(
+#         to=[user_instance.email],
+#         subject="Ativação do cadastro - Ambiente de Monitoria Online",
+#         body=f"Seu código de ativação: {token.token}",
+#     ).send()
 
 
-def confirm_email(activation_code: str, user: CustomUser):
-    Realiza a confirmação do e-mail de um usuário.
+# def confirm_email(activation_code: str, user: CustomUser):
+#     Realiza a confirmação do e-mail de um usuário.
 
-    try:
-        activation_code_model = EmailActivationToken.objects.get(
-            token=activation_code, user=user
-        )
-    except exceptions.ObjectDoesNotExist as error:
-        raise errors.EmailConfirmationCodeNotFound() from error
+#     try:
+#         activation_code_model = EmailActivationToken.objects.get(
+#             token=activation_code, user=user
+#         )
+#     except exceptions.ObjectDoesNotExist as error:
+#         raise errors.EmailConfirmationCodeNotFound() from error
 
-    if activation_code_model.created_at + timedelta(hours=24) <= timezone.now():
-        raise errors.EmailConfirmationCodeExpired()
+#     if activation_code_model.created_at + timedelta(hours=24) <= timezone.now():
+#         raise errors.EmailConfirmationCodeExpired()
 
-    if (
-        user.is_email_active
-        or activation_code_model.email != user.email
-        or activation_code_model.activated_at is not None
-    ):
-        raise errors.EmailConfirmationConflict()
+#     if (
+#         user.is_email_active
+#         or activation_code_model.email != user.email
+#         or activation_code_model.activated_at is not None
+#     ):
+#         raise errors.EmailConfirmationConflict()
 
-    with transaction.atomic():
-        activation_code_model.activated_at = timezone.now()
-        activation_code_model.save()
+#     with transaction.atomic():
+#         activation_code_model.activated_at = timezone.now()
+#         activation_code_model.save()
 
-        user.is_email_active = True
-        user.save()
-"""
+#         user.is_email_active = True
+#         user.save()
 
 
 def get_user_token(user):

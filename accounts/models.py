@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Curso
+from monitorias.settings import MEDIA_ROOT
 
 
 class CustomUserManager(BaseUserManager):
@@ -18,11 +19,10 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self.db)
-
-        # Essa linha, quando não há nenhum usuário registrado, retorna um erro «Group matching does not exit"
+        # Essa linha, quando não há nenhum usuário registrado,
+        # retorna um erro «Group matching does not exit"
         # Ao invés disso, utilizei a função Group.objects.get_or_create()
-        # user.groups.add(Group.objects.get(name="aluno"))
-
+        # user.groups.add(Group.objects.get_or_create(name="aluno"))
         group, _ = Group.objects.get_or_create(name="aluno")
         user.groups.add(group)
 
@@ -79,7 +79,7 @@ class Perfil(models.Model):
     usuario = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, related_name="perfil"
     )
-
+    foto = models.ImageField(blank=True, null=True, upload_to=MEDIA_ROOT)
     nome_completo = models.CharField(max_length=255)
     nome_exibicao = models.CharField(max_length=32)
     data_nascimento = models.DateField(null=True)

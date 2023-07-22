@@ -11,7 +11,7 @@ from drf_spectacular.utils import (
 )
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
-from rest_framework.decorators import action
+
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
@@ -86,89 +86,87 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         response = {"data": {"auth_token": token_str}}
         return Response(data=response, status=201)
 
+    # pylint: disable=C0301
+    # @extend_schema(
+    #     tags=["Cadastro do Usuário"],
+    #     request={
+    #         "application/json": {
+    #             "type": "object",
+    #             "properties": {"token": {"type": "string", "example": "157543"}},
+    #         }
+    #     },
+    #     responses={
+    #         (204, "application/json"): {},
+    #         (404, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "erro": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "mensagem": {
+    #                             "type": "string",
+    #                             "example": errors.EmailConfirmationCodeNotFound.message,
+    #                         },
+    #                         "codigo": {
+    #                             "type": "integer",
+    #                             "example": errors.EmailConfirmationCodeNotFound.internal_error_code,
+    #                         },
+    #                     },
+    #                 }
+    #             },
+    #         },
+    #         (409, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "erro": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "mensagem": {
+    #                             "type": "string",
+    #                             "example": errors.EmailConfirmationCodeExpired.message,
+    #                         },
+    #                         "codigo": {
+    #                             "type": "integer",
+    #                             "example": errors.EmailConfirmationCodeExpired.internal_error_code,
+    #                         },
+    #                     },
+    #                 }
+    #             },
+    #         },
+    #     },
+    # )
+    # @action(methods=["POST"], detail=False)
+    # def confirmar_email(self, request):
+    #     Realiza a confirmação do email do usuário.
+    #     unsafe_activation_code = request.data.get("token", "")
 
-"""
-    @extend_schema(
-        tags=["Cadastro do Usuário"],
-        request={
-            "application/json": {
-                "type": "object",
-                "properties": {"token": {"type": "string", "example": "157543"}},
-            }
-        },
-        responses={
-            (204, "application/json"): {},
-            (404, "application/json"): {
-                "type": "object",
-                "properties": {
-                    "erro": {
-                        "type": "object",
-                        "properties": {
-                            "mensagem": {
-                                "type": "string",
-                                "example": errors.EmailConfirmationCodeNotFound.message,
-                            },
-                            "codigo": {
-                                "type": "integer",
-                                "example": errors.EmailConfirmationCodeNotFound.internal_error_code,
-                            },
-                        },
-                    }
-                },
-            },
-            (409, "application/json"): {
-                "type": "object",
-                "properties": {
-                    "erro": {
-                        "type": "object",
-                        "properties": {
-                            "mensagem": {
-                                "type": "string",
-                                "example": errors.EmailConfirmationCodeExpired.message,
-                            },
-                            "codigo": {
-                                "type": "integer",
-                                "example": errors.EmailConfirmationCodeExpired.internal_error_code,
-                            },
-                        },
-                    }
-                },
-            },
-        },
-    )
-    @action(methods=["POST"], detail=False)
-    def confirmar_email(self, request):
-        Realiza a confirmação do email do usuário.
-        unsafe_activation_code = request.data.get("token", "")
+    #     sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
 
-        sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
+    #     try:
+    #         account_management_service.confirm_email(
+    #             sanitized_activation_code, request.user
+    #         )
+    #     except errors.EmailConfirmationCodeNotFound as e:
+    #         return Response(
+    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+    #             status=status.HTTP_404_NOT_FOUND,
+    #         )
+    #     except errors.EmailConfirmationCodeExpired as e:
+    #         return Response(
+    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+    #             status=status.HTTP_409_CONFLICT,
+    #         )
+    #     except errors.EmailConfirmationConflict as e:
+    #         return Response(
+    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
+    #             status=status.HTTP_409_CONFLICT,
+    #         )
 
-        try:
-            account_management_service.confirm_email(
-                sanitized_activation_code, request.user
-            )
-        except errors.EmailConfirmationCodeNotFound as e:
-            return Response(
-                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except errors.EmailConfirmationCodeExpired as e:
-            return Response(
-                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-                status=status.HTTP_409_CONFLICT,
-            )
-        except errors.EmailConfirmationConflict as e:
-            return Response(
-                data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-                status=status.HTTP_409_CONFLICT,
-            )
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-"""
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema_view(
-    create=extend_schema(tags=["Usuário"]),
+    # create=extend_schema(tags=["Usuário"]),
     list=extend_schema(tags=["Usuário"]),
     details=extend_schema(tags=["Usuário"]),
     update=extend_schema(tags=["Usuário"]),
@@ -185,8 +183,78 @@ class UserViewSet(
     """ViewSet para ações relacionadas ao usuário."""
 
     access_policy = access_policy.UserViewAccessPolicy
-    queryset = models.CustomUser.objects.all()
+    queryset = models.CustomUser.objects.all().order_by("id")
     serializer_class = serializer.UserSerializer
+    # @extend_schema(
+    #     tags=["Usuário"],
+    #     request={
+    #             "multipart/form-data": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
+    #                 "password": {
+    #                     "type": "string",
+    #                     "example": "supersecurepassword1",
+    #                 },
+    #                 "nome_exibicao": {"type":"string", "example":"David Gilmour"},
+    #                 "data_nascimento": {"type": "string", "example": "1948-06-20"},
+
+    #                 "matricula": {"type": "string", "example": "123456"},
+
+    #                 "entrada": {"type": "string", "example": "2021.1"},
+
+    #                 "curso": {"type": "integer", "example": "1"},
+    #                 "foto": {"type": "file"}
+    #             },
+    #         }
+    #     },
+    #     responses={
+    #         (200, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "sucesso": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "id": {"type": "string", "example":"Perfil criado com sucesso!"},
+    #                 }
+    #             },
+    #         },
+    #         (409, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "erro": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "mensagem": {
+    #                             "type": "string",
+    #                             "example": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH",
+    #                         }
+    #                     },
+    #                 }
+    #             },
+    #         },
+    #     },
+    # })
+    # def create(self, request):
+    #     user = models.CustomUser.objects.get(email=request.user)
+    #     resul = account_management_service.update_user_profile(user.perfil, request.data)
+    #     print(resul)
+    #     # if user.perfil.nome_completo == "":
+    #     #     with transaction.atomic():
+    #     #         user.perfil.nome_completo = request.data['nome_completo']
+    #     #         user.perfil.nome_exibicao = request.data['nome_exibicao']
+    #     #         user.perfil.data_nascimento = request.data['data_nascimento']
+    #     #         user.perfil.matricula = request.data['matricula']
+    #     #         user.perfil.entrada = request.data['entrada']
+    #     #         user.perfil.curso = models.Curso.objects.get(pk=request.data['curso'])
+    #     #         user.perfil.foto = request.data['foto']
+    #     #         user.perfil.save()
+    #     #         user.save()
+    #     #         perfil = account_management_service.get_user_profile(user)
+    #     # else:
+    #     #     return Response(data={"erro": {"mensagem": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH"}}, status=status.HTTP_409_CONFLICT)
+
+    #     # return Response(data=perfil, status=status.HTTP_200_OK)
 
     @extend_schema(
         tags=["Usuário"],
@@ -241,7 +309,6 @@ class UserViewSet(
             user_model = (
                 request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
             )
-
             perfil = account_management_service.get_user_profile(user_model)
         except exceptions.ObjectDoesNotExist:
             return Response(
@@ -261,6 +328,24 @@ class UserViewSet(
                 description="id do usuário ou 'eu', como atalho para o usuário atual.",
             )
         ],
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
+                    "password": {
+                        "type": "string",
+                        "example": "supersecurepassword1",
+                    },
+                    "nome_exibicao": {"type": "string", "example": "David Gilmour"},
+                    "data_nascimento": {"type": "string", "example": "1948-06-20"},
+                    "matricula": {"type": "string", "example": "123456"},
+                    "entrada": {"type": "string", "example": "2021.1"},
+                    "curso": {"type": "integer", "example": "1"},
+                    "foto": {"type": "file"},
+                },
+            }
+        },
         responses={
             (200, "application/json"): {
                 "type": "object",
@@ -268,6 +353,11 @@ class UserViewSet(
                     "perfil": {
                         "type": "object",
                         "properties": {
+                            "id": {"type": "integer", "example": "1"},
+                            "foto": {
+                                "type": "file",
+                                "example": "192.168.0.1/imagens/foto.jpg",
+                            },
                             "nome_exibição": {
                                 "type": "string",
                                 "example": "Francisco Silva",
@@ -277,6 +367,7 @@ class UserViewSet(
                                 "example": "Ciência da Computação",
                             },
                             "entrada": {"type": "string", "example": "2022.1"},
+                            "cargos": {"type": "list", "example": "[]"},
                         },
                     }
                 },
@@ -289,7 +380,7 @@ class UserViewSet(
                         "properties": {
                             "nome_completo": {
                                 "type": "array",
-                                "example": ["This field cannot be blank."],
+                                "example": ["Este campo não pode estar vazio!"],
                             }
                         },
                     }
@@ -299,11 +390,18 @@ class UserViewSet(
     )
     def partial_update(self, request, pk=None):
         """Realiza a atualização dos valores do perfil do usuário."""
+        # print(request.data['foto'])
+        # models.Perfil.objects.update
         user = request.user if pk == "eu" else self.get_object()
+        print(request.data)
+        # user.perfil.foto = request.data['foto']
+        # user.perfil.save()
+        # user.save()
         try:
             perfil = account_management_service.update_user_profile(
-                user.perfil, request.data.get("perfil")
+                user.perfil, request.data
             )
+        # return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
         except exceptions.ValidationError as e:
             return Response(
                 data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST

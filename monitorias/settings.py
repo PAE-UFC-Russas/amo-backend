@@ -19,12 +19,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
+ALLOWED_HOSTS = []
 if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = False
-    ALLOWED_HOSTS = os.getenv("DJANGO_HOSTS").split(";")
-    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+    DEBUG = True
+    ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
+    DATABASES = {
+        "default": dj_database_url.config(
+            # pylint: disable=C0301
+            default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
 else:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = ("django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu",)
@@ -32,10 +39,12 @@ else:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
-    ALLOWED_HOSTS = ["174.129.219.95", "127.0.0.1"]
+    ALLOWED_HOSTS.append("127.0.0.1")
 
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+    # pylint: disable=C0301
+    # DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
 
     DATABASES = {
         "default": {
@@ -43,7 +52,14 @@ else:
             "NAME": BASE_DIR + "db.sqlite3",
         }
     }
-
+    # DATABASES = {
+    #     "default": dj_database_url.config(
+    #         # pylint: disable=C0301
+    #         default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
+    #         conn_max_age=600,
+    #         ssl_require=True,
+    #     )
+    # }
 # Application definition
 
 INSTALLED_APPS = [
@@ -135,7 +151,8 @@ STATIC_URL = "/static/"
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-
+MEDIA_ROOT = "imagens"
+MEDIA_URL = "/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

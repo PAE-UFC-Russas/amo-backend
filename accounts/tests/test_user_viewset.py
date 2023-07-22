@@ -62,14 +62,12 @@ class UserViewSetTest(APITestCase):
         response = self.client.patch(
             reverse("usuario-detail", args=["eu"]),
             {
-                "perfil": {
-                    "nome_completo": "Usuário da Silva",
-                    "nome_exibicao": "Usuário",
-                    "data_nascimento": "2000-12-30",
-                    "matricula": "000000",
-                    "curso": 1,
-                    "entrada": "2022.1",
-                }
+                "nome_completo": "Usuário da Silva",
+                "nome_exibicao": "Usuário",
+                "data_nascimento": "2000-12-30",
+                "matricula": "000000",
+                "curso": 1,
+                "entrada": "2022.1",
             },
             format="json",
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token.key}",
