@@ -12,7 +12,6 @@ from drf_spectacular.utils import (
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
 
-# from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
@@ -167,7 +166,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
 
 
 @extend_schema_view(
-    create=extend_schema(tags=["Usuário"]),
+    # create=extend_schema(tags=["Usuário"]),
     list=extend_schema(tags=["Usuário"]),
     details=extend_schema(tags=["Usuário"]),
     update=extend_schema(tags=["Usuário"]),
@@ -184,8 +183,78 @@ class UserViewSet(
     """ViewSet para ações relacionadas ao usuário."""
 
     access_policy = access_policy.UserViewAccessPolicy
-    queryset = models.CustomUser.objects.all()
+    queryset = models.CustomUser.objects.all().order_by("id")
     serializer_class = serializer.UserSerializer
+    # @extend_schema(
+    #     tags=["Usuário"],
+    #     request={
+    #             "multipart/form-data": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
+    #                 "password": {
+    #                     "type": "string",
+    #                     "example": "supersecurepassword1",
+    #                 },
+    #                 "nome_exibicao": {"type":"string", "example":"David Gilmour"},
+    #                 "data_nascimento": {"type": "string", "example": "1948-06-20"},
+
+    #                 "matricula": {"type": "string", "example": "123456"},
+
+    #                 "entrada": {"type": "string", "example": "2021.1"},
+
+    #                 "curso": {"type": "integer", "example": "1"},
+    #                 "foto": {"type": "file"}
+    #             },
+    #         }
+    #     },
+    #     responses={
+    #         (200, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "sucesso": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "id": {"type": "string", "example":"Perfil criado com sucesso!"},
+    #                 }
+    #             },
+    #         },
+    #         (409, "application/json"): {
+    #             "type": "object",
+    #             "properties": {
+    #                 "erro": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "mensagem": {
+    #                             "type": "string",
+    #                             "example": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH",
+    #                         }
+    #                     },
+    #                 }
+    #             },
+    #         },
+    #     },
+    # })
+    # def create(self, request):
+    #     user = models.CustomUser.objects.get(email=request.user)
+    #     resul = account_management_service.update_user_profile(user.perfil, request.data)
+    #     print(resul)
+    #     # if user.perfil.nome_completo == "":
+    #     #     with transaction.atomic():
+    #     #         user.perfil.nome_completo = request.data['nome_completo']
+    #     #         user.perfil.nome_exibicao = request.data['nome_exibicao']
+    #     #         user.perfil.data_nascimento = request.data['data_nascimento']
+    #     #         user.perfil.matricula = request.data['matricula']
+    #     #         user.perfil.entrada = request.data['entrada']
+    #     #         user.perfil.curso = models.Curso.objects.get(pk=request.data['curso'])
+    #     #         user.perfil.foto = request.data['foto']
+    #     #         user.perfil.save()
+    #     #         user.save()
+    #     #         perfil = account_management_service.get_user_profile(user)
+    #     # else:
+    #     #     return Response(data={"erro": {"mensagem": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH"}}, status=status.HTTP_409_CONFLICT)
+
+    #     # return Response(data=perfil, status=status.HTTP_200_OK)
 
     @extend_schema(
         tags=["Usuário"],
@@ -239,7 +308,7 @@ class UserViewSet(
         try:
             user_model = (
                 request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
-            )   
+            )
             perfil = account_management_service.get_user_profile(user_model)
         except exceptions.ObjectDoesNotExist:
             return Response(
@@ -260,7 +329,7 @@ class UserViewSet(
             )
         ],
         request={
-                "multipart/form-data": {
+            "multipart/form-data": {
                 "type": "object",
                 "properties": {
                     "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
@@ -268,16 +337,12 @@ class UserViewSet(
                         "type": "string",
                         "example": "supersecurepassword1",
                     },
-                    "nome_exibicao": {"type":"string", "example":"David Gilmour"},
+                    "nome_exibicao": {"type": "string", "example": "David Gilmour"},
                     "data_nascimento": {"type": "string", "example": "1948-06-20"},
-
                     "matricula": {"type": "string", "example": "123456"},
-
                     "entrada": {"type": "string", "example": "2021.1"},
-
                     "curso": {"type": "integer", "example": "1"},
-                    "foto": {"type": "file"}
-                
+                    "foto": {"type": "file"},
                 },
             }
         },
@@ -288,9 +353,11 @@ class UserViewSet(
                     "perfil": {
                         "type": "object",
                         "properties": {
-
-                            "id": {"type": "integer", "example":"1"},
-                            "foto": {"type": "file", "example":"192.168.0.1/imagens/foto.jpg"},
+                            "id": {"type": "integer", "example": "1"},
+                            "foto": {
+                                "type": "file",
+                                "example": "192.168.0.1/imagens/foto.jpg",
+                            },
                             "nome_exibição": {
                                 "type": "string",
                                 "example": "Francisco Silva",
@@ -300,7 +367,6 @@ class UserViewSet(
                                 "example": "Ciência da Computação",
                             },
                             "entrada": {"type": "string", "example": "2022.1"},
-
                             "cargos": {"type": "list", "example": "[]"},
                         },
                     }
@@ -341,6 +407,4 @@ class UserViewSet(
                 data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        return Response(
-            data={"perfil": perfil}, status=status.HTTP_200_OK
-        )
+        return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)

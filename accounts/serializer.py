@@ -57,7 +57,6 @@ class PerfilSerializer(WritableNestedModelSerializer):
             "curso",
             "foto",
         ]
-        
 
 
 @extend_schema_serializer(

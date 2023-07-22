@@ -15,6 +15,7 @@ from accounts import errors, schema
 from accounts.models import CustomUser, Perfil  # , EmailActivationToken
 from monitorias.settings import ALLOWED_HOSTS
 
+
 def create_account(
     sanitized_email_str: str, unsafe_password_str: str, admin: bool = False
 ):
@@ -64,14 +65,21 @@ def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
 
     profile = model_to_dict(user_instance.perfil)
-    
-    profile["foto"] =  ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
+    profile["foto"] = ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
 
     profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
 
-    allowed_fields = ["id", "nome_completo", "nome_exibicao", "entrada", "curso", "cargos", "foto"]
+    allowed_fields = [
+        "id",
+        "nome_completo",
+        "nome_exibicao",
+        "entrada",
+        "curso",
+        "cargos",
+        "foto",
+    ]
     for key in list(profile.keys()):
         if key not in allowed_fields:
             profile.pop(key)
