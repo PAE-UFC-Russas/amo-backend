@@ -159,7 +159,7 @@ class RespostaTestes(APITestCase):
             reverse("respostas-detail", args=[1]),
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
         )
-
+        print(response.data)
         self.assertEqual(
             response.data,
             {
@@ -169,6 +169,8 @@ class RespostaTestes(APITestCase):
                 "resposta": self.resposta.resposta,
                 "autor": {
                     "id": self.resposta.autor_id,
+                    "foto": "127.0.0.1/",
+                    "nome_completo": self.resposta.autor.perfil.nome_completo,
                     "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
                     "curso": self.resposta.autor.perfil.curso_id,
                     "entrada": self.resposta.autor.perfil.entrada,
