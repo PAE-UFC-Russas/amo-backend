@@ -16,6 +16,7 @@ from core.serializer import (
 from django.db import transaction
 from rest_framework.response import Response
 
+
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
 
@@ -51,10 +52,16 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet, UpdateModelMixin):
 
     def partial_update(self, request, pk=None):
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
-        
         agendamento = Agendamento.objects.get(id=pk)
-        if request.data["status"] and request.data["status"]=="confirmado":
-            return Response(data={"mensagem": "Usuarios não podem confirmar um agendamento"}, status=304)
+        if (
+            request.data["status"]
+            and request.data["status"] == "confirmado"
+            and request.user not in agendamento.disciplina.monitores.all()
+        ):
+            return Response(
+                data={"mensagem": "Usuarios não podem confirmar um agendamento"},
+                status=304,
+            )
         with transaction.atomic():
             for key, value in request.data.items():
                 if key in allowed_keys:
