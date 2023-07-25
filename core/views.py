@@ -3,9 +3,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.mixins import UpdateModelMixin
+from rest_framework.response import Response
+from django.db import transaction
 from core import access_policy, filters
-from django.contrib.auth.models import Group
 from core.models import Agendamento, Curso, Disciplinas
 from core.serializer import (
     AgendamentoRequestSerializer,
@@ -13,8 +13,6 @@ from core.serializer import (
     CursoSerializer,
     DisciplinaSerializer,
 )
-from django.db import transaction
-from rest_framework.response import Response
 
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
@@ -38,7 +36,7 @@ class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0
     search_fields = ["nome"]
 
 
-class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet, UpdateModelMixin):
+class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     """Ações do agendamento de atendimento."""
 
     access_policy = access_policy.AgendamentoAccessPolicy
@@ -50,7 +48,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet, UpdateModelMixin):
     ordering = ["data"]
     ordering_fields = ["data"]
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
         agendamento = Agendamento.objects.get(id=pk)
         if (
