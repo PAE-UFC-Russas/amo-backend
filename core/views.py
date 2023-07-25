@@ -3,7 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.response import Response
+from django.db import transaction
 from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas
 from core.serializer import (
@@ -46,6 +47,25 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     search_fields = ["assunto", "descricao"]
     ordering = ["data"]
     ordering_fields = ["data"]
+
+    def partial_update(self, request, pk=None):  # pylint: disable=W0221
+        allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
+        agendamento = Agendamento.objects.get(id=pk)
+        if (
+            request.data["status"]
+            and request.data["status"] == "confirmado"
+            and request.user not in agendamento.disciplina.monitores.all()
+        ):
+            return Response(
+                data={"mensagem": "Usuarios não podem confirmar um agendamento"},
+                status=304,
+            )
+        with transaction.atomic():
+            for key, value in request.data.items():
+                if key in allowed_keys:
+                    setattr(agendamento, key, value)
+            agendamento.save()
+        return Response(data={"sucesso"}, status=200)
 
     def perform_create(self, serializer):
         """Salva o agendamento adicionando o usuário atual como solicitante."""
