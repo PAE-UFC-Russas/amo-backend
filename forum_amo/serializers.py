@@ -62,6 +62,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
             "resposta_correta",
             "votos",
             "votou",
+            "quantidade_comentarios",
         ]
 
 
@@ -81,6 +82,9 @@ class RespostaSerializer(serializers.ModelSerializer):
             duvida_id=validated_data["duvida"].id,
             resposta=validated_data["resposta"],
         )
+        duvida = Duvida.objects.get(id=validated_data["duvida"].id)
+        duvida.quantidade_comentarios += 1
+        duvida.save()
         return nova_resposta
 
 

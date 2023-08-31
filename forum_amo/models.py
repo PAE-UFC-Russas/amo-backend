@@ -24,6 +24,7 @@ class Duvida(models.Model):
     )
     autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
     votos = models.IntegerField(default=0)
+    quantidade_comentarios = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
         return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
