@@ -38,7 +38,8 @@ class DuvidaSerializer(serializers.ModelSerializer):
     autor = UserSerializer(read_only=True)
     votos = serializers.IntegerField(read_only=True)
     votou = DuvidaVotouField(read_only=True)
-
+    quantidade_comentarios = serializers.IntegerField(read_only=True)
+    
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(
             titulo=validated_data["titulo"],
