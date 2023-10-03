@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+
 ALLOWED_HOSTS = []
 if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -27,7 +28,7 @@ if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     DATABASES = {
         "default": dj_database_url.config(
             # pylint: disable=C0301
-            default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
+            default=os.getenv("DB_URL"),
             conn_max_age=600,
             ssl_require=True,
         )
@@ -44,7 +45,8 @@ else:
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
     # pylint: disable=C0301
-    # DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
+
+    # DATABASES = {"default": dj_database_url.config(default="postgres://alcantar0:Vkb3A8SwsvgO@ep-proud-sky-81119633-pooler.us-east-2.aws.neon.tech/neondb")}
 
     DATABASES = {
         "default": {
