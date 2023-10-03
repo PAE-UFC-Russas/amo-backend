@@ -46,14 +46,14 @@ else:
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
     # pylint: disable=C0301
 
-    # DATABASES = {"default": dj_database_url.config(default="postgres://alcantar0:Vkb3A8SwsvgO@ep-proud-sky-81119633-pooler.us-east-2.aws.neon.tech/neondb")}
+    DATABASES = {"default": dj_database_url.config(default=os.getenv("DB_URL"))}
 
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR + "db.sqlite3",
-        }
-    }
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR + "db.sqlite3",
+    #     }
+    # }
     # DATABASES = {
     #     "default": dj_database_url.config(
     #         # pylint: disable=C0301
