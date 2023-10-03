@@ -70,7 +70,7 @@ class AgendamentoAccessPolicy(AccessPolicy):
 
         - Alunos tem acesso apenas a seus agendamentos.
         - Monitores tem acesso a todos os agendamentos das disciplinas que são monitores.
-        - Professores podem ver todos os agendamentos de todas as disciplinas."""
+        - Professores podem ver todos os agendamentos de suas disciplinas"""
 
         if (
             request.user.groups.filter(name__in=["monitor"]).exists()
