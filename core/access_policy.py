@@ -71,16 +71,22 @@ class AgendamentoAccessPolicy(AccessPolicy):
         - Alunos tem acesso apenas a seus agendamentos.
         - Monitores tem acesso a todos os agendamentos das disciplinas que são monitores.
         - Professores podem ver todos os agendamentos de todas as disciplinas."""
-        if disciplina_id := request.query_params.get("disciplina", None):
-            if (
-                request.user.groups.filter(name__in=["monitor"]).exists()
-                and models.Disciplinas.objects.filter(
-                    pk=disciplina_id, monitores=request.user
-                ).exists()
-            ):
-                return qs
 
-            if request.user.groups.filter(name__in=["professor"]).exists():
-                return qs
+        if (
+            request.user.groups.filter(name__in=["monitor"]).exists()
+            and models.Disciplinas.objects.filter(monitores=request.user).exists()
+        ):
+
+            user = request.user
+            disciplinas = models.Disciplinas.objects.filter(monitores=user)
+            new_qs = models.Agendamento.objects.filter(disciplina__id__in=disciplinas)
+
+            return new_qs
+        if request.user.groups.filter(name__in=["professor"]).exists():
+            user = request.user
+            disciplinas = models.Disciplinas.objects.filter(professores=user)
+            new_qs = models.Agendamento.objects.filter(disciplina__id__in=disciplinas)
+
+            return qs
 
         return qs.filter(solicitante=request.user)
