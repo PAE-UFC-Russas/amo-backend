@@ -54,14 +54,7 @@ else:
             "NAME": BASE_DIR + "db.sqlite3",
         }
     }
-    # DATABASES = {
-    #     "default": dj_database_url.config(
-    #         # pylint: disable=C0301
-    #         default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
-    #         conn_max_age=600,
-    #         ssl_require=True,
-    #     )
-    # }
+
 # Application definition
 
 INSTALLED_APPS = [
