@@ -117,16 +117,6 @@ AUTH_PASSWORD_VALIDATORS = []
 # Email (smtp-backend)
 # https://docs.djangoproject.com/en/4.0/topics/email/#smtp-backend
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv(key="EMAIL_HOST", default="localhost")
-EMAIL_PORT = int(os.getenv(key="EMAIL_PORT", default="25"))
-EMAIL_HOST_USER = os.getenv(key="EMAIL_HOST_USER", default="amo@localhost")
-DEFAULT_FROM_EMAIL = os.getenv(key="DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
-EMAIL_HOST_PASSWORD = os.getenv(key="EMAIL_HOST_PASSWORD", default="")
-EMAIL_TIMEOUT = int(os.getenv(key="EMAIL_TIMEOUT", default="120"))
-EMAIL_USE_TLS = "True" == os.getenv(key="EMAIL_USE_TLS", default=None)
-EMAIL_USE_SSL = "True" == os.getenv(key="EMAIL_USE_SSL", default=None)
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
