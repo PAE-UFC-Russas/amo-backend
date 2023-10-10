@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
+
 ALLOWED_HOSTS = []
 if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
@@ -27,7 +28,7 @@ if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
     DATABASES = {
         "default": dj_database_url.config(
             # pylint: disable=C0301
-            default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
+            default=os.getenv("DB_URL"),
             conn_max_age=600,
             ssl_require=True,
         )
@@ -44,7 +45,8 @@ else:
     # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
     # pylint: disable=C0301
-    # DATABASES = {"default": dj_database_url.config(default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database", conn_max_age=600, ssl_require=True)}
+
+    # DATABASES = {"default": dj_database_url.config(default=os.getenv("DB_URL"))}
 
     DATABASES = {
         "default": {
@@ -52,14 +54,7 @@ else:
             "NAME": BASE_DIR + "db.sqlite3",
         }
     }
-    # DATABASES = {
-    #     "default": dj_database_url.config(
-    #         # pylint: disable=C0301
-    #         default="postgres://amo_database_user:uDeOeVsLyXHWO4xDZRvcpwMrBKRox8iX@dpg-ciiammlph6erq6nl2vng-a.oregon-postgres.render.com/amo_database",
-    #         conn_max_age=600,
-    #         ssl_require=True,
-    #     )
-    # }
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -121,16 +116,6 @@ AUTH_PASSWORD_VALIDATORS = []
 
 # Email (smtp-backend)
 # https://docs.djangoproject.com/en/4.0/topics/email/#smtp-backend
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv(key="EMAIL_HOST", default="localhost")
-EMAIL_PORT = int(os.getenv(key="EMAIL_PORT", default="25"))
-EMAIL_HOST_USER = os.getenv(key="EMAIL_HOST_USER", default="amo@localhost")
-DEFAULT_FROM_EMAIL = os.getenv(key="DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
-EMAIL_HOST_PASSWORD = os.getenv(key="EMAIL_HOST_PASSWORD", default="")
-EMAIL_TIMEOUT = int(os.getenv(key="EMAIL_TIMEOUT", default="120"))
-EMAIL_USE_TLS = "True" == os.getenv(key="EMAIL_USE_TLS", default=None)
-EMAIL_USE_SSL = "True" == os.getenv(key="EMAIL_USE_SSL", default=None)
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
