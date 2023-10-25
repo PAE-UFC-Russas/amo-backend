@@ -14,6 +14,9 @@ import os
 import dj_database_url
 import rollbar
 
+import cloudinary_storage
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -39,7 +42,7 @@ else:
 
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
-
+    
     ALLOWED_HOSTS.append("127.0.0.1")
 
     # Database
@@ -72,6 +75,8 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "forum_amo",
+    "cloudinary",
+    "cloudinary_storage"
 ]
 
 MIDDLEWARE = [
@@ -163,5 +168,10 @@ ROLLBAR = {
     "suppress_reinit_warning": True,
     "enabled": not DEBUG,
 }
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': f"{os.getenv('CLOUD_NAME')}",
+    'API_KEY': f"{os.getenv('API_KEY')}",
+    'API_SECRET': f"{os.getenv('API_SECRET')}"
+}
 
-rollbar.init(**ROLLBAR)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
