@@ -24,9 +24,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 ALLOWED_HOSTS = []
-if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
+
+if os.getenv("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
     DATABASES = {
         "default": dj_database_url.config(
