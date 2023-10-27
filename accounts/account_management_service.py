@@ -13,7 +13,6 @@ from rest_framework.authtoken.models import Token
 
 from accounts import errors, schema
 from accounts.models import CustomUser, Perfil  # , EmailActivationToken
-from monitorias.settings import ALLOWED_HOSTS
 
 
 def create_account(
@@ -64,7 +63,9 @@ def create_account(
 def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
     profile = model_to_dict(user_instance.perfil)
-    profile["foto"] = ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
+    profile["foto"] = "https://res.cloudinary.com/dlvmqmqcn/image/upload/v1/" + str(
+        user_instance.perfil.foto
+    )
     profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
