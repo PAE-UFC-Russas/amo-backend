@@ -12,7 +12,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 
 import dj_database_url
-import rollbar
+
+import rollbar  # pylint: disable=W0611
+
+
+import cloudinary_storage  # pylint: disable=W0611
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,9 +26,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 ALLOWED_HOSTS = []
-if os.environ.get("DJANGO_ENVIRONMENT") == "PRODUCTION":
+
+if os.getenv("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
     DATABASES = {
         "default": dj_database_url.config(
@@ -64,6 +70,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "cloudinary_storage",
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
@@ -72,6 +79,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "forum_amo",
+    "cloudinary",
 ]
 
 MIDDLEWARE = [
@@ -163,5 +171,12 @@ ROLLBAR = {
     "suppress_reinit_warning": True,
     "enabled": not DEBUG,
 }
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": f"{os.getenv('CLOUD_NAME')}",
+    "API_KEY": f"{os.getenv('API_KEY')}",
+    "API_SECRET": f"{os.getenv('API_SECRET')}",
+}
 
-rollbar.init(**ROLLBAR)
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticHashedCloudinaryStorage"
