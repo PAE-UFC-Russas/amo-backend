@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 
 import dj_database_url
-import rollbar
 
-import cloudinary_storage
+import rollbar  # pylint: disable=W0611
+
+
+import cloudinary_storage  # pylint: disable=W0611
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,7 +45,7 @@ else:
 
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
-    
+
     ALLOWED_HOSTS.append("127.0.0.1")
 
     # Database
@@ -62,7 +64,6 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-
     "fixtures",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -171,11 +172,11 @@ ROLLBAR = {
     "enabled": not DEBUG,
 }
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': f"{os.getenv('CLOUD_NAME')}",
-    'API_KEY': f"{os.getenv('API_KEY')}",
-    'API_SECRET': f"{os.getenv('API_SECRET')}"
+    "CLOUD_NAME": f"{os.getenv('CLOUD_NAME')}",
+    "API_KEY": f"{os.getenv('API_KEY')}",
+    "API_SECRET": f"{os.getenv('API_SECRET')}",
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticHashedCloudinaryStorage"
