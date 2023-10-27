@@ -169,7 +169,7 @@ class RespostaTestes(APITestCase):
                 "resposta": self.resposta.resposta,
                 "autor": {
                     "id": self.resposta.autor_id,
-                    "foto": "127.0.0.1/",
+                    "foto": "https://res.cloudinary.com/dlvmqmqcn/image/upload/v1/",
                     "nome_completo": self.resposta.autor.perfil.nome_completo,
                     "nome_exibicao": self.resposta.autor.perfil.nome_exibicao,
                     "curso": self.resposta.autor.perfil.curso_id,
