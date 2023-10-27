@@ -64,7 +64,7 @@ def create_account(
 def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
     profile = model_to_dict(user_instance.perfil)
-    profile["foto"] = ALLOWED_HOSTS[0] + "/" + str(user_instance.perfil.foto)
+    profile["foto"] = "https://res.cloudinary.com/dlvmqmqcn/image/upload/v1/" + str(user_instance.perfil.foto)
     profile["cargos"] = user_instance.cargos
     if profile["curso"]:
         profile["curso"] = user_instance.perfil.curso.nome
@@ -75,7 +75,7 @@ def get_user_profile(user_instance: CustomUser) -> dict:
         "entrada",
         "curso",
         "cargos",
-        "foto",
+        "foto"
     ]
     for key in list(profile.keys()):
         if key not in allowed_fields:
