@@ -27,7 +27,7 @@ ALLOWED_HOSTS = []
 
 if os.getenv("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
     DATABASES = {
         "default": dj_database_url.config(
@@ -62,12 +62,14 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+
     "fixtures",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "cloudinary_storage",
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
@@ -77,7 +79,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "forum_amo",
     "cloudinary",
-    "cloudinary_storage"
 ]
 
 MIDDLEWARE = [
@@ -176,3 +177,5 @@ CLOUDINARY_STORAGE = {
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
