@@ -410,9 +410,64 @@ class UserViewSet(
 
         return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        tags=["usuario"],
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "senha_velha": {
+                        "type": "string",
+                        "example": "securepassword_velha",
+                    },
+                    "senha_nova": {
+                        "type": "string",
+                        "example": "supersecurepassword_nova",
+                    },
+                    "confirma": {
+                        "type": "string",
+                        "example": "supersecurepassword_nova",
+                    },
+                },
+            }
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "sucesso": {
+                        "type": "string",
+                        "example": "senha alterada com sucesso!",
+                    },
+                },
+            },
+            (403, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {"type": "string", "example": "senhas não coincidem"},
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {"type": "string", "example": "senha atual incorreta"},
+                },
+            },
+        },
+    )
     @action(methods=["POST"], detail=True)
     def mudar(self, request, pk=None):
-        """Função para alterar senha do usuário
+        """
+        Função para alterar senha do usuário.
         Recebe como parâmetros: senha_velha; senha_nova; confirma (confirmação de senha_nova)
         """
 
@@ -429,5 +484,10 @@ class UserViewSet(
                     status=status.HTTP_200_OK,
                 )
 
-            return Response(data={"erro": "senhas não coincidem"})
-        return Response(data={"erro": "senha atual incorreta"})
+            return Response(
+                data={"erro": "senhas não coincidem"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            data={"erro": "senha atual incorreta"}, status=status.HTTP_403_FORBIDDEN
+        )
