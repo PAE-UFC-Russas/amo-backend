@@ -409,20 +409,25 @@ class UserViewSet(
             )
 
         return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
-    
+
     @action(methods=["POST"], detail=True)
     def mudar(self, request, pk=None):
-        
+        """Função para alterar senha do usuário
+        Recebe como parâmetros: senha_velha; senha_nova; confirma (confirmação de senha_nova)
+        """
+
         user_model = (
-            request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk))
-        if user_model.check_password(request.data['senha_velha']) == True:
-            if request.data['senha_nova'] == request.data['confirma']:
-                user_model.set_password(request.data['senha_nova'])
+            request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
+        )
+        if user_model.check_password(request.data["senha_velha"]) is True:
+            if request.data["senha_nova"] == request.data["confirma"]:
+                user_model.set_password(request.data["senha_nova"])
                 user_model.save()
-                
-                return Response(data={"sucesso": "senha alterada com sucesso!"}, status=status.HTTP_200_OK)
-            
-            else:
-                 return Response(data={"erro": "senhas não coincidem"})
-        else:
-            return Response(data={"erro": "senha atual incorreta"})
+
+                return Response(
+                    data={"sucesso": "senha alterada com sucesso!"},
+                    status=status.HTTP_200_OK,
+                )
+
+            return Response(data={"erro": "senhas não coincidem"})
+        return Response(data={"erro": "senha atual incorreta"})
