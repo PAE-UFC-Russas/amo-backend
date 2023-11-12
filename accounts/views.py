@@ -11,6 +11,7 @@ from drf_spectacular.utils import (
 )
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
+from rest_framework.decorators import action
 
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
@@ -408,3 +409,85 @@ class UserViewSet(
             )
 
         return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["usuario"],
+        parameters=[
+            OpenApiParameter(
+                "id",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="id do usuário ou 'eu', como atalho para o usuário atual.",
+            )
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "senha_velha": {
+                        "type": "string",
+                        "example": "securepassword_velha",
+                    },
+                    "senha_nova": {
+                        "type": "string",
+                        "example": "supersecurepassword_nova",
+                    },
+                    "confirma": {
+                        "type": "string",
+                        "example": "supersecurepassword_nova",
+                    },
+                },
+            }
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "sucesso": {
+                        "type": "string",
+                        "example": "senha alterada com sucesso!",
+                    },
+                },
+            },
+            (403, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {"type": "string", "example": "senhas não coincidem"},
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "erro": {"type": "string", "example": "senha atual incorreta"},
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=True)
+    def mudar(self, request, pk=None):
+        """
+        Função para alterar senha do usuário.
+        Recebe como parâmetros: senha_velha; senha_nova; confirma (confirmação de senha_nova)
+        """
+
+        user_model = (
+            request.user if pk == "eu" else models.CustomUser.objects.get(pk=pk)
+        )
+        if user_model.check_password(request.data["senha_velha"]) is True:
+            if request.data["senha_nova"] == request.data["confirma"]:
+                user_model.set_password(request.data["senha_nova"])
+                user_model.save()
+
+                return Response(
+                    data={"sucesso": "senha alterada com sucesso!"},
+                    status=status.HTTP_200_OK,
+                )
+
+            return Response(
+                data={"erro": "senhas não coincidem"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            data={"erro": "senha atual incorreta"}, status=status.HTTP_403_FORBIDDEN
+        )
