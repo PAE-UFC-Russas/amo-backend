@@ -334,10 +334,6 @@ class UserViewSet(
                 "type": "object",
                 "properties": {
                     "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
-                    "password": {
-                        "type": "string",
-                        "example": "supersecurepassword1",
-                    },
                     "nome_exibicao": {"type": "string", "example": "David Gilmour"},
                     "data_nascimento": {"type": "string", "example": "1948-06-20"},
                     "matricula": {"type": "string", "example": "123456"},
