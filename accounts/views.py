@@ -186,76 +186,6 @@ class UserViewSet(
     access_policy = access_policy.UserViewAccessPolicy
     queryset = models.CustomUser.objects.all().order_by("id")
     serializer_class = serializer.UserSerializer
-    # @extend_schema(
-    #     tags=["Usuário"],
-    #     request={
-    #             "multipart/form-data": {
-    #             "type": "object",
-    #             "properties": {
-    #                 "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
-    #                 "password": {
-    #                     "type": "string",
-    #                     "example": "supersecurepassword1",
-    #                 },
-    #                 "nome_exibicao": {"type":"string", "example":"David Gilmour"},
-    #                 "data_nascimento": {"type": "string", "example": "1948-06-20"},
-
-    #                 "matricula": {"type": "string", "example": "123456"},
-
-    #                 "entrada": {"type": "string", "example": "2021.1"},
-
-    #                 "curso": {"type": "integer", "example": "1"},
-    #                 "foto": {"type": "file"}
-    #             },
-    #         }
-    #     },
-    #     responses={
-    #         (200, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "sucesso": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "id": {"type": "string", "example":"Perfil criado com sucesso!"},
-    #                 }
-    #             },
-    #         },
-    #         (409, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "erro": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "mensagem": {
-    #                             "type": "string",
-    #                             "example": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH",
-    #                         }
-    #                     },
-    #                 }
-    #             },
-    #         },
-    #     },
-    # })
-    # def create(self, request):
-    #     user = models.CustomUser.objects.get(email=request.user)
-    #     resul = account_management_service.update_user_profile(user.perfil, request.data)
-    #     print(resul)
-    #     # if user.perfil.nome_completo == "":
-    #     #     with transaction.atomic():
-    #     #         user.perfil.nome_completo = request.data['nome_completo']
-    #     #         user.perfil.nome_exibicao = request.data['nome_exibicao']
-    #     #         user.perfil.data_nascimento = request.data['data_nascimento']
-    #     #         user.perfil.matricula = request.data['matricula']
-    #     #         user.perfil.entrada = request.data['entrada']
-    #     #         user.perfil.curso = models.Curso.objects.get(pk=request.data['curso'])
-    #     #         user.perfil.foto = request.data['foto']
-    #     #         user.perfil.save()
-    #     #         user.save()
-    #     #         perfil = account_management_service.get_user_profile(user)
-    #     # else:
-    #     #     return Response(data={"erro": {"mensagem": "Já existe um perfil para esse usuário. Considere utilizar o método PATCH"}}, status=status.HTTP_409_CONFLICT)
-
-    #     # return Response(data=perfil, status=status.HTTP_200_OK)
 
     @extend_schema(
         tags=["Usuário"],
@@ -334,10 +264,6 @@ class UserViewSet(
                 "type": "object",
                 "properties": {
                     "nome_completo": {"type": "string", "example": "David Jon Gilmour"},
-                    "password": {
-                        "type": "string",
-                        "example": "supersecurepassword1",
-                    },
                     "nome_exibicao": {"type": "string", "example": "David Gilmour"},
                     "data_nascimento": {"type": "string", "example": "1948-06-20"},
                     "matricula": {"type": "string", "example": "123456"},
@@ -391,18 +317,11 @@ class UserViewSet(
     )
     def partial_update(self, request, pk=None):
         """Realiza a atualização dos valores do perfil do usuário."""
-        # print(request.data['foto'])
-        # models.Perfil.objects.update
         user = request.user if pk == "eu" else self.get_object()
-        print(request.data)
-        # user.perfil.foto = request.data['foto']
-        # user.perfil.save()
-        # user.save()
         try:
             perfil = account_management_service.update_user_profile(
                 user.perfil, request.data
             )
-        # return Response(data={"perfil": perfil}, status=status.HTTP_200_OK)
         except exceptions.ValidationError as e:
             return Response(
                 data={"erro": e.error_dict}, status=status.HTTP_400_BAD_REQUEST
