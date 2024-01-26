@@ -53,3 +53,4 @@ class Agendamento(models.Model):
     data = models.DateTimeField()
     assunto = models.TextField()
     descricao = models.TextField()
+    link_zoom = models.TextField(null=True)
