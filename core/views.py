@@ -13,7 +13,7 @@ from core.serializer import (
     CursoSerializer,
     DisciplinaSerializer,
 )
-
+from forum_amo.zoom import create_meeting
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -48,6 +48,24 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     ordering = ["data"]
     ordering_fields = ["data"]
 
+    def create(self, request):
+        if request.data['tipo']=='virtual':
+            print(request.data['disciplina'])
+            a = Disciplinas.objects.get(id=request.data['disciplina'])
+            print(a)
+            data = {"tipo": request.data['tipo'],
+                    "data": request.data['data'],
+                    "assunto": request.data['assunto'],
+                    "descricao": request.data["descricao"],
+                    "disciplina": a
+            }
+
+            link = create_meeting()
+
+            print(link)
+
+            
+        Agendamento.objects.create(tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=a, solicitante_id=request.user.id)
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
         agendamento = Agendamento.objects.get(id=pk)
