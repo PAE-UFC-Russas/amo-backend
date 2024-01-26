@@ -62,7 +62,8 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
 
             link = create_meeting()
         Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=a, solicitante_id=request.user.id)
-    
+        return Response(data={"sucesso"}, status=200)
+
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
         agendamento = Agendamento.objects.get(id=pk)
