@@ -50,19 +50,15 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
 
     def create(self, request):
         if request.data['tipo']=='virtual':
-            print(request.data['disciplina'])
-            a = Disciplinas.objects.get(id=request.data['disciplina'])
-            print(a)
-            data = {"tipo": request.data['tipo'],
-                    "data": request.data['data'],
-                    "assunto": request.data['assunto'],
-                    "descricao": request.data["descricao"],
-                    "disciplina": a
-            }
-
+            disciplina = Disciplinas.objects.get(id=request.data['disciplina'])
             link = create_meeting()
-        Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=a, solicitante_id=request.user.id)
-        return Response(data={"sucesso"}, status=200)
+        s_agen = None
+        with transaction.atomic():
+            agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
+            agendamento.save()
+            s_agen = AgendamentoSerializer(agendamento)
+        print(s_agen)
+        return Response(data=s_agen.data, status=200)
 
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
