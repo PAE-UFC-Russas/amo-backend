@@ -57,7 +57,6 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
             agendamento.save()
             s_agen = AgendamentoSerializer(agendamento)
-        print(s_agen)
         return Response(data=s_agen.data, status=200)
 
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
