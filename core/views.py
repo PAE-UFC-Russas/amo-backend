@@ -59,7 +59,8 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
 
         try:
             with transaction.atomic():
-                agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)                    agendamento.save()
+                agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
+                agendamento.save()
                 s_agen = AgendamentoSerializer(agendamento)
             
         except IntegrityError:
