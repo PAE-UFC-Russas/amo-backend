@@ -14,6 +14,8 @@ from core.serializer import (
     DisciplinaSerializer,
 )
 from forum_amo.zoom import create_meeting
+from django.db import IntegrityError
+from rest_framework import status
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -53,11 +55,15 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             disciplina = Disciplinas.objects.get(id=request.data['disciplina'])
             link = create_meeting()
         s_agen = None
-        with transaction.atomic():
-            agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
-            agendamento.save()
-            s_agen = AgendamentoSerializer(agendamento)
-        return Response(data=s_agen.data, status=200)
+        try:
+            with transaction.atomic():
+                agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
+                agendamento.save()
+                s_agen = AgendamentoSerializer(agendamento)
+        
+        except IntegrityError:
+            return Response(data={"mensagem": "já existe um agendamento pra essa data e horário"}, status=status.HTTP_409_CONFLICT)
+        return Response(data=s_agen.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
