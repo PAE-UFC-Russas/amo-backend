@@ -51,28 +51,20 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     ordering_fields = ["data"]
 
     def create(self, request):
+        disciplina = Disciplinas.objects.get(id=request.data['disciplina'])
+        link = None
+        s_agen = None
         if request.data['tipo']=='virtual':
-            disciplina = Disciplinas.objects.get(id=request.data['disciplina'])
             link = create_meeting()
-            s_agen = None
-            try:
-                with transaction.atomic():
-                    agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
-                    agendamento.save()
-                    s_agen = AgendamentoSerializer(agendamento)
-            
-            except IntegrityError:
-                return Response(data={"mensagem": "já existe um agendamento pra essa data e horário"}, status=status.HTTP_409_CONFLICT)
-            
-            return Response(data=s_agen.data, status=status.HTTP_201_CREATED)
 
         try:
             with transaction.atomic():
-                agendamento = Agendamento.objects.create(tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
-                agendamento.save()
-                s_agen = AgendamentoSerializer(agendamento)            
+                agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)                    agendamento.save()
+                s_agen = AgendamentoSerializer(agendamento)
+            
         except IntegrityError:
-                return Response(data={"mensagem": "já existe um agendamento pra essa data e horário"}, status=status.HTTP_409_CONFLICT)
+            return Response(data={"mensagem": "já existe um agendamento pra essa data e horário"}, status=status.HTTP_409_CONFLICT)
+            
         return Response(data=s_agen.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
