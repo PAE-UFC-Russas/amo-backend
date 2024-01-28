@@ -4,7 +4,9 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework import status
 from django.db import transaction
+from django.db import IntegrityError
 from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas
 from core.serializer import (
@@ -14,8 +16,7 @@ from core.serializer import (
     DisciplinaSerializer,
 )
 from forum_amo.zoom import create_meeting
-from django.db import IntegrityError
-from rest_framework import status
+
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -50,22 +51,33 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     ordering = ["data"]
     ordering_fields = ["data"]
 
-    def create(self, request):
-        disciplina = Disciplinas.objects.get(id=request.data['disciplina'])
+    def create(self, request, *args, **kwargs):
+        disciplina = Disciplinas.objects.get(id=request.data["disciplina"])
         link = None
         s_agen = None
-        if request.data['tipo']=='virtual':
+        if request.data["tipo"] == "virtual":
             link = create_meeting()
 
         try:
             with transaction.atomic():
-                agendamento = Agendamento.objects.create(link_zoom = link, tipo=request.data['tipo'], data=request.data['data'], assunto=request.data['assunto'], descricao=request.data["descricao"], disciplina=disciplina, solicitante_id=request.user.id)
+                agendamento = Agendamento.objects.create(
+                    link_zoom=link,
+                    tipo=request.data["tipo"],
+                    data=request.data["data"],
+                    assunto=request.data["assunto"],
+                    descricao=request.data["descricao"],
+                    disciplina=disciplina,
+                    solicitante_id=request.user.id,
+                )
                 agendamento.save()
                 s_agen = AgendamentoSerializer(agendamento)
-            
+
         except IntegrityError:
-            return Response(data={"mensagem": "já existe um agendamento pra essa data e horário"}, status=status.HTTP_409_CONFLICT)
-            
+            return Response(
+                data={"mensagem": "já existe um agendamento pra essa data e horário"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         return Response(data=s_agen.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):  # pylint: disable=W0221

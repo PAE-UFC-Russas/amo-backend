@@ -57,5 +57,7 @@ class Agendamento(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["data", "disciplina"], name="agendamento_unico")
+            models.UniqueConstraint(
+                fields=["data", "disciplina"], name="agendamento_unico"
+            )
         ]
