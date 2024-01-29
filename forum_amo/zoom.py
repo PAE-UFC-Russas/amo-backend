@@ -31,6 +31,7 @@ payload = {
         "participant_video": True,
         "join_before_host": True,
         "mute_upon_entry": True,
+        "alternative_hosts_email_notification": False
     },
 }
 headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
