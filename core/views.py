@@ -53,10 +53,10 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         disciplina = Disciplinas.objects.get(id=request.data["disciplina"])
-        link = None
         s_agen = None
+        link = "Link é disponibilizado apenas para agendamentos remotos."
         if request.data["tipo"] == "virtual":
-            link = create_meeting()
+            link = "O link estará disponível após o monitor confirmar o agendamento."
 
         try:
             with transaction.atomic():
@@ -96,6 +96,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             for key, value in request.data.items():
                 if key in allowed_keys:
                     setattr(agendamento, key, value)
+            agendamento.link_zoom = create_meeting()
             agendamento.save()
         return Response(data={"sucesso"}, status=200)
 
