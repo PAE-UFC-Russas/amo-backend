@@ -4,7 +4,9 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework import status
 from django.db import transaction
+from django.db import IntegrityError
 from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas
 from core.serializer import (
@@ -13,6 +15,7 @@ from core.serializer import (
     CursoSerializer,
     DisciplinaSerializer,
 )
+from forum_amo.zoom import create_meeting
 
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
@@ -48,6 +51,35 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     ordering = ["data"]
     ordering_fields = ["data"]
 
+    def create(self, request, *args, **kwargs):
+        disciplina = Disciplinas.objects.get(id=request.data["disciplina"])
+        s_agen = None
+        link = "Link é disponibilizado apenas para agendamentos remotos."
+        if request.data["tipo"] == "virtual":
+            link = "O link estará disponível após o monitor confirmar o agendamento."
+
+        try:
+            with transaction.atomic():
+                agendamento = Agendamento.objects.create(
+                    link_zoom=link,
+                    tipo=request.data["tipo"],
+                    data=request.data["data"],
+                    assunto=request.data["assunto"],
+                    descricao=request.data["descricao"],
+                    disciplina=disciplina,
+                    solicitante_id=request.user.id,
+                )
+                agendamento.save()
+                s_agen = AgendamentoSerializer(agendamento)
+
+        except IntegrityError:
+            return Response(
+                data={"mensagem": "já existe um agendamento pra essa data e horário"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(data=s_agen.data, status=status.HTTP_201_CREATED)
+
     def partial_update(self, request, pk=None):  # pylint: disable=W0221
         allowed_keys = ["tipo", "data", "assunto", "descricao", "disciplina", "status"]
         agendamento = Agendamento.objects.get(id=pk)
@@ -64,6 +96,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             for key, value in request.data.items():
                 if key in allowed_keys:
                     setattr(agendamento, key, value)
+            agendamento.link_zoom = create_meeting()
             agendamento.save()
         return Response(data={"sucesso"}, status=200)
 

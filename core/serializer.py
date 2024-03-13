@@ -58,6 +58,7 @@ class AgendamentoSerializer(serializers.ModelSerializer):
 
     status = serializers.CharField(read_only=True)
     solicitante = UsuarioBasicoSerializer(read_only=True)
+    link_zoom = serializers.CharField(read_only=True)
 
     class Meta:
         model = Agendamento

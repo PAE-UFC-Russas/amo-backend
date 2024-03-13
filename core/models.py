@@ -53,3 +53,11 @@ class Agendamento(models.Model):
     data = models.DateTimeField()
     assunto = models.TextField()
     descricao = models.TextField()
+    link_zoom = models.TextField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["data", "disciplina"], name="agendamento_unico"
+            )
+        ]
