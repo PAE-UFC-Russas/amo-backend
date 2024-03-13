@@ -90,7 +90,8 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
         ):
             return Response(
                 data={
-                    "mensagem": "Alunos e professores não podem confirmar um agendamento com um monitor"
+                    "mensagem": """Alunos e professores não podem
+                    confirmar um agendamento com um monitor"""
                 },
                 status=401,
             )
