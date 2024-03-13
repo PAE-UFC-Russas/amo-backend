@@ -85,12 +85,11 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
         agendamento = Agendamento.objects.get(id=pk)
         if (
             request.data["status"]
-            and request.data["status"] == "confirmado"
             and request.user not in agendamento.disciplina.monitores.all()
         ):
             return Response(
                 data={"mensagem": "Usuarios não podem confirmar um agendamento"},
-                status=304,
+                status=401,
             )
         with transaction.atomic():
             for key, value in request.data.items():
