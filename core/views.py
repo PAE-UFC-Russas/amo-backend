@@ -89,9 +89,13 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             and request.user not in agendamento.disciplina.monitores.all()
         ):
             return Response(
-                data={"mensagem": "Usuarios não podem confirmar um agendamento"},
-                status=304,
+                data={
+                    "mensagem": """Alunos e professores não podem
+                    confirmar um agendamento com um monitor"""
+                },
+                status=401,
             )
+
         with transaction.atomic():
             for key, value in request.data.items():
                 if key in allowed_keys:
