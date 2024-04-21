@@ -12,6 +12,7 @@ from drf_spectacular.utils import (
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
@@ -87,83 +88,75 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         response = {"data": {"auth_token": token_str}}
         return Response(data=response, status=201)
 
-    # pylint: disable=C0301
-    # @extend_schema(
-    #     tags=["Cadastro do Usuário"],
-    #     request={
-    #         "application/json": {
-    #             "type": "object",
-    #             "properties": {"token": {"type": "string", "example": "157543"}},
-    #         }
-    #     },
-    #     responses={
-    #         (204, "application/json"): {},
-    #         (404, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "erro": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "mensagem": {
-    #                             "type": "string",
-    #                             "example": errors.EmailConfirmationCodeNotFound.message,
-    #                         },
-    #                         "codigo": {
-    #                             "type": "integer",
-    #                             "example": errors.EmailConfirmationCodeNotFound.internal_error_code,
-    #                         },
-    #                     },
-    #                 }
-    #             },
-    #         },
-    #         (409, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "erro": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "mensagem": {
-    #                             "type": "string",
-    #                             "example": errors.EmailConfirmationCodeExpired.message,
-    #                         },
-    #                         "codigo": {
-    #                             "type": "integer",
-    #                             "example": errors.EmailConfirmationCodeExpired.internal_error_code,
-    #                         },
-    #                     },
-    #                 }
-    #             },
-    #         },
-    #     },
-    # )
-    # @action(methods=["POST"], detail=False)
-    # def confirmar_email(self, request):
-    #     Realiza a confirmação do email do usuário.
-    #     unsafe_activation_code = request.data.get("token", "")
+class EmailConfirmationViewSet(ViewSet):
+    """ViewSet para confirmar e-mails com base no token de ativação."""
 
-    #     sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
+    @extend_schema(
+        tags=["Confirmação de E-mail"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "example": "aluno@alu.ufc.br"},
+                    "activation_code": {"type": "string", "example": "123456"},
+                },
+            },
+        },
+        responses={
+            (200, "application/json"): {
+                "description": "E-mail confirmado com sucesso.",
+                "properties": {
+                    "sucesso": {"type": "string", "example": "E-mail confirmado com sucesso!"},
+                },
+            },
+            (404, "application/json"): {
+                "description": "Código de ativação não encontrado.",
+                "properties": {
+                    "erro": {"type": "string", "example": "Código de ativação não encontrado."},
+                },
+            },
+            (400, "application/json"): {
+                "description": "Código expirado ou conflito na confirmação do e-mail.",
+                "properties": {
+                    "erro": {
+                        "type": "string",
+                        "example": "Código expirado ou conflito na confirmação do e-mail.",
+                    },
+                },
+            },
+        },
+    )
+    def confirm(self, request):
+        """Confirma o e-mail do usuário com base no código de ativação."""
+        email = request.data.get("email", "")
+        activation_code = request.data.get("activation_code", "")
 
-    #     try:
-    #         account_management_service.confirm_email(
-    #             sanitized_activation_code, request.user
-    #         )
-    #     except errors.EmailConfirmationCodeNotFound as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_404_NOT_FOUND,
-    #         )
-    #     except errors.EmailConfirmationCodeExpired as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_409_CONFLICT,
-    #         )
-    #     except errors.EmailConfirmationConflict as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_409_CONFLICT,
-    #         )
+        try:
+            user = models.CustomUser.objects.get(email=email)
 
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+            account_management_service.confirm_email(
+                activation_code=activation_code, user=user
+            )
+        except exceptions.ObjectDoesNotExist:
+            return Response(
+                {"erro": {"mensagem": "Código de ativação não encontrado."}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except errors.EmailConfirmationCodeExpired:
+            return Response(
+                {"erro": {"mensagem": "Código de ativação expirado."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except errors.EmailConfirmationConflict:
+            return Response(
+                {"erro": {"mensagem": "Conflito na confirmação do e-mail."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {"sucesso": "E-mail confirmado com sucesso!"},
+            status=status.HTTP_200_OK,
+        )
 
 
 @extend_schema_view(

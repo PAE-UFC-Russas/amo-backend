@@ -21,12 +21,15 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitVie
 from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
 
-from accounts.views import UserRegistration, UserViewSet
+
+
+from accounts.views import UserRegistration, UserViewSet, EmailConfirmationViewSet
 from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
 router = routers.DefaultRouter()
 router.register(r"registrar", UserRegistration, basename="registrar")
+router.register(r'confirm-email', EmailConfirmationViewSet, basename='email-confirmation')
 router.register(r"cursos", CursoViewSet, basename="cursos")
 router.register(r"disciplinas", DisciplinaViewSet, basename="disciplinas")
 router.register(r"usuario", UserViewSet, basename="usuario")
