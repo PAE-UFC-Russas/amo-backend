@@ -3,7 +3,7 @@ View forum_app
 """
 from django import http
 from django.core import exceptions
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema
@@ -204,3 +204,18 @@ class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(resposta, status=200)
+
+    def destroy(self, request, *args, pk=None, **kwargs):
+        with transaction.atomic():
+
+            resposta = Resposta.objects.get(id=pk)
+            resposta.delete()
+            resposta.duvida.quantidade_comentarios -= 1
+            duvida = Duvida.objects.get(id=resposta.duvida.id)
+            duvida.quantidade_comentarios -= 1
+            duvida.save()
+
+            return response.Response(
+                data={"Sucesso": {"mensagem": "Resposta excluída.."}},
+                status=status.HTTP_204_NO_CONTENT,
+            )
