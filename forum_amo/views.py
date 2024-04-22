@@ -210,7 +210,6 @@ class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
 
             resposta = Resposta.objects.get(id=pk)
             resposta.delete()
-            resposta.duvida.quantidade_comentarios -= 1
             duvida = Duvida.objects.get(id=resposta.duvida.id)
             duvida.quantidade_comentarios -= 1
             duvida.save()

@@ -113,6 +113,7 @@ class RespostaTestes(APITestCase):
             descricao="Probabilidade e Estatística",
             disciplina=disciplina,
             autor=self.user,
+            quantidade_comentarios=1,
         )
         self.resposta = Resposta.objects.create(
             autor=self.user, duvida=self.duvida, resposta="Esforce-se mais"
@@ -186,6 +187,7 @@ class RespostaTestes(APITestCase):
             reverse("respostas-detail", args=[1]),
             HTTP_AUTHORIZATION=f"Token {self.user.auth_token}",
         )
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_deletar_resposta_nao_existente(self):
