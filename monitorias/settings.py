@@ -160,6 +160,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
 }
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 FIXTURE_DIRS = ["fixtures"]
 
@@ -176,6 +177,13 @@ CLOUDINARY_STORAGE = {
     "API_KEY": f"{os.getenv('API_KEY')}",
     "API_SECRET": f"{os.getenv('API_SECRET')}",
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'paeufcrussas@gmail.com'
+EMAIL_HOST_PASSWORD = 'xsah jvmx nhee eczh'
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 

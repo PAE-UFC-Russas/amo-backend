@@ -1,12 +1,6 @@
 """Este módulo define erros da aplicação."""
 
 
-class EmailConfirmationCodeNotFound(Exception):
-    """O código de ativação de informado e-mail não foi encontrado."""
-
-    message = "Código de ativação não encontrado."
-    internal_error_code = 404001
-
 
 class EmailAddressAlreadyExistsError(Exception):
     """Representa um erro de cadastro quando um e-mail já foi utilizado."""
@@ -16,10 +10,10 @@ class EmailAddressAlreadyExistsError(Exception):
     internal_error_code = 409001
 
 
-class EmailConfirmationCodeExpired(Exception):
-    """O código de ativação de e-mail informado já expirou."""
+class EmailConfirmationCodeInactive(Exception):
+    """O código de ativação de e-mail informado não existe ou expirou."""
 
-    message = "Código de ativação expirado."
+    message = "Código de ativação não existe ou expirou."
     internal_error_code = 409002
 
 

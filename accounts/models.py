@@ -1,5 +1,7 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
 
+
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core import validators
 from django.db import models
@@ -8,6 +10,9 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Curso
 from monitorias.settings import MEDIA_ROOT
 
+from datetime import timedelta, datetime
+from django.utils import timezone
+import secrets
 
 class CustomUserManager(BaseUserManager):
     """Define um 'manager' para utilização com CustomUser."""
@@ -107,4 +112,17 @@ class EmailActivationToken(models.Model):
     email = models.EmailField(blank=False)
     token = models.CharField(unique=True, blank=False, max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
-    activated_at = models.DateTimeField(null=True)
+    expires_at = models.DateTimeField(default=timezone.make_aware(datetime.now() + timedelta(minutes=15)))
+
+    @staticmethod
+    def generate_token(user):
+        """Gera um token de ativação de email."""
+        token = secrets.token_hex(3)
+        expiration_date = timezone.now() + timedelta(minutes=15)
+        token_instance = EmailActivationToken.objects.create(
+            user=user,
+            email=user.email,
+            token=token,
+            expires_at=expiration_date
+        )
+        return token_instance

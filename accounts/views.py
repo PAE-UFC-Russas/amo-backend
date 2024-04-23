@@ -1,5 +1,6 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
+from datetime import timezone
 import marshmallow
 from django.core import exceptions
 from drf_spectacular.utils import (
@@ -23,6 +24,7 @@ from accounts import (
     access_policy,
     models,
     serializer,
+
 )
 from accounts.utils import sanitization_utils
 
@@ -67,96 +69,27 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     def create(self, request):
-        """Realiza o cadastro do usuário."""
         unsafe_email = request.data.get("email", "")
         unsafe_password = request.data.get("password", "")
-
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
 
         try:
-            _, token_str = account_management_service.create_account(
+            models.user_model = account_management_service.create_account(
                 sanitized_email, unsafe_password
             )
+            return Response(
+                {"message": "Usuário criado com sucesso. Verifique seu e-mail para ativar sua conta."},
+                status=201
+            )
         except errors.EmailAddressAlreadyExistsError as e:
-            response = {
-                "error": {"message": e.message, "error_code": e.internal_error_code}
-            }
-            return Response(data=response, status=e.http_error_code)
+            return Response(
+                {"error": {"message": e.message, "error_code": e.internal_error_code}},
+                status=e.http_error_code
+            )
         except marshmallow.exceptions.ValidationError as e:
-            return Response(data={"error": {"message": e.messages}}, status=422)
+            return Response({"error": {"message": e.messages}}, status=422)
 
-        response = {"data": {"auth_token": token_str}}
-        return Response(data=response, status=201)
 
-class EmailConfirmationViewSet(ViewSet):
-    """ViewSet para confirmar e-mails com base no token de ativação."""
-
-    @extend_schema(
-        tags=["Confirmação de E-mail"],
-        request={
-            "application/json": {
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "example": "aluno@alu.ufc.br"},
-                    "activation_code": {"type": "string", "example": "123456"},
-                },
-            },
-        },
-        responses={
-            (200, "application/json"): {
-                "description": "E-mail confirmado com sucesso.",
-                "properties": {
-                    "sucesso": {"type": "string", "example": "E-mail confirmado com sucesso!"},
-                },
-            },
-            (404, "application/json"): {
-                "description": "Código de ativação não encontrado.",
-                "properties": {
-                    "erro": {"type": "string", "example": "Código de ativação não encontrado."},
-                },
-            },
-            (400, "application/json"): {
-                "description": "Código expirado ou conflito na confirmação do e-mail.",
-                "properties": {
-                    "erro": {
-                        "type": "string",
-                        "example": "Código expirado ou conflito na confirmação do e-mail.",
-                    },
-                },
-            },
-        },
-    )
-    def confirm(self, request):
-        """Confirma o e-mail do usuário com base no código de ativação."""
-        email = request.data.get("email", "")
-        activation_code = request.data.get("activation_code", "")
-
-        try:
-            user = models.CustomUser.objects.get(email=email)
-
-            account_management_service.confirm_email(
-                activation_code=activation_code, user=user
-            )
-        except exceptions.ObjectDoesNotExist:
-            return Response(
-                {"erro": {"mensagem": "Código de ativação não encontrado."}},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except errors.EmailConfirmationCodeExpired:
-            return Response(
-                {"erro": {"mensagem": "Código de ativação expirado."}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except errors.EmailConfirmationConflict:
-            return Response(
-                {"erro": {"mensagem": "Conflito na confirmação do e-mail."}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        return Response(
-            {"sucesso": "E-mail confirmado com sucesso!"},
-            status=status.HTTP_200_OK,
-        )
 
 
 @extend_schema_view(
@@ -403,3 +336,31 @@ class UserViewSet(
         return Response(
             data={"erro": "senha atual incorreta"}, status=status.HTTP_403_FORBIDDEN
         )
+    
+    @action(detail=False, methods=['post'], url_path='confirmar-email')
+    def confirm_email(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response(
+                data={"erro": "Token não informado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            token_instance = models.EmailActivationToken.objects.get(token=token, expires_at__gt=timezone.now())
+            user = token_instance.user
+            user.is_email_active = True
+            user.save()
+            token_instance.delete()
+
+           
+            auth_token = account_management_service.get_user_token(user)
+
+            return Response({
+                "message": "E-mail confirmado com sucesso.",
+                "auth_token": auth_token.key 
+            }, status=status.HTTP_200_OK)
+        except models.EmailActivationToken.DoesNotExist:
+            return Response(
+                data={"erro": "Token inválido ou expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

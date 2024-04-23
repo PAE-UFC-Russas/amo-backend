@@ -1,8 +1,10 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
-from datetime import timedelta
-from random import randint
 
-from django.core import exceptions, mail
+from django.core.mail import send_mail
+from django.forms.models import model_to_dict
+
+
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -28,77 +30,110 @@ def create_account(
         EmailAddressAlreadyExistsError: existe um usuário cadastrado com o e-mail informado.
         ValidationError: ocorreu um erro ao validar dados informados.
     """
-    schema.UserRegistration().load(
-        {"email": sanitized_email_str, "password": unsafe_password_str}
-    )
 
     if CustomUser.objects.filter(email=sanitized_email_str).exists():
         raise errors.EmailAddressAlreadyExistsError()
 
     with transaction.atomic():
-        if admin:
-            user_model = CustomUser.objects.create_superuser(
-                email=sanitized_email_str, password=unsafe_password_str
-            )
-        else:
-            user_model = CustomUser.objects.create_user(
-                email=sanitized_email_str, password=unsafe_password_str
-            )
+        user_model = CustomUser.objects.create_user(
+            email=sanitized_email_str, 
+            password=unsafe_password_str,
+            is_email_active=False 
+        )
         user_model.full_clean()
         user_model.save()
 
         Perfil.objects.create(usuario=user_model)
-
+    
     send_email_confirmation_token(user_instance=user_model)
 
-    auth_token_model = get_user_token(user=user_model)
+    return user_model
+def get_user_profile(user_instance: CustomUser) -> dict:
+    """Retorna o perfil de um usuário."""
+    profile = model_to_dict(user_instance.perfil)
+    profile["foto"] = "https://res.cloudinary.com/dlvmqmqcn/image/upload/v1/" + str(
+        user_instance.perfil.foto
+    )
+    profile["cargos"] = user_instance.cargos
+    if profile["curso"]:
+        profile["curso"] = user_instance.perfil.curso.nome
+    allowed_fields = [
+        "id",
+        "nome_completo",
+        "nome_exibicao",
+        "entrada",
+        "curso",
+        "cargos",
+        "foto",
+    ]
+    for key in list(profile.keys()):
+        if key not in allowed_fields:
+            profile.pop(key)
+    profile["id"] = user_instance.id
+    return profile
 
-    return user_model, auth_token_model.key
+
+def update_user_profile(perfil: Perfil, data: dict) -> dict:
+    """Atualiza o perfil do usuário."""
+    allowed_keys = [
+        "nome_completo",
+        "nome_exibicao",
+        "data_nascimento",
+        "matricula",
+        "entrada",
+        "curso",
+        "foto",
+    ]
+
+    with transaction.atomic():
+        if "curso" in allowed_keys:
+            allowed_keys.remove("curso")
+            if "curso" in data.keys():
+                perfil.curso_id = data["curso"]
+
+        for key, value in data.items():
+            if key in allowed_keys:
+                setattr(perfil, key, value)
+
+        perfil.full_clean()
+        perfil.save()
+
+    return get_user_profile(perfil.usuario)
+
 
 
 def send_email_confirmation_token(user_instance):
     """Envia token de confirmação do e-mail para o usuário."""
+    token_instance = EmailActivationToken.generate_token(user=user_instance)
 
-    token = EmailActivationToken.objects.create(
-        user=user_instance,
-        email=user_instance.email,
-        token=str(randint(0, 999999)).zfill(6),
+    subject = "Ativação do cadastro - Ambiente de Monitoria Online"
+    body = f"Seu código de ativação: {token_instance.token}"
+
+    send_mail(
+        subject,
+        body,
+        settings.DEFAULT_FROM_EMAIL,
+        [user_instance.email],
+        fail_silently=False,
     )
 
-    mail.EmailMessage(
-        to=[user_instance.email],
-        subject="Ativação do cadastro - Ambiente de Monitoria Online",
-        body=f"Seu código de ativação: {token.token}",
-    ).send()
-
-
-def confirm_email(activation_code: str, user: CustomUser):
-    """Realiza a confirmação do e-mail de um usuário."""
-
-    try:
-        activation_code_model = EmailActivationToken.objects.get(
-            token=activation_code, user=user
+def confirm_email(user, token):
+    try: 
+        token_instance = EmailActivationToken.objects.get(
+            user=user, 
+            token=token,
+            expires_at__gt=timezone.now()
         )
-    except exceptions.ObjectDoesNotExist as error:
-        raise errors.EmailConfirmationCodeNotFound() from error
+    except EmailActivationToken.DoesNotExist:
+        raise errors.EmailConfirmationCodeInactive()
+    
+    user.is_email_active = True
+    user.save()
 
-    if activation_code_model.created_at + timedelta(hours=24) <= timezone.now():
-        raise errors.EmailConfirmationCodeExpired()
-
-    if (
-        user.is_email_active
-        or activation_code_model.email != user.email
-        or activation_code_model.activated_at is not None
-    ):
-        raise errors.EmailConfirmationConflict()
-
-    with transaction.atomic():
-        activation_code_model.activated_at = timezone.now()
-        activation_code_model.save()
-
-        user.is_email_active = True
-        user.save()
-
+    token_instance.delete()
+    
+    auth_token = get_user_token(user)
+    return auth_token.key
 
 def get_user_token(user):
     """Busca ou cria um Token de autenticação do usuário.
