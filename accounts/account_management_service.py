@@ -10,7 +10,9 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from accounts import schema, errors
+from accounts import models
 from accounts.models import CustomUser, EmailActivationToken, Perfil
+
 
 
 def create_account(

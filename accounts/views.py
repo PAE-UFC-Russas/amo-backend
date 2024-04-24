@@ -1,5 +1,6 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
+from contextvars import Token
 from datetime import timezone
 import marshmallow
 from django.core import exceptions
@@ -27,8 +28,25 @@ from accounts import (
 
 )
 from accounts.utils import sanitization_utils
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 
+
+class CustomAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token = Token.objects.get(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })
+    
 class UserRegistration(AccessViewSetMixin, ViewSet):
     """ViewSet para ações relacionadas ao cadastro do usuário."""
 
@@ -72,6 +90,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         unsafe_email = request.data.get("email", "")
         unsafe_password = request.data.get("password", "")
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
+       
 
         try:
             models.user_model = account_management_service.create_account(
