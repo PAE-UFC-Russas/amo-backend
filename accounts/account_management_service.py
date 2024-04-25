@@ -1,5 +1,6 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 
+from datetime import timedelta
 from django.core.mail import send_mail
 from django.forms.models import model_to_dict
 
@@ -23,33 +24,40 @@ def create_account(
     Args:
         sanitized_email_str: e-mail informado pelo usuário.
         unsafe_password_str: senha informada pelo usuário.
-        admin: booleano informando se usuário deve ser administrador
+        admin: booleano informando se usuário deve ser administrador.
 
     Returns:
-        Retorna uma tupla contendo uma instância de Usuário e seu Token de autenticação.
+        Retorna uma instância de Usuário.
 
     Raises:
-        EmailAddressAlreadyExistsError: existe um usuário cadastrado com o e-mail informado.
+        EmailAddressAlreadyExistsError: existe um usuário ativo cadastrado com o e-mail informado.
         ValidationError: ocorreu um erro ao validar dados informados.
     """
 
-    if CustomUser.objects.filter(email=sanitized_email_str).exists():
-        raise errors.EmailAddressAlreadyExistsError()
+    user_model = CustomUser.objects.filter(email=sanitized_email_str).first()
+
+    if user_model:
+        if user_model.is_email_active:
+            raise errors.EmailAddressAlreadyExistsError("E-mail already in use.")
+        else:
+            send_email_confirmation_token(user_instance=user_model)
+            return user_model  
 
     with transaction.atomic():
         user_model = CustomUser.objects.create_user(
             email=sanitized_email_str, 
             password=unsafe_password_str,
-            is_email_active=False 
+            is_email_active=False  
         )
         user_model.full_clean()
         user_model.save()
 
         Perfil.objects.create(usuario=user_model)
-    
-    send_email_confirmation_token(user_instance=user_model)
+        send_email_confirmation_token(user_instance=user_model)
 
     return user_model
+
+
 def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
     profile = model_to_dict(user_instance.perfil)
@@ -106,7 +114,18 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
 def send_email_confirmation_token(user_instance):
     """Envia token de confirmação do e-mail para o usuário."""
-    token_instance = EmailActivationToken.generate_token(user=user_instance)
+    # Verificar se já existe um token ativo ou expirado
+    existing_token = EmailActivationToken.objects.filter(user=user_instance, email=user_instance.email).first()
+
+    if existing_token:
+        if existing_token.expires_at > timezone.now():
+            
+            token_instance = existing_token
+        else:
+            existing_token.delete()  # Limpa o token antigo
+            token_instance = EmailActivationToken.generate_token(user=user_instance)
+    else:
+        token_instance = EmailActivationToken.generate_token(user=user_instance)
 
     subject = "Ativação do cadastro - Ambiente de Monitoria Online"
     body = f"Seu código de ativação: {token_instance.token}"

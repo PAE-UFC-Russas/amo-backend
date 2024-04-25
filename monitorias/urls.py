@@ -22,7 +22,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views as auth_views
 
 
-from accounts.views import CustomAuthToken, UserRegistration, UserViewSet
+from accounts.views import CustomAuthToken, UserRegistration, UserViewSet, CustomAuthToken
 from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
@@ -40,7 +40,6 @@ router.register(r"agendamentos", AgendamentoViewSet, basename="agendamentos")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("usuario/login/", CustomAuthToken.as_view(), name="obtain-api-token"),
-    #path("usuario/login/", auth_views.obtain_auth_token, name="obtain-api-token"),
     # path("registrar", UserRegistration, name="registrar"),
     path("", include(router.urls)),
     # documentação/drf_spectacular

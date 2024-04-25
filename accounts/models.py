@@ -116,6 +116,9 @@ class EmailActivationToken(models.Model):
 
     @staticmethod
     def generate_token(user):
+        """Verifica se existe um token criado para o usuário e o deleta."""
+        EmailActivationToken.objects.filter(user=user, email=user.email).delete()
+
         """Gera um token de ativação de email."""
         token = secrets.token_hex(3)
         expiration_date = timezone.now() + timedelta(minutes=15)
