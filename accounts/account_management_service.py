@@ -1,6 +1,6 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 
-from datetime import timedelta
+
 from django.core.mail import send_mail
 from django.forms.models import model_to_dict
 
@@ -8,6 +8,7 @@ from django.forms.models import model_to_dict
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta, datetime
 from rest_framework.authtoken.models import Token
 
 from accounts import schema, errors

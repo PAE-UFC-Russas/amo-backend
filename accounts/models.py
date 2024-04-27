@@ -10,8 +10,10 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Curso
 from monitorias.settings import MEDIA_ROOT
 
-from datetime import timedelta, datetime
+
 from django.utils import timezone
+from datetime import  datetime
+from datetime import timedelta
 import secrets
 
 class CustomUserManager(BaseUserManager):
