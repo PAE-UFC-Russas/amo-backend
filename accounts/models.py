@@ -12,6 +12,14 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Curso
 from monitorias.settings import MEDIA_ROOT
 
+<<<<<<< HEAD
+=======
+
+from django.utils import timezone
+from datetime import  datetime
+from datetime import timedelta
+import secrets
+>>>>>>> 3a0c2fc0d2007267875cad0cb278ab78554b491d
 
 class CustomUserManager(BaseUserManager):
     """Define um 'manager' para utilização com CustomUser."""

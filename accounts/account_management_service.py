@@ -1,5 +1,9 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3a0c2fc0d2007267875cad0cb278ab78554b491d
 from django.core.mail import send_mail
 from django.forms.models import model_to_dict
 
@@ -7,6 +11,7 @@ from django.forms.models import model_to_dict
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta, datetime
 from rest_framework.authtoken.models import Token
 
 from accounts import errors

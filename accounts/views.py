@@ -1,7 +1,7 @@
 """Conjunto de Views do aplicativo 'accounts'."""
 
 from contextvars import Token
-from datetime import timezone
+
 import marshmallow
 from django.core import exceptions
 from drf_spectacular.utils import (
@@ -17,6 +17,8 @@ from rest_framework.decorators import action
 
 # from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
+from django.utils import timezone
+from datetime import datetime
 
 
 from rest_framework.response import Response
