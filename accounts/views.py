@@ -13,7 +13,8 @@ from drf_spectacular.utils import (
 )
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
-from rest_framework.decorators import action, authentication_classes, permission_classes
+from rest_framework.decorators import action
+
 # from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 
@@ -21,40 +22,36 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.exceptions import AuthenticationFailed
+
 from accounts import (
     account_management_service,
     errors,
     access_policy,
     models,
     serializer,
-
 )
 from accounts.utils import sanitization_utils
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import AuthenticationFailed
-
-
 
 
 class CustomAuthToken(ObtainAuthToken):
+    """Subclasse referente ao endpoint de login"""
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
+        serializer = self.serializer_class(  # pylint: disable=W0621
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
 
         if not user.is_email_active:
-            raise AuthenticationFailed('Credenciais inválidas ou conta inativa.')
-        
-        token = Token.objects.get(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email
-        })
-    
+            raise AuthenticationFailed("Credenciais inválidas ou conta inativa.")
+
+        token = Token.objects.get(user=user)  # pylint: disable=E1101
+        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+
+
 class UserRegistration(AccessViewSetMixin, ViewSet):
     """ViewSet para ações relacionadas ao cadastro do usuário."""
 
@@ -95,30 +92,39 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     def create(self, request):
+        """
+        Cria um usuário inativo (sem token de autenticação).
+        """
         unsafe_email = request.data.get("email", "")
         unsafe_password = request.data.get("password", "")
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
-       
 
         try:
             models.user_model = account_management_service.create_account(
                 sanitized_email, unsafe_password
             )
             return Response(
-                {"message": "Usuário criado com sucesso. Verifique seu e-mail para ativar sua conta."},
-                status=201
+                {
+                    "message": """Usuário criado com sucesso.
+                    Verifique seu e-mail para ativar sua conta."""
+                },
+                status=201,
             )
         except errors.EmailAddressAlreadyExistsError as e:
             return Response(
                 {"error": {"message": e.message, "error_code": e.internal_error_code}},
-                status=e.http_error_code
+                status=e.http_error_code,
             )
         except marshmallow.exceptions.ValidationError as e:
             return Response({"error": {"message": e.messages}}, status=422)
-        
 
-    @action(methods=['post'], detail=False, url_path='confirmar-email', 
-            authentication_classes=[], permission_classes=[AllowAny])
+    @action(
+        methods=["post"],
+        detail=False,
+        url_path="confirmar-email",
+        authentication_classes=[],
+        permission_classes=[AllowAny],
+    )
     @extend_schema(
         tags=["Cadastro do Usuário"],
         request={
@@ -128,9 +134,9 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
                     "token": {
                         "type": "string",
                         "description": "Token de ativação enviado por e-mail",
-                        "example": "af23f2"
+                        "example": "af23f2",
                     }
-                }
+                },
             }
         },
         responses={
@@ -139,10 +145,16 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
                 response={
                     "type": "object",
                     "properties": {
-                        "message": {"type": "string", "example": "E-mail confirmado com sucesso."},
-                        "auth_token": {"type": "string", "example": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"}
-                    }
-                }
+                        "message": {
+                            "type": "string",
+                            "example": "E-mail confirmado com sucesso.",
+                        },
+                        "auth_token": {
+                            "type": "string",
+                            "example": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
+                        },
+                    },
+                },
             ),
             (400, "application/json"): OpenApiResponse(
                 description="Erro na confirmação do e-mail",
@@ -151,35 +163,48 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
                     "properties": {
                         "error": {
                             "type": "string",
-                            "example": "Token inválido ou expirado."
+                            "example": "Token inválido ou expirado.",
                         }
-                    }
-                }
-            )
-        }
+                    },
+                },
+            ),
+        },
     )
     def confirm_email(self, request):
-        token = request.data.get('token')
+        """
+        Função (endpoint), para confirmação do código enviado para o email do usuário.
+        """
+        token = request.data.get("token")
         if not token:
-            return Response({"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST
+            )
         try:
-            token_instance = models.EmailActivationToken.objects.get(token=token, expires_at__gt=timezone.now())
+            token_instance = models.EmailActivationToken.objects.get(
+                token=token, expires_at__gt=timezone.now()
+            )
             user = token_instance.user
             user.is_email_active = True
             user.save()
             token_instance.delete()
 
             auth_token = account_management_service.get_user_token(user)
-            return Response({
-                "message": "E-mail confirmado com sucesso.",
-                "auth_token": auth_token.key 
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "E-mail confirmado com sucesso.",
+                    "auth_token": auth_token.key,
+                },
+                status=status.HTTP_200_OK,
+            )
         except models.EmailActivationToken.DoesNotExist:
-            return Response({"error": "Token inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+            return Response(
+                {"error": "Token inválido ou expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:  # pylint: disable=W0703
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @extend_schema_view(

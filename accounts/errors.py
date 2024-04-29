@@ -1,7 +1,6 @@
 """Este módulo define erros da aplicação."""
 
 
-
 class EmailAddressAlreadyExistsError(Exception):
     """Representa um erro de cadastro quando um e-mail já foi utilizado."""
 

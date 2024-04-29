@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """Testes de controle de acesso do aplicativo 'accounts'."""
 
 from django.urls import reverse
@@ -16,9 +18,11 @@ class UserAccessPolicyTestCase(APITestCase):
     """Verifica o controle de acesso para UserViewSet"""
 
     fixtures = ["groups.yaml"]
-
+    # def test_criar(self):
+    #     response = self.client.post(reverse("registrar-list"), {"email": "user2@pae.localhost", "password": "ajfsd9p&*aa"})
+    #     assert response.status_code == 201
     def setUp(self) -> None:
-        self.user, self.token = account_management_service.create_account(
+        self.user_model = account_management_service.create_account(
             sanitized_email_str="user@localhost", unsafe_password_str=PASSWORD
         )
 

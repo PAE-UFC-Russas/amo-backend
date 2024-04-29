@@ -22,7 +22,6 @@ class CursoTestCase(APITestCase):
         _, self.admin_token = create_account(
             sanitized_email_str="superuser@localhost",
             unsafe_password_str="adminpassword1!",
-            admin=True,
         )
 
         self.curso = Curso.objects.create(
