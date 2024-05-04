@@ -108,7 +108,7 @@ class Perfil(models.Model):
 
 
 class EmailActivationToken(models.Model):
-    """Token enviado ao usuário para ativação de seu email."""
+    """Token enviado ao usuário para ativação de seu email e recuperação da senha."""
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     email = models.EmailField(blank=False)
@@ -118,10 +118,9 @@ class EmailActivationToken(models.Model):
 
     @staticmethod
     def generate_token(user):
-        """Verifica se existe um token criado para o usuário e o deleta."""
         EmailActivationToken.objects.filter(user=user, email=user.email).delete()
 
-        """Gera um token de ativação de email."""
+
         token = secrets.token_hex(3)
         expiration_date = timezone.now() + timedelta(minutes=15)
         token_instance = EmailActivationToken.objects.create(

@@ -31,6 +31,11 @@ class UserViewAccessPolicy(AccessPolicy):
             "principal": "authenticated",
             "effect": "allow",
         },
+        {
+            "action": ["solicitar_redefinicao_senha", "redefinir_senha"],
+            "principal": ["anonymous"],
+            "effect": "allow",
+        },
     ]
 
     def is_owner(self, request, view, *args):
