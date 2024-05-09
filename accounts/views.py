@@ -2,7 +2,10 @@
 
 from contextvars import Token
 
-import marshmallow
+from django.forms import ValidationError
+
+from accounts.schema import validate_password
+import marshmallow 
 from django.core import exceptions
 from drf_spectacular.utils import (
     extend_schema,
@@ -486,8 +489,8 @@ class UserViewSet(
 
     @action(methods=['POST'], detail=False, url_path='solicitar-redefinicao-senha')
     def solicitar_redefinicao_senha(self, request):
-        '''Enviar o email'''
         email = request.data.get('email')
+        request.session['email'] = email
         if not email:
             return Response({"error": "Email não informado."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -499,48 +502,29 @@ class UserViewSet(
             return Response({"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
+    
     @extend_schema(
         tags=["Usuário"],
         parameters=[
-        OpenApiParameter(
-            "Token",
-            type=OpenApiTypes.STR,
-            required=True,
-            location="path",
-            description="Token de redefinição de senha",
-        ),
-        OpenApiParameter(
-            "Senha",
-            type=OpenApiTypes.STR,
-            required=True,
-            location="path",
-            description="Nova senha",
-        ),
-        OpenApiParameter(
-            "Confirmar nova senha",
-            type=OpenApiTypes.STR,
-            required=True,
-            location="path",
-            description="Nova senha",
-        ),
-    ],
+            OpenApiParameter(
+                "Token",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="Token de redefinição de senha",
+            )
+        ],
         request={
             "application/json": {
                 "type": "object",
                 "properties": {
                     "token": {
-                        "type": "string", 
-                        "example": "a8k2j3"},
-                    "new_password": {
-                        "type": "string", 
-                        "example": "NovaSenha!"},
-                    "confirm_password": {
-                        "type": "string", 
-                        "example": "NovaSenha!"
-                    },
-                },
-            },
+                        "type": "string",
+                        "example": "af23f2"
+                    }
+                }
+            }
         },
         responses={
             (200, "application/json"): {
@@ -548,25 +532,7 @@ class UserViewSet(
                 "properties": {
                     "message": {
                         "type": "string",
-                        "example": "Senha redefinida com sucesso."
-                    },
-                },
-            },
-            (404, "application/json"): {
-                "type": "object",
-                "properties": {
-                    "error": {
-                        "type": "string",
-                        "example": "Usuário não encontrado."
-                    },
-                },
-            },
-            (401, "application/json"): {
-                "type": "object",
-                "properties": {
-                    "error": {
-                        "type": "string",
-                        "example": "Token não informado."
+                        "example": "Token válido."
                     },
                 },
             },
@@ -589,37 +555,72 @@ class UserViewSet(
                 },
             },
         },
-    )    
-
-    @action(methods=['POST'], detail=False, url_path='redefinir-senha')
-    def redefinir_senha(self, request):
+    )
+    @action(methods=['POST'], detail=False, url_path='verificar-token')
+    def verificar_token(self, request):
         token = request.data.get('token')
-        new_password = request.data.get('new_password')
-        confirm_password = request.data.get('confirm_password')
-
         if not token:
             return Response({"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST)
-        if not new_password:
-            return Response({"error": "Nova senha não informada."}, status=status.HTTP_400_BAD_REQUEST)
-        if new_password != confirm_password:
-            return Response({"error": "As senhas não coincidem."}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             token_instance = models.EmailActivationToken.objects.get(token=token, expires_at__gt=timezone.now())
-            if token_instance.expires_at <= timezone.now():
-                token_instance.delete()
-                return Response({"error": "Token inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-            user = token_instance.user
-            user.set_password(new_password)
-            user.save()
-            token_instance.delete()
-            return Response({"message": "Senha redefinida com sucesso."}, status=status.HTTP_200_OK)
+            request.session['token_verification'] = True
+            return Response({"message": "Token válido."}, status=status.HTTP_200_OK)
         except models.EmailActivationToken.DoesNotExist:
             return Response({"error": "Token inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    
+
+    @extend_schema(
+        tags=["Usuário"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "senha": {
+                        "type": "string",
+                        "example": "supersecurepassword1"
+                    }
+                }
+            }
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Senha redefinida com sucesso."
+                    },
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Senha inválida."
+                    },
+                },
+            },
+        },
+    )
+    @action(methods=['POST'], detail=False, url_path='redefinir-senha')
+    def redefinir_senha(self, request):
+        if not request.session.get('token_verification', False):
+            return Response({"error": "Verificação de token não realizada."}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = request.session.get('email')
+        if not email:
+            return Response({"error": "Email não encontrado."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_password(request.data)
+            user = models.CustomUser.objects.get(email=email)
+            user.set_password(request.data['senha'])
+            user.save()
             
+            return Response({"message": "Senha redefinida com sucesso."}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        

@@ -29,7 +29,6 @@ class DuvidaTestes(APITestCase):
         _, self.admin_token = create_account(
             sanitized_email_str="superjohndoe@localhost.com",
             unsafe_password_str="superpassword123",
-            admin=True,
         )
         disciplina = Disciplinas.objects.create(
             nome="teste", descricao="descrição teste"

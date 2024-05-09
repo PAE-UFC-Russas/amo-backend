@@ -1,6 +1,5 @@
 """Este módulo contem ações de gerenciamento de contas de Usuário."""
 
-
 from django.core.mail import send_mail
 from django.forms.models import model_to_dict
 
@@ -11,15 +10,11 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 from rest_framework.authtoken.models import Token
 
-from accounts import schema, errors
-from accounts import models
+from accounts import errors
 from accounts.models import CustomUser, EmailActivationToken, Perfil
 
 
-
-def create_account(
-    sanitized_email_str: str, unsafe_password_str: str, admin: bool = False
-):
+def create_account(sanitized_email_str: str, unsafe_password_str: str):
     """Realiza a criação de um usuário.
 
     Args:
@@ -40,15 +35,14 @@ def create_account(
     if user_model:
         if user_model.is_email_active:
             raise errors.EmailAddressAlreadyExistsError("E-mail already in use.")
-        else:
-            send_email_confirmation_token(user_instance=user_model)
-            return user_model  
+        send_email_confirmation_token(user_instance=user_model)
+        return user_model
 
     with transaction.atomic():
         user_model = CustomUser.objects.create_user(
-            email=sanitized_email_str, 
+            email=sanitized_email_str,
             password=unsafe_password_str,
-            is_email_active=False  
+            is_email_active=False,
         )
         user_model.full_clean()
         user_model.save()
@@ -112,14 +106,13 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
     return get_user_profile(perfil.usuario)
 
 
-
 def send_email_confirmation_token(user_instance):
     """Envia token de confirmação do e-mail para o usuário."""
     existing_token = EmailActivationToken.objects.filter(user=user_instance, email=user_instance.email).first()
 
     if existing_token:
         if existing_token.expires_at > timezone.now():
-            
+
             token_instance = existing_token
         else:
             existing_token.delete()  
@@ -138,23 +131,26 @@ def send_email_confirmation_token(user_instance):
         fail_silently=False,
     )
 
+
 def confirm_email(user, token):
-    try: 
+    """
+    Função para autenticação do código enviado para o email do usuário.
+    """
+    try:
         token_instance = EmailActivationToken.objects.get(
-            user=user, 
-            token=token,
-            expires_at__gt=timezone.now()
+            user=user, token=token, expires_at__gt=timezone.now()
         )
-    except EmailActivationToken.DoesNotExist:
-        raise errors.EmailConfirmationCodeInactive()
-    
+    except EmailActivationToken.DoesNotExist as exc:
+        raise errors.EmailConfirmationCodeInactive() from exc
+
     user.is_email_active = True
     user.save()
 
     token_instance.delete()
-    
+
     auth_token = get_user_token(user)
     return auth_token.key
+
 
 def get_user_token(user):
     """Busca ou cria um Token de autenticação do usuário.
