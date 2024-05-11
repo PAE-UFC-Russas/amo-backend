@@ -415,6 +415,10 @@ class UserViewSet(
         )
         if user_model.check_password(request.data["senha_velha"]) is True:
             if request.data["senha_nova"] == request.data["confirma"]:
+                try:
+                    validate_password(request.data["senha_nova"])
+                except ValidationError:
+                    return Response(data={"erro": "senha não segue os critérios de uma senha"}, status=status.HTTP_406_NOT_ACCEPTABLE)
                 user_model.set_password(request.data["senha_nova"])
                 user_model.save()
 
