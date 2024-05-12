@@ -1,19 +1,11 @@
-<<<<<<< HEAD
 # pylint: skip-file
-
 # accounts/tests/test_registration_user.py
 from django.urls import reverse
-=======
-from django.test import TestCase
-from django.core.exceptions import ValidationError
-from rest_framework.test import APIClient
->>>>>>> 3a0c2fc0d2007267875cad0cb278ab78554b491d
 from rest_framework import status
 from accounts.models import CustomUser
 from accounts.models import EmailActivationToken
 import datetime
 
-<<<<<<< HEAD
 
 class UserRegistrationTest(APITestCase):
     """Testa a criação de conta e a geração do token de confirmação de e-mail."""
@@ -28,27 +20,6 @@ class UserRegistrationTest(APITestCase):
             format="json",
         )
 
-=======
-class UserRegistrationAndEmailConfirmationTest(TestCase):
-    """Testes para registro de usuário e confirmação de email."""
-
-    def setUp(self):
-        """Configurações iniciais para cada teste."""
-        self.client = APIClient()
-        self.user_data = {
-            "email": "test@example.com",
-            "password": "safePassword123"
-        }
-        self.email_token = EmailActivationToken.objects.create(
-            user=self.user,
-            token="valid-token",
-            expires_at=datetime.datetime.now() + datetime.timedelta(hours=24)
-        )
-
-    def test_user_registration(self):
-        """Testa o registro de um novo usuário."""
-        response = self.client.post('/api/user/register/', self.user_data)
->>>>>>> 3a0c2fc0d2007267875cad0cb278ab78554b491d
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("Verifique seu e-mail para ativar sua conta", response.data["message"])
 

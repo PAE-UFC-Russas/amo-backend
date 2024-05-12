@@ -108,14 +108,16 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
 
 def send_email_confirmation_token(user_instance):
     """Envia token de confirmação do e-mail para o usuário."""
-    existing_token = EmailActivationToken.objects.filter(user=user_instance, email=user_instance.email).first()
+    existing_token = EmailActivationToken.objects.filter(
+        user=user_instance, email=user_instance.email
+    ).first()
 
     if existing_token:
         if existing_token.expires_at > timezone.now():
 
             token_instance = existing_token
         else:
-            existing_token.delete()  
+            existing_token.delete()
             token_instance = EmailActivationToken.generate_token(user=user_instance)
     else:
         token_instance = EmailActivationToken.generate_token(user=user_instance)
@@ -164,15 +166,18 @@ def get_user_token(user):
     token_model, _ = Token.objects.get_or_create(user=user)
     return token_model
 
+
 def password_reset_email(user):
-    existing_token = EmailActivationToken.objects.filter(user=user, email=user.email).first()
+    existing_token = EmailActivationToken.objects.filter(
+        user=user, email=user.email
+    ).first()
 
     if existing_token:
         if existing_token.expires_at > timezone.now():
-            
+
             token_instance = existing_token
         else:
-            existing_token.delete()  
+            existing_token.delete()
             token_instance = EmailActivationToken.generate_token(user=user)
     else:
         token_instance = EmailActivationToken.generate_token(user=user)

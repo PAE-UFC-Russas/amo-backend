@@ -13,7 +13,7 @@ from core.models import Curso
 from monitorias.settings import MEDIA_ROOT
 
 from django.utils import timezone
-from datetime import  datetime
+from datetime import datetime
 from datetime import timedelta
 import secrets
 

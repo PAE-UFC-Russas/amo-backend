@@ -21,15 +21,21 @@ class UserRegistration(Schema):
         ],
     )
 
+
 class RedefinirSenhaSchema(Schema):
     senha = fields.String(
         required=True,
         validate=[
             validate.Length(min=8, error="Senha deve ter pelo menos 8 caracteres."),
-            validate.Regexp(regex=r".*\d+", error="Senha deve conter pelo menos um número."),
-            validate.Regexp(regex=r".*[a-zA-Z]", error="Senha deve conter pelo menos uma letra.")
-        ]
+            validate.Regexp(
+                regex=r".*\d+", error="Senha deve conter pelo menos um número."
+            ),
+            validate.Regexp(
+                regex=r".*[a-zA-Z]", error="Senha deve conter pelo menos uma letra."
+            ),
+        ],
     )
+
 
 def validate_password(data):
     schema = RedefinirSenhaSchema()

@@ -32,7 +32,11 @@ class UserViewAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
-            "action": ["solicitar_redefinicao_senha", "redefinir_senha", "verificar_token"],
+            "action": [
+                "solicitar_redefinicao_senha",
+                "redefinir_senha",
+                "verificar_token",
+            ],
             "principal": ["anonymous"],
             "effect": "allow",
         },
