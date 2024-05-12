@@ -21,7 +21,7 @@ class UserRegistration(APITestCase):
         """Verifica a criação de um usuário em UserViewSet"""
         response = self.client.post(
             reverse("registrar-list"),
-            {"email": "test@user.com", "password": PASSWORD},
+            {"email": "alanisoliveira39@gmail.com", "password": PASSWORD},
             format="json",
         )
         user = CustomUser.objects.first()
@@ -33,7 +33,7 @@ class UserRegistration(APITestCase):
         """Verifica que a senha não pode conter apenas letras."""
         response = self.client.post(
             reverse("registrar-list"),
-            {"email": "test@user.com", "password": "hgfedcba"},
+            {"email": "alanisbig10@gmail.com", "password": "hgfedcba"},
         )
 
         self.assertContains(

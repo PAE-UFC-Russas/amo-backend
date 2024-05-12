@@ -21,7 +21,6 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         _, self.admin_token = create_account(
             sanitized_email_str="superuser@localhost",
             unsafe_password_str="adminpassword1!",
-            admin=True,
         )
 
         self.curso_cc = Curso.objects.create(

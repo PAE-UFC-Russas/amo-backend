@@ -7,7 +7,7 @@ class AccountRegistrationAccessPolicy(AccessPolicy):
 
     statements = [
         {"action": "create", "principal": "anonymous", "effect": "allow"},
-        {"action": "confirmar_email", "principal": "authenticated", "effect": "allow"},
+        {"action": "confirm_email", "principal": "anonymous", "effect": "allow"},
     ]
 
 
@@ -29,6 +29,15 @@ class UserViewAccessPolicy(AccessPolicy):
         {
             "action": ["ativar", "list", "retrieve", "mudar"],
             "principal": "authenticated",
+            "effect": "allow",
+        },
+        {
+            "action": [
+                "solicitar_redefinicao_senha",
+                "redefinir_senha",
+                "verificar_token",
+            ],
+            "principal": ["anonymous"],
             "effect": "allow",
         },
     ]

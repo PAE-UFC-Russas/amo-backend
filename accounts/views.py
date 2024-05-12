@@ -1,5 +1,10 @@
 """Conjunto de Views do aplicativo 'accounts'."""
+import re
+from contextvars import Token
 
+from django.forms import ValidationError
+
+from accounts.schema import validate_password
 import marshmallow
 from django.core import exceptions
 from drf_spectacular.utils import (
@@ -11,7 +16,13 @@ from drf_spectacular.utils import (
 )
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, authentication_classes, permission_classes
+
+# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from django.utils import timezone
+from datetime import datetime
+
 
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
@@ -24,6 +35,24 @@ from accounts import (
     serializer,
 )
 from accounts.utils import sanitization_utils
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import AuthenticationFailed
+
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+
+        if not user.is_email_active:
+            raise AuthenticationFailed("Credenciais inválidas ou conta inativa.")
+
+        token = Token.objects.get(user=user)
+        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
 
 
 class UserRegistration(AccessViewSetMixin, ViewSet):
@@ -66,104 +95,106 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     def create(self, request):
-        """Realiza o cadastro do usuário."""
         unsafe_email = request.data.get("email", "")
         unsafe_password = request.data.get("password", "")
-
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
 
         try:
-            _, token_str = account_management_service.create_account(
+            models.user_model = account_management_service.create_account(
                 sanitized_email, unsafe_password
             )
+            return Response(
+                {
+                    "message": "Usuário criado com sucesso. Verifique seu e-mail para ativar sua conta."
+                },
+                status=201,
+            )
         except errors.EmailAddressAlreadyExistsError as e:
-            response = {
-                "error": {"message": e.message, "error_code": e.internal_error_code}
-            }
-            return Response(data=response, status=e.http_error_code)
+            return Response(
+                {"error": {"message": e.message, "error_code": e.internal_error_code}},
+                status=e.http_error_code,
+            )
         except marshmallow.exceptions.ValidationError as e:
-            return Response(data={"error": {"message": e.messages}}, status=422)
+            return Response({"error": {"message": e.messages}}, status=422)
 
-        response = {"data": {"auth_token": token_str}}
-        return Response(data=response, status=201)
+    @action(methods=["post"], detail=False, url_path="confirmar-email")
+    @extend_schema(
+        tags=["Cadastro do Usuário"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Token de ativação enviado por e-mail",
+                        "example": "af23f2",
+                    }
+                },
+            }
+        },
+        responses={
+            (200, "application/json"): OpenApiResponse(
+                description="E-mail confirmado com sucesso.",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string",
+                            "example": "E-mail confirmado com sucesso.",
+                        },
+                        "auth_token": {
+                            "type": "string",
+                            "example": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
+                        },
+                    },
+                },
+            ),
+            (400, "application/json"): OpenApiResponse(
+                description="Erro na confirmação do e-mail",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "error": {
+                            "type": "string",
+                            "example": "Token inválido ou expirado.",
+                        }
+                    },
+                },
+            ),
+        },
+    )
+    def confirm_email(self, request):
+        token = request.data.get("token")
+        if not token:
+            return Response(
+                {"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            token_instance = models.EmailActivationToken.objects.get(
+                token=token, expires_at__gt=timezone.now()
+            )
+            user = token_instance.user
+            user.is_email_active = True
+            user.save()
+            token_instance.delete()
 
-    # pylint: disable=C0301
-    # @extend_schema(
-    #     tags=["Cadastro do Usuário"],
-    #     request={
-    #         "application/json": {
-    #             "type": "object",
-    #             "properties": {"token": {"type": "string", "example": "157543"}},
-    #         }
-    #     },
-    #     responses={
-    #         (204, "application/json"): {},
-    #         (404, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "erro": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "mensagem": {
-    #                             "type": "string",
-    #                             "example": errors.EmailConfirmationCodeNotFound.message,
-    #                         },
-    #                         "codigo": {
-    #                             "type": "integer",
-    #                             "example": errors.EmailConfirmationCodeNotFound.internal_error_code,
-    #                         },
-    #                     },
-    #                 }
-    #             },
-    #         },
-    #         (409, "application/json"): {
-    #             "type": "object",
-    #             "properties": {
-    #                 "erro": {
-    #                     "type": "object",
-    #                     "properties": {
-    #                         "mensagem": {
-    #                             "type": "string",
-    #                             "example": errors.EmailConfirmationCodeExpired.message,
-    #                         },
-    #                         "codigo": {
-    #                             "type": "integer",
-    #                             "example": errors.EmailConfirmationCodeExpired.internal_error_code,
-    #                         },
-    #                     },
-    #                 }
-    #             },
-    #         },
-    #     },
-    # )
-    # @action(methods=["POST"], detail=False)
-    # def confirmar_email(self, request):
-    #     Realiza a confirmação do email do usuário.
-    #     unsafe_activation_code = request.data.get("token", "")
-
-    #     sanitized_activation_code = sanitization_utils.strip_xss(unsafe_activation_code)
-
-    #     try:
-    #         account_management_service.confirm_email(
-    #             sanitized_activation_code, request.user
-    #         )
-    #     except errors.EmailConfirmationCodeNotFound as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_404_NOT_FOUND,
-    #         )
-    #     except errors.EmailConfirmationCodeExpired as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_409_CONFLICT,
-    #         )
-    #     except errors.EmailConfirmationConflict as e:
-    #         return Response(
-    #             data={"erro": {"mensagem": e.message, "codigo": e.internal_error_code}},
-    #             status=status.HTTP_409_CONFLICT,
-    #         )
-
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+            auth_token = account_management_service.get_user_token(user)
+            return Response(
+                {
+                    "message": "E-mail confirmado com sucesso.",
+                    "auth_token": auth_token.key,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except models.EmailActivationToken.DoesNotExist:
+            return Response(
+                {"error": "Token inválido ou expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @extend_schema_view(
@@ -395,18 +426,219 @@ class UserViewSet(
         )
         if user_model.check_password(request.data["senha_velha"]) is True:
             if request.data["senha_nova"] == request.data["confirma"]:
-                user_model.set_password(request.data["senha_nova"])
-                user_model.save()
+
+                if (
+                    bool(re.search(r"\d", request.data["confirma"])) == True
+                    and bool(re.search(r"[a-zA-Z]", request.data["confirma"])) == True
+                    and len(request.data["confirma"]) >= 8
+                ):
+                    user_model.set_password(request.data["senha_nova"])
+                    user_model.save()
+
+                    return Response(
+                        data={"sucesso": "senha alterada com sucesso!"},
+                        status=status.HTTP_200_OK,
+                    )
 
                 return Response(
-                    data={"sucesso": "senha alterada com sucesso!"},
-                    status=status.HTTP_200_OK,
+                    data={
+                        "erro": "senha não segue os critérios de uma senha:"
+                        "1. Senha deve ter pelo menos 8 caracteres."
+                        "2.Senha deve conter pelo menos um número."
+                        "3.Senha deve conter pelo menos uma letra"
+                    },
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
 
             return Response(
-                data={"erro": "senhas não coincidem"},
+                data={"erro": "Senhas não coincidem"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(
             data={"erro": "senha atual incorreta"}, status=status.HTTP_403_FORBIDDEN
         )
+
+    @extend_schema(
+        tags=["Usuário"],
+        parameters=[
+            OpenApiParameter(
+                "Email",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="Email do usuário",
+            )
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "example": "usuario@gmail.com"},
+                },
+            },
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Email de redefinição de senha enviado com sucesso.",
+                    },
+                },
+            },
+            (404, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string", "example": "Usuário não encontrado."},
+                },
+            },
+            (500, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string", "example": "Erro interno do servidor."},
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=False, url_path="solicitar-redefinicao-senha")
+    def solicitar_redefinicao_senha(self, request):
+        email = request.data.get("email")
+        request.session["email"] = email
+        if not email:
+            return Response(
+                {"error": "Email não informado."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = models.CustomUser.objects.get(email=email)
+            token = account_management_service.password_reset_email(user)
+            return Response(
+                {"message": "Email de redefinição de senha enviado com sucesso."},
+                status=status.HTTP_200_OK,
+            )
+        except models.CustomUser.DoesNotExist:
+            return Response(
+                {"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        tags=["Usuário"],
+        parameters=[
+            OpenApiParameter(
+                "Token",
+                type=OpenApiTypes.STR,
+                required=True,
+                location="path",
+                description="Token de redefinição de senha",
+            )
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {"token": {"type": "string", "example": "af23f2"}},
+            }
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string", "example": "Token válido."},
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Token inválido ou expirado.",
+                    },
+                },
+            },
+            (500, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string", "example": "Erro interno do servidor."},
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=False, url_path="verificar-token")
+    def verificar_token(self, request):
+        token = request.data.get("token")
+        if not token:
+            return Response(
+                {"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            token_instance = models.EmailActivationToken.objects.get(
+                token=token, expires_at__gt=timezone.now()
+            )
+            request.session["token_verification"] = True
+            return Response({"message": "Token válido."}, status=status.HTTP_200_OK)
+        except models.EmailActivationToken.DoesNotExist:
+            return Response(
+                {"error": "Token inválido ou expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        tags=["Usuário"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "senha": {"type": "string", "example": "supersecurepassword1"}
+                },
+            }
+        },
+        responses={
+            (200, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Senha redefinida com sucesso.",
+                    },
+                },
+            },
+            (400, "application/json"): {
+                "type": "object",
+                "properties": {
+                    "error": {"type": "string", "example": "Senha inválida."},
+                },
+            },
+        },
+    )
+    @action(methods=["POST"], detail=False, url_path="redefinir-senha")
+    def redefinir_senha(self, request):
+        if not request.session.get("token_verification", False):
+            return Response(
+                {"error": "Verificação de token não realizada."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        email = request.session.get("email")
+        if not email:
+            return Response(
+                {"error": "Email não encontrado."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            validate_password(request.data)
+            user = models.CustomUser.objects.get(email=email)
+            user.set_password(request.data["senha"])
+            user.save()
+
+            return Response(
+                {"message": "Senha redefinida com sucesso."}, status=status.HTTP_200_OK
+            )
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
