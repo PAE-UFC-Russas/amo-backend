@@ -44,6 +44,7 @@ class UserRegistration(APITestCase):
 
     def test_numbers_only_password(self):
         """Verifica que a senha não pode conter apenas números."""
+        print('testanto')
         response = self.client.post(
             reverse("registrar-list"),
             {"email": "test@user.com", "password": "15798452"},
