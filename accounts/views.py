@@ -1,5 +1,5 @@
 """Conjunto de Views do aplicativo 'accounts'."""
-
+import re
 from contextvars import Token
 
 from django.forms import ValidationError
@@ -426,28 +426,32 @@ class UserViewSet(
         )
         if user_model.check_password(request.data["senha_velha"]) is True:
             if request.data["senha_nova"] == request.data["confirma"]:
-                try:
-                    validate_password(request.data["senha_nova"])
-                except ValidationError:
+
+                if (
+                    bool(re.search(r"\d", request.data["confirma"])) == True
+                    and bool(re.search(r"[a-zA-Z]", request.data["confirma"])) == True
+                    and len(request.data["confirma"]) >= 8
+                ):
+                    user_model.set_password(request.data["senha_nova"])
+                    user_model.save()
+
                     return Response(
-                        data={
-                            "erro": "senha não segue os critérios de uma senha:"
-                            "1. Senha deve ter pelo menos 8 caracteres."
-                            "2.Senha deve conter pelo menos um número."
-                            "3.Senha deve conter pelo menos uma letra"
-                        },
-                        status=status.HTTP_406_NOT_ACCEPTABLE,
+                        data={"sucesso": "senha alterada com sucesso!"},
+                        status=status.HTTP_200_OK,
                     )
-                user_model.set_password(request.data["senha_nova"])
-                user_model.save()
 
                 return Response(
-                    data={"sucesso": "senha alterada com sucesso!"},
-                    status=status.HTTP_200_OK,
+                    data={
+                        "erro": "senha não segue os critérios de uma senha:"
+                        "1. Senha deve ter pelo menos 8 caracteres."
+                        "2.Senha deve conter pelo menos um número."
+                        "3.Senha deve conter pelo menos uma letra"
+                    },
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
 
             return Response(
-                data={"erro": "senhas não coincidem"},
+                data={"erro": "Senhas não coincidem"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(
