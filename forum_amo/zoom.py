@@ -34,6 +34,7 @@ payload = {
         "alternative_hosts_email_notification": False,
     },
 }
+
 headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
 
