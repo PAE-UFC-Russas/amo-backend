@@ -5,9 +5,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.account_management_service import create_account
 from core.models import Curso
 from core.serializer import CursoSerializer
+from accounts.models import CustomUser, EmailActivationToken
 
 
 class CursoTestCase(APITestCase):
@@ -16,13 +16,24 @@ class CursoTestCase(APITestCase):
     fixtures = ["groups.yaml"]
 
     def setUp(self):
-        _, self.user_token = create_account(
-            sanitized_email_str="user@localhost", unsafe_password_str="password1!"
+        self.admin_user = CustomUser.objects.create_user(
+            email="superuser@localhost.com",
+            password="qwe123456",
+            is_email_active=False,
+            is_staff=True,
+            is_superuser=True,
         )
-        _, self.admin_token = create_account(
-            sanitized_email_str="superuser@localhost",
-            unsafe_password_str="adminpassword1!",
+        EmailActivationToken.objects.create(
+            user=self.admin_user, email="superuser@localhost.com", token="000000"
         )
+        response = self.client.post(
+            "/registrar/confirmar-email/",
+            {"token": "000000"},
+        )
+
+        form = {"username": "superuser@localhost.com", "password": "qwe123456"}
+        response = self.client.post("/usuario/login/", data=form)
+        self.user_auth_token = response.json()["token"]
 
         self.curso = Curso.objects.create(
             nome="Ciência da Computação",
@@ -33,7 +44,7 @@ class CursoTestCase(APITestCase):
         """Verifica a lista de Cursos"""
         response = self.client.get(
             reverse("cursos-list"),
-            HTTP_AUTHORIZATION=f"Token {self.user_token}",
+            HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
         )
         self.assertEqual(
             json.loads(response.content)["results"], [CursoSerializer(self.curso).data]
@@ -43,7 +54,7 @@ class CursoTestCase(APITestCase):
         """Verifica a visualização de um Curso"""
         response = self.client.get(
             reverse("cursos-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+            HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
         )
         self.assertEqual(response.data, CursoSerializer(self.curso).data)
 
@@ -52,7 +63,7 @@ class CursoTestCase(APITestCase):
         response = self.client.post(
             reverse("cursos-list"),
             {"nome": "curso do admin", "descricao": "curso"},
-            HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+            HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
         )
         self.assertEqual(Curso.objects.all().count(), 2)
         self.assertEqual(
@@ -65,7 +76,7 @@ class CursoTestCase(APITestCase):
         with self.subTest("Remover um Curso"):
             response = self.client.delete(
                 reverse("cursos-detail", args=[1]),
-                HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+                HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
             )
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
             self.assertEqual(Curso.objects.all().count(), 0)
@@ -73,6 +84,6 @@ class CursoTestCase(APITestCase):
         with self.subTest("Remover Curso inexistente"):
             response = self.client.delete(
                 reverse("cursos-detail", args=[100]),
-                HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+                HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
             )
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
