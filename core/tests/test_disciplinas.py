@@ -4,7 +4,7 @@ import json
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from accounts.account_management_service import create_account
+from accounts.models import CustomUser, EmailActivationToken
 from core.models import Curso, Disciplinas
 from core.serializer import DisciplinaSerializer
 
@@ -15,14 +15,45 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
     fixtures = ["groups.yaml"]
 
     def setUp(self):
-        _, self.user_token = create_account(
-            sanitized_email_str="user@localhost", unsafe_password_str="password1!"
+        # Criação do Admin
+        self.admin_user = CustomUser.objects.create_user(
+            email="superuser@localhost.com",
+            password="qwe123456",
+            is_email_active=False,
+            is_staff=True,
+            is_superuser=True,
         )
-        _, self.admin_token = create_account(
-            sanitized_email_str="superuser@localhost",
-            unsafe_password_str="adminpassword1!",
+        EmailActivationToken.objects.create(
+            user=self.admin_user, email="superuser@localhost.com", token="000000"
+        )
+        response = self.client.post(
+            "/registrar/confirmar-email/",
+            {"token": "000000"},
         )
 
+        form = {"username": "superuser@localhost.com", "password": "qwe123456"}
+        response = self.client.post("/usuario/login/", data=form)
+        self.admin_auth_token = response.json()["token"]
+
+        # Criação do User
+        self.admin_user = CustomUser.objects.create_user(
+            email="user@localhost.com",
+            password="qwe123456",
+            is_email_active=False,
+        )
+        EmailActivationToken.objects.create(
+            user=self.admin_user, email="user@localhost.com", token="000001"
+        )
+        response = self.client.post(
+            "/registrar/confirmar-email/",
+            {"token": "000001"},
+        )
+
+        form = {"username": "user@localhost.com", "password": "qwe123456"}
+        response = self.client.post("/usuario/login/", data=form)
+        self.user_auth_token = response.json()["token"]
+
+        #############################################
         self.curso_cc = Curso.objects.create(
             nome="Ciência da Computação",
             descricao="Curso de Bacharelado em Ciência da Computação da UFC em Russas",
@@ -56,7 +87,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
                 descricao="Introduzir a ciência da computação utilizando o seu histórico...",
                 cursos=[self.curso_cc.pk],
             ),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+            HTTP_AUTHORIZATION=f"Token {self.admin_auth_token}",
         )
         self.assertEqual(Disciplinas.objects.all().count(), 3)
         self.assertEqual(
@@ -70,7 +101,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         """Verifica a leitura de um Disciplina"""
         response = self.client.get(
             reverse("disciplinas-detail", args=[1]),
-            HTTP_AUTHORIZATION=f"Token {self.admin_token}",
+            HTTP_AUTHORIZATION=f"Token {self.admin_auth_token}",
         )
         self.assertEqual(
             DisciplinaSerializer(Disciplinas.objects.get(id=1)).data,
@@ -94,7 +125,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         with self.subTest("Todos as disciplinas"):
             response = self.client.get(
                 reverse("disciplinas-list"),
-                HTTP_AUTHORIZATION=f"Token {self.user_token}",
+                HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
             )
             self.assertEqual(
                 [
@@ -107,7 +138,7 @@ class DisciplinaTestCase(APITestCase):  # pylint: disable=R0902
         with self.subTest("Filtragem por curso"):
             response = self.client.get(
                 reverse("disciplinas-list"),
-                HTTP_AUTHORIZATION=f"Token {self.user_token}",
+                HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
             )
             self.assertEqual(
                 DisciplinaSerializer(
