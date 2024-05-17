@@ -2,11 +2,15 @@
 import re
 from contextvars import Token
 
+from django.utils import timezone
 from django.forms import ValidationError
-
-from accounts.schema import validate_password
-import marshmallow
 from django.core import exceptions
+
+from accounts.utils import sanitization_utils
+from accounts.schema import validate_password
+
+import marshmallow
+
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiResponse,
@@ -14,16 +18,13 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
 )
+
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
-from rest_framework.decorators import action, authentication_classes, permission_classes
-
-# from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
-from django.utils import timezone
-from datetime import datetime
-
-
+from rest_framework.decorators import action
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
@@ -34,10 +35,7 @@ from accounts import (
     models,
     serializer,
 )
-from accounts.utils import sanitization_utils
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import AuthenticationFailed
+
 
 
 class CustomAuthToken(ObtainAuthToken):
