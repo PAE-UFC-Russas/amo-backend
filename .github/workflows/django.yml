@@ -24,9 +24,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install poetry 
-        pip install python-dotenv
     - name: Install Dependencies
       run: |
+        pip install python-dotenv
         poetry install
     - name: Run Tests
       run: |
