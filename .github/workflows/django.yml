@@ -26,7 +26,6 @@ jobs:
         pip install poetry 
     - name: Install Dependencies
       run: |
-        pip install python-dotenv
         poetry install
     - name: Run Tests
       run: |
