@@ -19,7 +19,6 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitView
 from rest_framework import routers
-from rest_framework.authtoken import views
 
 
 from accounts.views import CustomAuthToken, UserRegistration, UserViewSet

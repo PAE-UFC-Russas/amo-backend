@@ -179,10 +179,6 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": f"{os.getenv('API_SECRET')}",
 }
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 EMAIL_BACKEND = f"{os.getenv('EMAIL_BACKEND')}"
 EMAIL_HOST = f"{os.getenv('EMAIL_HOST')}"
 EMAIL_PORT = f"{os.getenv('EMAIL_PORT')}"
