@@ -12,11 +12,6 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Curso
 from monitorias.settings import MEDIA_ROOT
 
-from django.utils import timezone
-from datetime import datetime
-from datetime import timedelta
-import secrets
-
 
 class CustomUserManager(BaseUserManager):
     """Define um 'manager' para utilização com CustomUser."""
@@ -122,6 +117,9 @@ class EmailActivationToken(models.Model):
 
     @staticmethod
     def generate_token(user):
+        """Gerar token (código para o e-mail)
+        OBS: Não confundir com o token de autenticação!
+        """
         EmailActivationToken.objects.filter(user=user, email=user.email).delete()
 
         token = secrets.token_hex(3)

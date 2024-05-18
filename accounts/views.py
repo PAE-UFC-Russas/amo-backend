@@ -2,11 +2,12 @@
 import re
 from contextvars import Token
 
+from django.utils import timezone
 from django.forms import ValidationError
-
-from accounts.schema import validate_password
-import marshmallow
 from django.core import exceptions
+
+import marshmallow
+
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiResponse,
@@ -14,18 +15,19 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
 )
+
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status
-from rest_framework.decorators import action, authentication_classes, permission_classes
-
-# from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
-from django.utils import timezone
-from datetime import datetime
-
-
+from rest_framework.decorators import action
+from rest_framework.authtoken.models import Token  # pylint: disable=W0404
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
+
+from accounts.utils import sanitization_utils
+from accounts.schema import validate_password
+
 
 from accounts import (
     account_management_service,
@@ -34,15 +36,14 @@ from accounts import (
     models,
     serializer,
 )
-from accounts.utils import sanitization_utils
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import AuthenticationFailed
 
 
 class CustomAuthToken(ObtainAuthToken):
+    """Classe para login"""
+
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
+        """Função para realizar o login do usuário"""
+        serializer = self.serializer_class(  # pylint: disable=W0621
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
@@ -51,7 +52,7 @@ class CustomAuthToken(ObtainAuthToken):
         if not user.is_email_active:
             raise AuthenticationFailed("Credenciais inválidas ou conta inativa.")
 
-        token = Token.objects.get(user=user)
+        token = Token.objects.get(user=user)  # pylint: disable=E1101
         return Response({"token": token.key, "user_id": user.pk, "email": user.email})
 
 
@@ -95,6 +96,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     def create(self, request):
+        """Cria usuário inativo, é necessário confirmar o e-mail."""
         unsafe_email = request.data.get("email", "")
         unsafe_password = request.data.get("password", "")
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
@@ -105,7 +107,8 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             )
             return Response(
                 {
-                    "message": "Usuário criado com sucesso. Verifique seu e-mail para ativar sua conta."
+                    "message": "Usuário criado com sucesso."
+                    "Verifique seu e-mail para ativar sua conta."
                 },
                 status=201,
             )
@@ -164,6 +167,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     def confirm_email(self, request):
+        """Confirma o e-mail do usuário (é enviado um código de confirmação para o seu e-mail)"""
         token = request.data.get("token")
         if not token:
             return Response(
@@ -191,7 +195,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
                 {"error": "Token inválido ou expirado."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -428,8 +432,8 @@ class UserViewSet(
             if request.data["senha_nova"] == request.data["confirma"]:
 
                 if (
-                    bool(re.search(r"\d", request.data["confirma"])) == True
-                    and bool(re.search(r"[a-zA-Z]", request.data["confirma"])) == True
+                    bool(re.search(r"\d", request.data["confirma"])) is True
+                    and bool(re.search(r"[a-zA-Z]", request.data["confirma"])) is True
                     and len(request.data["confirma"]) >= 8
                 ):
                     user_model.set_password(request.data["senha_nova"])
@@ -503,6 +507,7 @@ class UserViewSet(
     )
     @action(methods=["POST"], detail=False, url_path="solicitar-redefinicao-senha")
     def solicitar_redefinicao_senha(self, request):
+        """Função de solicitação de redefinição de senha de fora do APP"""
         email = request.data.get("email")
         request.session["email"] = email
         if not email:
@@ -512,7 +517,9 @@ class UserViewSet(
 
         try:
             user = models.CustomUser.objects.get(email=email)
-            token = account_management_service.password_reset_email(user)
+            token = account_management_service.password_reset_email(  # pylint: disable=E1111, W0612
+                user
+            )
             return Response(
                 {"message": "Email de redefinição de senha enviado com sucesso."},
                 status=status.HTTP_200_OK,
@@ -521,7 +528,7 @@ class UserViewSet(
             return Response(
                 {"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -569,14 +576,17 @@ class UserViewSet(
     )
     @action(methods=["POST"], detail=False, url_path="verificar-token")
     def verificar_token(self, request):
+        """Função que verifica e valida o token enviado ao e-mail do usuário"""
         token = request.data.get("token")
         if not token:
             return Response(
                 {"error": "Token não informado."}, status=status.HTTP_400_BAD_REQUEST
             )
         try:
-            token_instance = models.EmailActivationToken.objects.get(
-                token=token, expires_at__gt=timezone.now()
+            token_instance = (  # pylint: disable=W0612
+                models.EmailActivationToken.objects.get(
+                    token=token, expires_at__gt=timezone.now()
+                )
             )
             request.session["token_verification"] = True
             return Response({"message": "Token válido."}, status=status.HTTP_200_OK)
@@ -585,7 +595,7 @@ class UserViewSet(
                 {"error": "Token inválido ou expirado."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -620,6 +630,7 @@ class UserViewSet(
     )
     @action(methods=["POST"], detail=False, url_path="redefinir-senha")
     def redefinir_senha(self, request):
+        """Redefine senha"""
         if not request.session.get("token_verification", False):
             return Response(
                 {"error": "Verificação de token não realizada."},

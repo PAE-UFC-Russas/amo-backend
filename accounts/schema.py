@@ -23,6 +23,8 @@ class UserRegistration(Schema):
 
 
 class RedefinirSenhaSchema(Schema):
+    """Schema para validação de senha. Dentro do processo de redefinição de senha."""
+
     senha = fields.String(
         required=True,
         validate=[
@@ -38,6 +40,7 @@ class RedefinirSenhaSchema(Schema):
 
 
 def validate_password(data):
+    """Função que valida uma senha baseada no Schema acima"""
     schema = RedefinirSenhaSchema()
     errors = schema.validate(data)
     if errors:

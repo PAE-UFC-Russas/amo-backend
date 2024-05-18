@@ -7,7 +7,6 @@ from django.forms.models import model_to_dict
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from datetime import timedelta, datetime
 from rest_framework.authtoken.models import Token
 
 from accounts import errors
@@ -168,6 +167,7 @@ def get_user_token(user):
 
 
 def password_reset_email(user):
+    """Resetar senha"""
     existing_token = EmailActivationToken.objects.filter(
         user=user, email=user.email
     ).first()
