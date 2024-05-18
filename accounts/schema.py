@@ -23,7 +23,8 @@ class UserRegistration(Schema):
 
 
 class RedefinirSenhaSchema(Schema):
-    """Schema para validação de senha. Dentro do processo de redefinição de senha. """
+    """Schema para validação de senha. Dentro do processo de redefinição de senha."""
+
     senha = fields.String(
         required=True,
         validate=[
