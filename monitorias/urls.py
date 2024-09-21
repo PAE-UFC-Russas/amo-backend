@@ -22,13 +22,16 @@ from rest_framework import routers
 
 
 from accounts.views import CustomAuthToken, UserRegistration, UserViewSet
-from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet
+
+from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet, MonitoresHorarioViewSet
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
 router = routers.DefaultRouter()
 router.register(r"registrar", UserRegistration, basename="registrar")
 router.register(r"cursos", CursoViewSet, basename="cursos")
 router.register(r"disciplinas", DisciplinaViewSet, basename="disciplinas")
+router.register(r"monitorias", MonitoresHorarioViewSet, basename="monitorias")
+
 router.register(r"usuario", UserViewSet, basename="usuario")
 # Forum
 router.register(r"duvidas", DuvidaViewSet, basename="duvidas")

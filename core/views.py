@@ -8,15 +8,20 @@ from rest_framework import status
 from django.db import transaction
 from django.db import IntegrityError
 from core import access_policy, filters
-from core.models import Agendamento, Curso, Disciplinas
+from core.models import Agendamento, Curso, Disciplinas, Monitoria
+
+
 from core.serializer import (
     AgendamentoRequestSerializer,
     AgendamentoSerializer,
     CursoSerializer,
     DisciplinaSerializer,
+    MonitoriaSerializer,
+
 )
 from forum_amo.zoom import create_meeting
-
+from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -115,3 +120,43 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     def get_queryset(self):
         """Passa o controle sobre a queryset para o módulo de controle de acesso."""
         return self.access_policy.scope_queryset(self.request, self.queryset)
+
+class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
+    """Ações do horário de monitoria."""
+
+    access_policy = access_policy.MonitoriaAccessPolicy
+    serializer_class = MonitoriaSerializer
+    queryset = Monitoria.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['disciplina', 'professor', 'monitor', 'dia_semana']
+    search_fields = ["local"]
+    ordering = ["dia_semana", "hora_inicio"]
+    ordering_fields = ["dia_semana", "hora_inicio"]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except IntegrityError:
+            return Response(
+                data={"mensagem": "Já existe um horário para esse monitor nessa disciplina, dia e hora"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        return self.access_policy.scope_queryset(self.request, self.queryset)
+

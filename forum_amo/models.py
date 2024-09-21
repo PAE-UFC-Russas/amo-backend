@@ -52,7 +52,6 @@ class VotoDuvida(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["usuario", "duvida"], name="voto_unico")
         ]
-
 class Denuncia(models.Model):
     "Modelo para denunciar dúvidas ou respostas"
     razoes = [('Ameaças', 'Ameaças'), 

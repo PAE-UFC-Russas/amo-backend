@@ -25,6 +25,7 @@ class DuvidaVotouField(serializers.Field):
     def to_internal_value(self, data):
         raise NotImplementedError
 
+
 class DenunciaSerializer(serializers.ModelSerializer):
     """Serializer para denúncias"""
 
@@ -51,7 +52,6 @@ class DuvidaSerializer(serializers.ModelSerializer):
     votos = serializers.IntegerField(read_only=True)
     votou = DuvidaVotouField(read_only=True)
     quantidade_comentarios = serializers.IntegerField(read_only=True)
-    
 
 
     def create(self, validated_data):
@@ -136,6 +136,3 @@ class VotoDuvidaSerializer(serializers.ModelSerializer):
             duvida = Duvida.objects.get(pk=validated_data["duvida"])
             duvida.votos -= 1
             duvida.save()
-
-
-    

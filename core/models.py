@@ -12,6 +12,15 @@ STATUS_AGENDAMENTO = [
     ("cancelado", "Cancelado"),
 ]
 
+DIA_SEMANA = [
+    ("0", "Segunda-feira"),
+    ("1", "Terça-feira"),
+    ("2", "Quarta-feira"),
+    ("3", "Quinta-feira"),
+    ("4", "Sexta-feira"),
+    ("5", "Sábado"),
+]
+
 
 class Curso(models.Model):
     """Representação de um curso."""
@@ -61,3 +70,42 @@ class Agendamento(models.Model):
                 fields=["data", "disciplina"], name="agendamento_unico"
             )
         ]
+class Monitoria(models.Model):
+    """Page para visualização do monitor, com informações sobre a monitoria."""
+
+    professor = models.ForeignKey(
+        "accounts.CustomUser",
+        on_delete=models.CASCADE,
+        related_name="monitorias_como_professor",
+        null=True,
+        blank=True
+    )
+    disciplina = models.ForeignKey(
+        Disciplinas,
+        on_delete=models.CASCADE,
+        related_name="DisciplinaMonitorias",
+        null=True,
+        blank=True  
+    )
+    monitor = models.ForeignKey(
+        "accounts.CustomUser",
+        on_delete=models.CASCADE,
+        related_name="Monitorias_como_monitor",
+        null=True,
+        blank=True
+    )
+    dia_semana = models.CharField(max_length=1, choices=DIA_SEMANA, null=True, blank=True)
+    hora_inicio = models.TimeField(blank=True, null=True)
+    hora_fim = models.TimeField(blank=True, null=True)
+    local = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['monitor', 'disciplina', 'dia_semana', 'hora_inicio'],
+                name='horario_unico'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.get_dia_semana_display()} - {self.hora_inicio} às {self.hora_fim} - {self.disciplina.nome}"
