@@ -90,3 +90,40 @@ class AgendamentoAccessPolicy(AccessPolicy):
             return qs
 
         return qs.filter(solicitante=request.user)
+
+
+
+class MonitoriaAccessPolicy(AccessPolicy):
+    statements = [
+        {
+            "action": ["list", "retrieve"],
+            "principal": "*",
+            "effect": "allow"
+        },
+        {
+            "action": ["create", "update", "partial_update", "destroy"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "is_professor_or_monitor"
+        }
+    ]
+
+    def is_professor_or_monitor(self, request, view, action):
+        user = request.user
+        if action == "create":
+            disciplina_id = request.data.get('disciplina')
+            monitor_id = request.data.get('monitor')
+        else:
+            obj = view.get_object()
+            disciplina_id = obj.disciplina.id
+            monitor_id = obj.monitor.id
+
+        if not disciplina_id:
+            return False
+
+        disciplina = models.Disciplinas.objects.get(id=disciplina_id)
+        return disciplina.professores.filter(id=user.id).exists() or user.id == monitor_id
+
+    def scope_queryset(self, queryset):
+        return queryset  
+
