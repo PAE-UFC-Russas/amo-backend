@@ -90,9 +90,7 @@ class AgendamentoAccessPolicy(AccessPolicy):
             return qs
 
         return qs.filter(solicitante=request.user)
-
-
-
+    
 class MonitoriaAccessPolicy(AccessPolicy):
     statements = [
         {
@@ -126,4 +124,3 @@ class MonitoriaAccessPolicy(AccessPolicy):
 
     def scope_queryset(self, queryset):
         return queryset  
-

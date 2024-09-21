@@ -1,13 +1,9 @@
 """Este módulo contém os serializadores utilizados na aplicação 'core'."""
 from rest_framework import serializers
-
-
 from accounts.models import Perfil
 from core.models import Agendamento, Curso, Disciplinas
 from accounts.models import Perfil, CustomUser
 from core.models import Agendamento, Curso, Disciplinas, Monitoria
-
-
 
 class UsuarioBasicoSerializer(serializers.ModelSerializer):
     """Define um serializer para exibição apenas do nome e id do usuário."""
@@ -68,7 +64,6 @@ class AgendamentoSerializer(serializers.ModelSerializer):
         model = Agendamento
         fields = "__all__"
 
-
 class MonitoriaSerializer(serializers.ModelSerializer):
     """Serializer para visualizar os horários de monitoria."""
 
@@ -89,4 +84,3 @@ class MonitoriaSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Você não tem permissão para cadastrar horários para esta monitoria.")
         
         return data
-

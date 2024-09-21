@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from accounts.serializer import UserSerializer
 from core.models import Disciplinas
-from forum_amo.models import Duvida, Resposta, VotoDuvida
+from forum_amo.models import Duvida, Resposta, VotoDuvida, Denuncia
 
 
 class DuvidaVotouField(serializers.Field):
@@ -26,6 +26,19 @@ class DuvidaVotouField(serializers.Field):
         raise NotImplementedError
 
 
+class DenunciaSerializer(serializers.ModelSerializer):
+    """Serializer para denúncias"""
+
+    class Meta:
+        model = Denuncia
+        fields = ["id", "reason", "descricao", "duvida", "resposta", "autor"]
+        read_only_fields = ["autor"]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['autor'] = request.user
+        return super().create(validated_data)
+
 class DuvidaSerializer(serializers.ModelSerializer):
     """Serializer para arquivos"""
 
@@ -39,6 +52,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     votos = serializers.IntegerField(read_only=True)
     votou = DuvidaVotouField(read_only=True)
     quantidade_comentarios = serializers.IntegerField(read_only=True)
+
 
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(

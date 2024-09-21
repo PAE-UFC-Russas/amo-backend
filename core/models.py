@@ -70,7 +70,6 @@ class Agendamento(models.Model):
                 fields=["data", "disciplina"], name="agendamento_unico"
             )
         ]
-
 class Monitoria(models.Model):
     """Page para visualização do monitor, com informações sobre a monitoria."""
 

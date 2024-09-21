@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas, Monitoria
 
+
 from core.serializer import (
     AgendamentoRequestSerializer,
     AgendamentoSerializer,
@@ -21,8 +22,6 @@ from core.serializer import (
 from forum_amo.zoom import create_meeting
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import PermissionDenied
-
-
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -121,7 +120,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     def get_queryset(self):
         """Passa o controle sobre a queryset para o módulo de controle de acesso."""
         return self.access_policy.scope_queryset(self.request, self.queryset)
-    
+
 class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
     """Ações do horário de monitoria."""
 

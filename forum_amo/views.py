@@ -15,13 +15,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+
+from forum_amo.utils import send_report_mail
 import forum_amo.forum_service
 from forum_amo.access_policy import DuvidaAccessPolicy, RespostaAccessPolicy
-from forum_amo.models import Duvida, Resposta, VotoDuvida
+from forum_amo.models import Duvida, Resposta, VotoDuvida, Denuncia
+
+from forum_amo.access_policy import DuvidaAccessPolicy, RespostaAccessPolicy
+
 from forum_amo.serializers import (
     DuvidaSerializer,
     RespostaSerializer,
     VotoDuvidaSerializer,
+    DenunciaSerializer,
 )
 
 
@@ -126,6 +132,20 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
 
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(methods=["POST"], detail=True, url_path="report-duvida")
+    def report(self, request, pk=None):
+        """Permite denunciar uma dúvida"""
+        duvida = self.get_object()
+        data = request.data
+        data['duvida'] = duvida.id
+
+        serializer = DenunciaSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            denuncia = serializer.save()
+            send_report_mail(denuncia)
+            return Response({'success': 'Denúncia enviada com sucesso'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                     
 
 class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
     """ViewSet referente ao modelo de respostas do fórum"""
@@ -218,3 +238,18 @@ class RespostaViewSet(AccessViewSetMixin, ModelViewSet):
                 data={"Sucesso": {"mensagem": "Resposta excluída.."}},
                 status=status.HTTP_204_NO_CONTENT,
             )
+        
+    @action(methods=["POST"], detail=True, url_path="report")
+    def report(self, request, pk=None):
+        """Permite denunciar uma resposta"""
+        resposta = self.get_object()
+        data = request.data
+
+        data['resposta'] = resposta.id
+        serializer = DenunciaSerializer(data=data, context={'request': request})
+        
+        if serializer.is_valid():
+            denuncia = serializer.save()
+            send_report_mail(denuncia)
+            return Response({'success': 'Denúncia enviada com sucesso'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

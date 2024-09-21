@@ -5,9 +5,13 @@ description = ""
 authors = ["Juan Monteiro <juan.monteiro@jmonteiro.net>"]
 
 [tool.poetry.dependencies]
+<<<<<<< HEAD
+python = "^3.9"
+=======
 
 python = "^3.12"
 
+>>>>>>> cfdab8816b3ca198e5aabab6146f05532d101c17
 Django = "^4.1"
 djangorestframework = "^3.14.0"
 drf-spectacular = "^0.24.2"
@@ -26,9 +30,12 @@ isort = "5.12.0"
 pillow = "^10.0.0"
 django-cloudinary-storage = "^0.3.0"
 
+<<<<<<< HEAD
+=======
 setuptools = ">=3.0"
 
 
+>>>>>>> cfdab8816b3ca198e5aabab6146f05532d101c17
 [tool.poetry.dev-dependencies]
 black = "^22.10.0"
 pylint = "~2.14.4"
@@ -53,3 +60,4 @@ profile = "black"
 requires = ["poetry-core>=1.0.0"]
 
 build-backend = "poetry.core.masonry.api"
+
