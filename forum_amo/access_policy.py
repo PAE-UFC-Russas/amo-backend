@@ -13,7 +13,6 @@ class RespostaAccessPolicy(AccessPolicy):
         },
         {
             "action": ["list", "retrieve", "create", "report"],
-            "action": ["list", "retrieve", "create"],
             "principal": "authenticated",
             "effect": "allow",
         },
@@ -41,7 +40,6 @@ class DuvidaAccessPolicy(AccessPolicy):
         },
         {
             "action": ["list", "retrieve", "create", "votar", "report"],
-            "action": ["list", "retrieve", "create", "votar"],
             "principal": "authenticated",
             "effect": "allow",
         },
