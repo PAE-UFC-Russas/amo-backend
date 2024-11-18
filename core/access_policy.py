@@ -93,6 +93,8 @@ class AgendamentoAccessPolicy(AccessPolicy):
 
 
 class MonitoriaAccessPolicy(AccessPolicy):
+    """Montiria Access Policy"""
+
     statements = [
         {"action": ["list", "retrieve"], "principal": "*", "effect": "allow"},
         {
@@ -104,6 +106,7 @@ class MonitoriaAccessPolicy(AccessPolicy):
     ]
 
     def is_professor_or_monitor(self, request, view, action):
+        """Verifica se é professor ou monitor"""
         user = request.user
         if action == "create":
             disciplina_id = request.data.get("disciplina")
@@ -121,5 +124,5 @@ class MonitoriaAccessPolicy(AccessPolicy):
             disciplina.professores.filter(id=user.id).exists() or user.id == monitor_id
         )
 
-    def scope_queryset(self, queryset):
+    def scope_queryset(self, queryset):  # pylint: disable=W0237
         return queryset

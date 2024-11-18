@@ -112,4 +112,7 @@ class Monitoria(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.get_dia_semana_display()} - {self.hora_inicio} às {self.hora_fim} - {self.disciplina.nome}"
+        return (
+            f"{self.get_dia_semana_display()} - {self.hora_inicio} "
+            f"às {self.hora_fim} - {self.disciplina.nome}"
+        )

@@ -19,8 +19,6 @@ from core.serializer import (
     MonitoriaSerializer,
 )
 from forum_amo.zoom import create_meeting
-from rest_framework import viewsets, permissions
-from rest_framework.exceptions import PermissionDenied
 
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
@@ -146,7 +144,10 @@ class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
         except IntegrityError:
             return Response(
                 data={
-                    "mensagem": "Já existe um horário para esse monitor nessa disciplina, dia e hora"
+                    "mensagem": (
+                        "Já existe um horário para esse monitor nessa "
+                        "disciplina, dia e hora"
+                    )
                 },
                 status=status.HTTP_409_CONFLICT,
             )

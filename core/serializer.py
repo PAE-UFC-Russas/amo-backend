@@ -1,7 +1,5 @@
 """Este módulo contém os serializadores utilizados na aplicação 'core'."""
 from rest_framework import serializers
-from accounts.models import Perfil
-from core.models import Agendamento, Curso, Disciplinas
 from accounts.models import Perfil, CustomUser
 from core.models import Agendamento, Curso, Disciplinas, Monitoria
 
@@ -90,16 +88,16 @@ class MonitoriaSerializer(serializers.ModelSerializer):
             "local",
         ]
 
-    def validate(self, data):
+    def validate(self, attrs):
         user = self.context["request"].user
-        disciplina = data["disciplina"]
+        disciplina = attrs["disciplina"]
 
         if not (
             disciplina.professores.filter(id=user.id).exists()
-            or user == data["monitor"]
+            or user == attrs["monitor"]
         ):
             raise serializers.ValidationError(
                 "Você não tem permissão para cadastrar horários para esta monitoria."
             )
 
-        return data
+        return attrs
