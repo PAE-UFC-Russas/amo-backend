@@ -35,9 +35,10 @@ class DenunciaSerializer(serializers.ModelSerializer):
         read_only_fields = ["autor"]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        validated_data['autor'] = request.user
+        request = self.context.get("request")
+        validated_data["autor"] = request.user
         return super().create(validated_data)
+
 
 class DuvidaSerializer(serializers.ModelSerializer):
     """Serializer para arquivos"""
@@ -52,7 +53,6 @@ class DuvidaSerializer(serializers.ModelSerializer):
     votos = serializers.IntegerField(read_only=True)
     votou = DuvidaVotouField(read_only=True)
     quantidade_comentarios = serializers.IntegerField(read_only=True)
-
 
     def create(self, validated_data):
         nova_duvida = Duvida.objects.create(

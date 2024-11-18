@@ -19,7 +19,3 @@ def send_report_mail(report):
     """
 
     send_mail(subject, message, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER])
-
-
-    
-    
