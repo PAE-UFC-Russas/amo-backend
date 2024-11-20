@@ -3,6 +3,7 @@
 from django.core.mail import send_mail
 from django.forms.models import model_to_dict
 
+from django.contrib.auth.models import Group
 
 from django.conf import settings
 from django.db import transaction
@@ -86,16 +87,31 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "matricula",
         "entrada",
         "curso",
-        "foto",
+        "foto"
     ]
-
     with transaction.atomic():
+                
+        perfil.usuario.groups.remove(1)
+        perfil.usuario.groups.remove(2)
+        perfil.usuario.groups.remove(3)
+
+        if "cargos" in data.keys():
+            if "monitor" in data["cargos"]:
+                perfil.usuario.groups.add(2)
+            if "aluno" in data["cargos"]:
+                perfil.usuario.groups.add(1)
+            if "professor" in data["cargos"]:
+                perfil.usuario.groups.add(3)
+
         if "curso" in allowed_keys:
             allowed_keys.remove("curso")
             if "curso" in data.keys():
                 perfil.curso_id = data["curso"]
 
+
         for key, value in data.items():
+
+
             if key in allowed_keys:
                 setattr(perfil, key, value)
 
