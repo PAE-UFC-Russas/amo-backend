@@ -98,9 +98,9 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         if "cargos" in data.keys():
             if "monitor" in data["cargos"]:
                 perfil.usuario.groups.add(2)
-            if "aluno" in data["cargos"]:
+            elif "aluno" in data["cargos"]:
                 perfil.usuario.groups.add(1)
-            if "professor" in data["cargos"]:
+            elif "professor" in data["cargos"]:
                 perfil.usuario.groups.add(3)
 
         if "curso" in allowed_keys:
