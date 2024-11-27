@@ -89,6 +89,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "curso",
         "foto"
     ]
+    dict = {"aluno": 1, "monitor": 2, "professor": 3}
     with transaction.atomic():
                 
         perfil.usuario.groups.remove(1)
@@ -96,12 +97,7 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         perfil.usuario.groups.remove(3)
 
         if "cargos" in data.keys():
-            if "monitor" in data["cargos"]:
-                perfil.usuario.groups.add(2)
-            elif "aluno" in data["cargos"]:
-                perfil.usuario.groups.add(1)
-            elif "professor" in data["cargos"]:
-                perfil.usuario.groups.add(3)
+            perfil.usuario.groups.add(dict[str(data["cargos"])])
 
         if "curso" in allowed_keys:
             allowed_keys.remove("curso")
