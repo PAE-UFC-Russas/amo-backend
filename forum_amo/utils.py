@@ -1,3 +1,6 @@
+"""
+Utilidades
+"""
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -19,7 +22,3 @@ def send_report_mail(report):
     """
 
     send_mail(subject, message, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER])
-
-
-    
-    
