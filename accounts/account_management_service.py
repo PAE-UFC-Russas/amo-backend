@@ -90,11 +90,12 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
     cargo_para_id = {"aluno": 1, "monitor": 2, "professor": 3}
     with transaction.atomic():
 
-        perfil.usuario.groups.remove(1)
-        perfil.usuario.groups.remove(2)
-        perfil.usuario.groups.remove(3)
-
         if "cargos" in data.keys():
+
+            perfil.usuario.groups.remove(1)
+            perfil.usuario.groups.remove(2)
+            perfil.usuario.groups.remove(3)
+
             perfil.usuario.groups.add(cargo_para_id[(data["cargos"][0])])
 
         if "curso" in allowed_keys:
