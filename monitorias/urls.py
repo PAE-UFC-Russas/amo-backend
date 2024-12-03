@@ -23,7 +23,12 @@ from rest_framework import routers
 
 from accounts.views import CustomAuthToken, UserRegistration, UserViewSet
 
-from core.views import AgendamentoViewSet, CursoViewSet, DisciplinaViewSet, MonitoresHorarioViewSet
+from core.views import (
+    AgendamentoViewSet,
+    CursoViewSet,
+    DisciplinaViewSet,
+    MonitoresHorarioViewSet,
+)
 from forum_amo.views import DuvidaViewSet, RespostaViewSet
 
 router = routers.DefaultRouter()

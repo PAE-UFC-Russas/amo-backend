@@ -52,13 +52,17 @@ class VotoDuvida(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["usuario", "duvida"], name="voto_unico")
         ]
+
+
 class Denuncia(models.Model):
     "Modelo para denunciar dúvidas ou respostas"
-    razoes = [('Ameaças', 'Ameaças'), 
-              ('Bullying', 'Bullying'), 
-              ('SPAM', 'SPAM'),
-              ('Bullying', 'Bullying'), 
-              ('SPAM', 'SPAM')]
+    razoes = [
+        ("Ameaças", "Ameaças"),
+        ("Bullying", "Bullying"),
+        ("SPAM", "SPAM"),
+        ("Bullying", "Bullying"),
+        ("SPAM", "SPAM"),
+    ]
     autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     duvida = models.ForeignKey(Duvida, on_delete=models.CASCADE)
     resposta = models.ForeignKey(Resposta, on_delete=models.CASCADE, null=True)
@@ -69,4 +73,3 @@ class Denuncia(models.Model):
         if self.resposta:
             return f"Denuncia para a resposta '{self.resposta.autor}'"
         return f"Denuncia para a dúvida '{self.duvida.titulo}'"
-        

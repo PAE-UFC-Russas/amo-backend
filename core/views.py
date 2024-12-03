@@ -17,11 +17,9 @@ from core.serializer import (
     CursoSerializer,
     DisciplinaSerializer,
     MonitoriaSerializer,
-
 )
 from forum_amo.zoom import create_meeting
-from rest_framework import viewsets, permissions
-from rest_framework.exceptions import PermissionDenied
+
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
@@ -121,6 +119,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
         """Passa o controle sobre a queryset para o módulo de controle de acesso."""
         return self.access_policy.scope_queryset(self.request, self.queryset)
 
+
 class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
     """Ações do horário de monitoria."""
 
@@ -128,7 +127,7 @@ class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
     serializer_class = MonitoriaSerializer
     queryset = Monitoria.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['disciplina', 'professor', 'monitor', 'dia_semana']
+    filterset_fields = ["disciplina", "professor", "monitor", "dia_semana"]
     search_fields = ["local"]
     ordering = ["dia_semana", "hora_inicio"]
     ordering_fields = ["dia_semana", "hora_inicio"]
@@ -139,10 +138,17 @@ class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
         try:
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
         except IntegrityError:
             return Response(
-                data={"mensagem": "Já existe um horário para esse monitor nessa disciplina, dia e hora"},
+                data={
+                    "mensagem": (
+                        "Já existe um horário para esse monitor nessa "
+                        "disciplina, dia e hora"
+                    )
+                },
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -150,7 +156,7 @@ class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
         serializer.save()
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -159,4 +165,3 @@ class MonitoresHorarioViewSet(AccessViewSetMixin, ModelViewSet):
 
     def get_queryset(self):
         return self.access_policy.scope_queryset(self.request, self.queryset)
-
