@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 if os.getenv("DJANGO_ENVIRONMENT") == "PRODUCTION":
     SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-    DEBUG = os.getenv("DEBUG") == "TRUE"
+    DEBUG = os.getenv("DEBUG") == "True"
     ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
     DATABASES = {
         "default": dj_database_url.config(
