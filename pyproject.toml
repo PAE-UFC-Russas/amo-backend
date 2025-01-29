@@ -2,7 +2,10 @@
 name = "monitorias-backend"
 version = "0.1.0"
 description = ""
-authors = ["Juan Monteiro <juan.monteiro@jmonteiro.net>"]
+authors = [
+    "Juan Monteiro <juan.monteiro@jmonteiro.net>",
+    "Second Author <alcantarapedro69@yahoo.com>"
+]
 packages = [{include = "monitorias"}] 
 
 [tool.poetry.dependencies]
