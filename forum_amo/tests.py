@@ -303,6 +303,9 @@ class RespostaCorretaTest(APITestCase):
             resposta="Capítulos 1 a 5.",
         )
 
+        
+
+
     def test_resposta_correta(self):
         """Verifica que o usuário pode selecionar e remover uma resposta como correta."""
         usuario = CustomUser.objects.first()
@@ -311,23 +314,23 @@ class RespostaCorretaTest(APITestCase):
         url = reverse("duvidas-correta", args=[duvida.pk])
 
         # Verifica o estado inicial, que a dúvida não tem uma resposta correta
-        self.assertIsNone(duvida.resposta_correta_id)
+        self.assertFalse(duvida.resposta_correta.exists())
 
         # Seleciona uma resposta como correta
         http_response = self.client.post(
             url, {"id": resposta.pk}, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
         )
-        self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(http_response.status_code, status.HTTP_200_OK)
         duvida.refresh_from_db()
-        self.assertEqual(duvida.resposta_correta_id, resposta.pk)
+        self.assertEqual(duvida.resposta_correta.count(), resposta.pk)
 
         # "Desmarca" uma resposta como correta
         http_response = self.client.delete(
             url, HTTP_AUTHORIZATION=f"Token {usuario.auth_token}"
         )
-        self.assertEqual(http_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(http_response.status_code, status.HTTP_200_OK)
         duvida.refresh_from_db()
-        self.assertIsNone(duvida.resposta_correta_id)
+        self.assertEqual(duvida.resposta_correta.count(), 1)
 
 
 class VotarNaDuvidaTest(APITestCase):
