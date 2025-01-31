@@ -110,7 +110,6 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                 data={"erro": {"mensagem": "Dúvida não encontrada."}},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        print('aqui')
         if request.method == "POST":
             try:
                 resposta_pk = request.data.get("id", None)
@@ -125,11 +124,16 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-        if request.method == "DELETE" and duvida.resposta_correta_id is not None:
-            duvida.resposta_correta.set(None)
+        if request.method == "DELETE":
+            resposta_pk = request.data.get("id", None)
+            duvida.resposta_correta.remove(resposta_pk)
             duvida.save()
+            return response.Response(
+                data={"sucesso": {"mensagem": "resposta desmarcada como certa."}},
+                status=status.HTTP_200_OK,
+            )
 
-        return response.Response({"sucesso": "a respota foi marcado como certa"},status=status.HTTP_204_NO_CONTENT)
+        return response.Response(data={"sucesso": {"mensagem": "a respota foi marcado como certa"}},status=status.HTTP_200_OK)
 
     @action(methods=["POST"], detail=True, url_path="report-duvida")
     def report(self, request):
