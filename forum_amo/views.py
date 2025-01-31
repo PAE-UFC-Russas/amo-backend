@@ -110,13 +110,14 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                 data={"erro": {"mensagem": "Dúvida não encontrada."}},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
+        print('aqui')
         if request.method == "POST":
             try:
                 resposta_pk = request.data.get("id", None)
                 resposta = Resposta.objects.get(pk=resposta_pk)
+                print(resposta)
                 if resposta.duvida_id == duvida.pk:
-                    duvida.resposta_correta = resposta
+                    duvida.resposta_correta.set([resposta])
                     duvida.save()
             except exceptions.ObjectDoesNotExist:
                 return response.Response(
@@ -125,10 +126,10 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                 )
 
         if request.method == "DELETE" and duvida.resposta_correta_id is not None:
-            duvida.resposta_correta = None
+            duvida.resposta_correta.set(None)
             duvida.save()
 
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response({"sucesso": "a respota foi marcado como certa"},status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=["POST"], detail=True, url_path="report-duvida")
     def report(self, request):
