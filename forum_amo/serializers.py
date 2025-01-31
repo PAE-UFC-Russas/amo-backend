@@ -48,7 +48,7 @@ class DuvidaSerializer(serializers.ModelSerializer):
     disciplina = serializers.PrimaryKeyRelatedField(
         read_only=False, queryset=Disciplinas.objects.all()
     )
-    resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True)
+    resposta_correta = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     autor = UserSerializer(read_only=True)
     votos = serializers.IntegerField(read_only=True)
     votou = DuvidaVotouField(read_only=True)
