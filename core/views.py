@@ -103,7 +103,7 @@ class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
             for key, value in request.data.items():
                 if key in allowed_keys:
                     setattr(agendamento, key, value)
-            agendamento.link_zoom = create_meeting()
+            #agendamento.link_zoom = create_meeting()
             agendamento.save()
         return Response(data={"sucesso"}, status=200)
 
