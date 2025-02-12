@@ -114,9 +114,8 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
             try:
                 resposta_pk = request.data.get("id", None)
                 resposta = Resposta.objects.get(pk=resposta_pk)
-                print(resposta)
                 if resposta.duvida_id == duvida.pk:
-                    duvida.resposta_correta.set([resposta])
+                    duvida.resposta_correta.add(resposta.id)
                     duvida.save()
             except exceptions.ObjectDoesNotExist:
                 return response.Response(
@@ -133,7 +132,10 @@ class DuvidaViewSet(AccessViewSetMixin, ModelViewSet):
                 status=status.HTTP_200_OK,
             )
 
-        return response.Response(data={"sucesso": {"mensagem": "a respota foi marcado como certa"}},status=status.HTTP_200_OK)
+        return response.Response(
+            data={"sucesso": {"mensagem": "a respota foi marcado como certa"}},
+            status=status.HTTP_200_OK,
+        )
 
     @action(methods=["POST"], detail=True, url_path="report-duvida")
     def report(self, request):

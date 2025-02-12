@@ -303,9 +303,6 @@ class RespostaCorretaTest(APITestCase):
             resposta="Capítulos 1 a 5.",
         )
 
-        
-
-
     def test_resposta_correta(self):
         """Verifica que o usuário pode selecionar e remover uma resposta como correta."""
         usuario = CustomUser.objects.first()
