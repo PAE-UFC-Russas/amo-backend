@@ -19,8 +19,8 @@ class Duvida(models.Model):
     # Ao usuário criar a dúvida, ainda não haverá respostas,
     # assim não é possivel adicionar uma resposta_correta.
     # Por isso está como blank=True
-    resposta_correta = models.ForeignKey(
-        "Resposta", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    resposta_correta = models.ManyToManyField(
+        "Resposta", null=True, blank=True, related_name="+"
     )
     autor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
     votos = models.IntegerField(default=0)
