@@ -18,8 +18,6 @@ from core.serializer import (
     DisciplinaSerializer,
     MonitoriaSerializer,
 )
-from forum_amo.zoom import create_meeting
-
 
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
