@@ -19,6 +19,7 @@ from core.serializer import (
     MonitoriaSerializer,
 )
 
+
 class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a cursos."""
 
