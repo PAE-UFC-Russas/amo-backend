@@ -29,6 +29,7 @@ pillow = "^10.0.0"
 django-cloudinary-storage = "^0.3.0"
 
 setuptools = ">=3.0"
+dotenv = "^0.9.9"
 
 
 [tool.poetry.dev-dependencies]

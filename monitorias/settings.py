@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
-
+from dotenv import load_dotenv
 import dj_database_url
 
 import rollbar  # pylint: disable=W0611
@@ -18,6 +18,7 @@ import rollbar  # pylint: disable=W0611
 
 import cloudinary_storage  # pylint: disable=W0611
 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,16 +58,12 @@ else:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = ("django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu",)
 
-    # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
 
     ALLOWED_HOSTS.append("127.0.0.1")
 
-    # Database
     # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
     # pylint: disable=C0301
-
-    # DATABASES = {"default": dj_database_url.config(default=os.getenv("DB_URL"))}
 
     DATABASES = {
         "default": {
@@ -74,6 +71,8 @@ else:
             "NAME": BASE_DIR + "db.sqlite3",
         }
     }
+    # DATABASES = {"default": dj_database_url.config(default=(os.getenv("DB_URL")))}
+
 
 # Application definition
 
