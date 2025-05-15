@@ -32,4 +32,4 @@ jobs:
         poetry install
     - name: Run Tests
       run: |
-        poetry run python manage.py test
+        poetry run python manage.py test --keepdb
