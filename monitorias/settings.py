@@ -39,6 +39,20 @@ if os.getenv("DJANGO_ENVIRONMENT") == "PRODUCTION":
             ssl_require=True,
         )
     }
+
+elif os.getenv("DJANGO_ENVIRONMENT") == "DEV":
+    SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+    DEBUG = os.getenv("DEBUG") == "False"
+    ALLOWED_HOSTS.append(os.getenv("DJANGO_HOSTS"))
+    DATABASES = {
+        "default": dj_database_url.config(
+            # pylint: disable=C0301
+            default=os.getenv("DB_URL"),
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+
 else:
     # SECURITY WARNING: keep the secret key used in production secret!
     SECRET_KEY = ("django-insecure-v8pebn^$2l9p&b8n^h(sk8*_28e(n_2q5#*znxf-3l9*egn!xu",)
