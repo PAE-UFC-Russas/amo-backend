@@ -7,8 +7,11 @@ on:
     branches: [ main ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
+    env:
+      DB_URL: postgresql://amo-dev_owner:npg_x10tqIhTGrXl@ep-wandering-breeze-a43zdssz-pooler.us-east-1.aws.neon.tech/amo-dev?sslmode=require
     strategy:
       max-parallel: 4
       matrix:
