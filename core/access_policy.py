@@ -35,6 +35,11 @@ class DisciplinaAccessPolicy(AccessPolicy):
             "principal": ["admin"],
             "effect": "allow",
         },
+        {
+            "action": ["adicionar_monitor"],
+            "principal": ["group:professor"],
+            "effect": "allow",
+        },
     ]
 
 

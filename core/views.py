@@ -5,12 +5,13 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 from django.db import transaction
 from django.db import IntegrityError
+from django.contrib.auth.models import Group
+from accounts.models import CustomUser
 from core import access_policy, filters
 from core.models import Agendamento, Curso, Disciplinas, Monitoria
-
-
 from core.serializer import (
     AgendamentoRequestSerializer,
     AgendamentoSerializer,
@@ -33,12 +34,46 @@ class CursoViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
 class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0901
     """ViewSet para ações relacionadas a disciplinas."""
 
+    # permission_classes = []
     access_policy = access_policy.DisciplinaAccessPolicy
     serializer_class = DisciplinaSerializer
     queryset = Disciplinas.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ["cursos"]
     search_fields = ["nome"]
+
+    @action(methods=["PATCH"], detail=False, url_path="adicionar-monitor")
+    def adicionar_monitor(self, request):
+        """Adicionar um monitor à uma disciplina.
+        É passado o email do usuário e id da disciplina.
+        """
+        try:
+            disciplina = Disciplinas.objects.get(id=request.data["disciplina"])
+        except Disciplinas.DoesNotExist:
+            return Response(
+                {"erro": "Disciplina não encontrada."}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            monitor = CustomUser.objects.get(email=request.data["email"]).id
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"erro": "Usuário com este email não encontrado."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Verifica se o monitor já está associado à disciplina
+        if disciplina.monitores.filter(id=monitor).exists():
+            return Response(
+                {"mensagem": "Usuário já é monitor desta disciplina."},
+                status=status.HTTP_200_OK,
+            )
+
+        CustomUser.objects.get(id=monitor).groups.add(Group.objects.get(name="monitor"))
+        disciplina.monitores.add(monitor)
+        return Response(
+            {"mensagem": "Monitor adicionado com sucesso à disciplina."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
