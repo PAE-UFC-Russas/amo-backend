@@ -36,7 +36,7 @@ class DisciplinaAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
-            "action": ["adicionar_monitor"],
+            "action": ["adicionar_monitor", "remover_monitor"],
             "principal": ["group:professor"],
             "effect": "allow",
         },
