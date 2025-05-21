@@ -27,7 +27,7 @@ class Duvida(models.Model):
     quantidade_comentarios = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
-        return f"Dúvida: {self.titulo}. Descricão: {self.descricao}"
+        return f"{self.disciplina} - Dúvida: {self.titulo}"
 
 
 class Resposta(models.Model):
