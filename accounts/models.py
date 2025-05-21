@@ -51,6 +51,7 @@ class CustomUser(AbstractUser):
     username = None
     first_name = None
     last_name = None
+    is_Professor = None
     email = models.EmailField(_("email address"), blank=False, unique=True)
     is_email_active = models.BooleanField(default=False)
     USERNAME_FIELD = "email"
@@ -102,6 +103,7 @@ class Perfil(models.Model):
 
     def __str__(self):
         return self.usuario.email
+        return self.nome_completo
 
 
 class EmailActivationToken(models.Model):
