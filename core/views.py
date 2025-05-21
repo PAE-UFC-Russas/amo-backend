@@ -75,6 +75,46 @@ class DisciplinaViewSet(AccessViewSetMixin, ModelViewSet):  # pylint: disable=R0
             status=status.HTTP_200_OK,
         )
 
+    @action(methods=["PATCH"], detail=False, url_path="remover-monitor")
+    def remover_monitor(self, request):
+        """remover um monitor à uma disciplina.
+        É passado o email do usuário e id da disciplina.
+        """
+        try:
+            disciplina = Disciplinas.objects.get(id=request.data["disciplina"])
+        except Disciplinas.DoesNotExist:
+            return Response(
+                {"erro": "Disciplina não encontrada."}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            monitor = CustomUser.objects.get(email=request.data["email"]).id
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"erro": "Usuário com este email não encontrado."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Verifica se o monitor já está associado à disciplina
+        if disciplina.monitores.filter(id=monitor).exists():
+            # Remove o monitor da disciplina atual
+            disciplina.monitores.remove(monitor)
+            # Verifica se o usuário ainda é monitor em alguma outra disciplina
+            ainda_monitor = Disciplinas.objects.filter(monitores__id=monitor).exists()
+            if not ainda_monitor:
+                # Remove o usuário do grupo monitor se não for mais monitor em nenhuma disciplina
+                CustomUser.objects.get(id=monitor).groups.remove(
+                    Group.objects.get(name="monitor")
+                )
+
+            return Response(
+                {"mensagem": "Monitor removido com sucesso da disciplina."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"mensagem": "Monitor não está acossiado com essa disciplina."},
+            status=status.HTTP_200_OK,
+        )
+
 
 class AgendamentoViewSet(AccessViewSetMixin, ModelViewSet):
     """Ações do agendamento de atendimento."""
