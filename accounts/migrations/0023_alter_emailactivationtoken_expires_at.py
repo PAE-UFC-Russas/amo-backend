@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name="expires_at",
             field=models.DateTimeField(
                 default=datetime.datetime(
-                    2025, 5, 20, 11, 40, 55, 644417, tzinfo=datetime.timezone.utc
+                    2025, 5, 19, 19, 43, 14, 288083, tzinfo=datetime.timezone.utc
                 )
             ),
         ),
