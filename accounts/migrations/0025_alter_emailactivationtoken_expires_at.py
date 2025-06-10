@@ -7,13 +7,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0024_alter_emailactivationtoken_expires_at'),
+        ("accounts", "0024_alter_emailactivationtoken_expires_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='emailactivationtoken',
-            name='expires_at',
-            field=models.DateTimeField(default=datetime.datetime(2025, 5, 26, 19, 31, 29, 860861, tzinfo=datetime.timezone.utc)),
+            model_name="emailactivationtoken",
+            name="expires_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(
+                    2025, 5, 26, 19, 31, 29, 860861, tzinfo=datetime.timezone.utc
+                )
+            ),
         ),
     ]

@@ -49,6 +49,7 @@ class Disciplinas(models.Model):
     def __str__(self):
         return f"Disciplina: {self.nome}"
 
+
 class Agendamento(models.Model):
     """Representa um adentamento para atendimento."""
 
@@ -72,16 +73,21 @@ class Agendamento(models.Model):
 
     def __str__(self):
         """Representação textual do agendamento"""
-        return f"{self.disciplina.nome} - {self.get_solicitante_name()} - {self.data.strftime('%d/%m/%Y %H:%M')}"
-    
+        return (
+            f"{self.disciplina.nome} - {self.get_solicitante_name()} - "
+            f"{self.data.strftime('%d/%m/%Y %H:%M')}"
+        )
+
     def get_solicitante_name(self):
+        """Retorna o nome do solicitante ou o e-mail caso não exista perfil."""
         perfil = getattr(self.solicitante, "perfil", None)
         return getattr(perfil, "nome_completo", None) or self.solicitante.email
 
     def get_data_formatada(self):
         """Retorna a data formatada para exibição"""
-        return self.data.strftime('%d/%m/%Y %H:%M')
-    get_data_formatada.short_description = 'Data'
+        return self.data.strftime("%d/%m/%Y %H:%M")
+
+    get_data_formatada.short_description = "Data"
 
 
 class Monitoria(models.Model):
