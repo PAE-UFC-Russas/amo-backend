@@ -120,55 +120,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         except marshmallow.exceptions.ValidationError as e:
             return Response({"error": {"message": e.messages}}, status=422)
 
-    @extend_schema(
-        tags=["Cadastro do Usuário"],
-        request={
-            "application/json": {
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "example": "professor@ufc.br"},
-                    "password": {
-                        "type": "string",
-                        "example": "supersecurepassword1",
-                    },
-                },
-            }
-        },
-    )
-    @action(methods=["post"], detail=False, url_path="professor")
-    def create_professor(self, request):
-        """Cria perfil de professor sem validações de modelo."""
-        unsafe_email = request.data.get("email", "").lower()
-        unsafe_password = request.data.get("password", "")
-        sanitized_email = sanitization_utils.strip_xss(unsafe_email)
-
-        if not re.match(r'^[^@]+@ufc\.br$', sanitized_email):
-            return Response(
-            {"error": "Domínio inválido. O email deve terminar com @ufc.br."},
-            status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            user_model = account_management_service.create_professor(
-            sanitized_email, unsafe_password
-            )
-
-            return Response(
-                {
-                    "message": "Usuário professor criado com sucesso."
-                    "Verifique seu e-mail para ativar sua conta."
-                },
-                status=201,
-            )
-        except errors.EmailAddressAlreadyExistsError as e:
-            return Response(
-                {"error": {"message": e.message, "error_code": e.internal_error_code}},
-                status=e.http_error_code,
-            )
-        except marshmallow.exceptions.ValidationError as e:
-            return Response({"error": {"message": e.messages}}, status=422)
-
-    
+    @action(methods=["post"], detail=False, url_path="confirmar-email")
     @extend_schema(
         tags=["Cadastro do Usuário"],
         request={
@@ -214,7 +166,6 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             ),
         },
     )
-    @action(methods=["post"], detail=False, url_path="confirmar-email")
     def confirm_email(self, request):
         """Confirma o e-mail do usuário (é enviado um código de confirmação para o seu e-mail)"""
         token = request.data.get("token")
