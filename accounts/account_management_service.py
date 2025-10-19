@@ -50,44 +50,6 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
 
     return user_model
 
-def create_professor(sanitized_email_str: str, unsafe_password_str: str):
-    """Realiza a criação de um professor.
-
-    Args:
-        sanitized_email_str: e-mail informado pelo usuário.
-        unsafe_password_str: senha informada pelo usuário.
-        admin: booleano informando se usuário deve ser administrador.
-
-    Returns:
-        Retorna uma instância de Usuário.
-
-    Raises:
-        EmailAddressAlreadyExistsError: existe um usuário ativo cadastrado com o e-mail informado.
-        ValidationError: ocorreu um erro ao validar dados informados.
-    """
-
-    user_model = CustomUser.objects.filter(email=sanitized_email_str).first()
-
-    if user_model:
-        if user_model.is_email_active:
-            raise errors.EmailAddressAlreadyExistsError("E-mail already in use.")
-        send_email_confirmation_token(user_instance=user_model)
-        return user_model
-
-    with transaction.atomic():
-        user_model = CustomUser.objects.create_professor(
-            email=sanitized_email_str,
-            password=unsafe_password_str,
-            is_email_active=False,
-        )
-        user_model.full_clean()
-        user_model.save()
-        
-        Perfil.objects.create(usuario=user_model)
-        send_email_confirmation_token(user_instance=user_model)
-
-    return user_model
-
 
 def get_user_profile(user_instance: CustomUser) -> dict:
     """Retorna o perfil de um usuário."""
@@ -106,8 +68,6 @@ def get_user_profile(user_instance: CustomUser) -> dict:
         "curso",
         "cargos",
         "foto",
-        "matricula",
-        "siape",
     ]
     for key in list(profile.keys()):
         if key not in allowed_fields:
@@ -123,7 +83,6 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "nome_exibicao",
         "data_nascimento",
         "matricula",
-        "siape",
         "entrada",
         "curso",
         "foto",
