@@ -1,4 +1,5 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
+from django.core.exceptions import ValidationError
 
 from datetime import timedelta, datetime
 import secrets
@@ -28,6 +29,18 @@ class CustomUserManager(BaseUserManager):
         # Ao invés disso, utilizei a função Group.objects.get_or_create()
         # user.groups.add(Group.objects.get_or_create(name="aluno"))
         group, _ = Group.objects.get_or_create(name="aluno")
+        user.groups.add(group)
+
+        return user
+    
+    def create_professor(self, email, password=None, **extra_fields):
+        """Cria um usuário professor."""
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self.db)
+        group, _ = Group.objects.get_or_create(name="professor")
         user.groups.add(group)
 
         return user
