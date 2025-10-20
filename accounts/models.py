@@ -5,6 +5,11 @@ from datetime import timedelta, datetime
 import secrets
 from django.utils import timezone
 
+
+def get_token_expiry():
+    """Return the expiry time for email activation tokens."""
+    return timezone.now() + timedelta(minutes=15)
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core import validators
 from django.db import models
@@ -101,6 +106,7 @@ class Perfil(models.Model):
     nome_exibicao = models.CharField(max_length=32)
     data_nascimento = models.DateField(null=True)
     matricula = models.CharField(max_length=6, null=True)
+    siape = models.CharField(max_length=7, null=True, blank=True)
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, blank=True, null=True)
     entrada = models.CharField(
         max_length=6,
@@ -124,9 +130,7 @@ class EmailActivationToken(models.Model):
     email = models.EmailField(blank=False)
     token = models.CharField(unique=True, blank=False, max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(
-        default=timezone.make_aware(datetime.now() + timedelta(minutes=15))
-    )
+    expires_at = models.DateTimeField(default=get_token_expiry)
 
     @staticmethod
     def generate_token(user):
