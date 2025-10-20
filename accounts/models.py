@@ -9,6 +9,7 @@ def get_token_expiry():
     """Return the expiry time for email activation tokens."""
     return timezone.now() + timedelta(minutes=15)
 
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core import validators
 from django.db import models
