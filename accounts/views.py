@@ -2,9 +2,11 @@
 import re
 from contextvars import Token
 
-from django.utils import timezone
-from django.forms import ValidationError
 from django.core import exceptions
+from django.forms import ValidationError
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 import marshmallow
 
@@ -22,6 +24,7 @@ from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token  # pylint: disable=W0404
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import mixins, GenericViewSet, ViewSet
 
@@ -56,10 +59,11 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({"token": token.key, "user_id": user.pk, "email": user.email})
 
 
-class UserRegistration(AccessViewSetMixin, ViewSet):
+@method_decorator(csrf_exempt, name="dispatch")
+class UserRegistration(ViewSet):
     """ViewSet para ações relacionadas ao cadastro do usuário."""
 
-    access_policy = access_policy.AccountRegistrationAccessPolicy
+    permission_classes = [AllowAny]  # Explicitly allow anonymous access
 
     @extend_schema(
         tags=["Cadastro do Usuário"],
@@ -136,26 +140,27 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         },
     )
     @action(methods=["post"], detail=False, url_path="professor")
+    @method_decorator(csrf_exempt)
     def create_professor(self, request):
         """Cria perfil de professor sem validações de modelo."""
-        unsafe_email = request.data.get("email", "").lower()
-        unsafe_password = request.data.get("password", "")
-        sanitized_email = sanitization_utils.strip_xss(unsafe_email)
-
-        if not re.match(r"^[^@]+@ufc\.br$", sanitized_email):
-            return Response(
-                {"error": "Domínio inválido. O email deve terminar com @ufc.br."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
+            unsafe_email = request.data.get("email", "").lower()
+            unsafe_password = request.data.get("password", "")
+            sanitized_email = sanitization_utils.strip_xss(unsafe_email)
+
+            if not re.match(r"^[^@]+@ufc\.br$", sanitized_email):
+                return Response(
+                    {"error": "Domínio inválido. O email deve terminar com @ufc.br."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             account_management_service.create_professor(
                 sanitized_email, unsafe_password
             )
 
             return Response(
                 {
-                    "message": "Usuário professor criado com sucesso."
+                    "message": "Usuário professor criado com sucesso. "
                     "Verifique seu e-mail para ativar sua conta."
                 },
                 status=201,
@@ -167,6 +172,12 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             )
         except marshmallow.exceptions.ValidationError as e:
             return Response({"error": {"message": e.messages}}, status=422)
+        except (ValueError, TypeError, AttributeError) as e:
+            # Handle specific common exceptions
+            return Response(
+                {"error": {"message": f"Erro interno: {str(e)}"}},
+                status=500,
+            )
 
     @extend_schema(
         tags=["Cadastro do Usuário"],
