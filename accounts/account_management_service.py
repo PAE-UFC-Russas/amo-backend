@@ -50,6 +50,7 @@ def create_account(sanitized_email_str: str, unsafe_password_str: str):
 
     return user_model
 
+
 def create_professor(sanitized_email_str: str, unsafe_password_str: str):
     """Realiza a criação de um professor.
 
@@ -82,7 +83,7 @@ def create_professor(sanitized_email_str: str, unsafe_password_str: str):
         )
         user_model.full_clean()
         user_model.save()
-        
+
         Perfil.objects.create(usuario=user_model)
         send_email_confirmation_token(user_instance=user_model)
 

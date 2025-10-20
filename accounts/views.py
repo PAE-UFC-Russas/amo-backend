@@ -142,15 +142,15 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         unsafe_password = request.data.get("password", "")
         sanitized_email = sanitization_utils.strip_xss(unsafe_email)
 
-        if not re.match(r'^[^@]+@ufc\.br$', sanitized_email):
+        if not re.match(r"^[^@]+@ufc\.br$", sanitized_email):
             return Response(
-            {"error": "Domínio inválido. O email deve terminar com @ufc.br."},
-            status=status.HTTP_400_BAD_REQUEST,
+                {"error": "Domínio inválido. O email deve terminar com @ufc.br."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
             user_model = account_management_service.create_professor(
-            sanitized_email, unsafe_password
+                sanitized_email, unsafe_password
             )
 
             return Response(
@@ -168,7 +168,6 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
         except marshmallow.exceptions.ValidationError as e:
             return Response({"error": {"message": e.messages}}, status=422)
 
-    
     @extend_schema(
         tags=["Cadastro do Usuário"],
         request={

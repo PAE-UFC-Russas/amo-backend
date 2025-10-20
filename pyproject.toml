@@ -32,7 +32,7 @@ setuptools = ">=3.0"
 dotenv = "^0.9.9"
 
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 pylint = "~2.14.4"
 pylint-django = "^2.5.3"
@@ -43,7 +43,7 @@ tomli = "^2.0.1"
 load-plugins = ["pylint_django"]
 django-settings-module= "monitorias.settings"
 ignore-paths = [".*/migrations/.*$"]
-disable = ["too-many-ancestors", "duplicate-code"]
+disable = ["too-many-ancestors", "duplicate-code", "astroid-error", "no-member"]
 good-names = [
     "e",
     "pk",
