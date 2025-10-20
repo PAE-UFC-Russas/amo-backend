@@ -107,8 +107,6 @@ def get_user_profile(user_instance: CustomUser) -> dict:
         "curso",
         "cargos",
         "foto",
-        "matricula",
-        "siape",
     ]
     for key in list(profile.keys()):
         if key not in allowed_fields:
@@ -124,7 +122,6 @@ def update_user_profile(perfil: Perfil, data: dict) -> dict:
         "nome_exibicao",
         "data_nascimento",
         "matricula",
-        "siape",
         "entrada",
         "curso",
         "foto",
