@@ -94,7 +94,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
                 },
             )
         },
-    )
+    )#
     def create(self, request):
         """Cria usuário inativo, é necessário confirmar o e-mail."""
         unsafe_email = request.data.get("email", "").lower()
