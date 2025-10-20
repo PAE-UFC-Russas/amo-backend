@@ -8,6 +8,7 @@ class AccountRegistrationAccessPolicy(AccessPolicy):
     statements = [
         {"action": "create", "principal": "anonymous", "effect": "allow"},
         {"action": "confirm_email", "principal": "anonymous", "effect": "allow"},
+        {"action": "create_professor", "principal": "anonymous", "effect": "allow"},
     ]
 
 
