@@ -149,7 +149,7 @@ class UserRegistration(AccessViewSetMixin, ViewSet):
             )
 
         try:
-            user_model = account_management_service.create_professor(
+            account_management_service.create_professor(
                 sanitized_email, unsafe_password
             )
 
