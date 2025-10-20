@@ -32,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         user.groups.add(group)
 
         return user
-    
+
     def create_professor(self, email, password=None, **extra_fields):
         """Cria um usuário professor."""
         extra_fields.setdefault("is_staff", False)
