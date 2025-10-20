@@ -1,12 +1,13 @@
 """Este módulo contém os serializadores utilizados na aplicação 'accounts'."""
 from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
+
 from drf_spectacular.utils import (
     OpenApiExample,
     extend_schema_field,
     extend_schema_serializer,
 )
 from drf_writable_nested.serializers import WritableNestedModelSerializer
-from rest_framework import serializers
 
 from accounts.models import CustomUser, EmailActivationToken, Perfil
 from core.models import Curso

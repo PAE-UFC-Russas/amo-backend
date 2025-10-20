@@ -1,22 +1,21 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
 
-from datetime import timedelta, datetime
 import secrets
+from datetime import timedelta
+
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
+from django.core import validators
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from core.models import Curso
+from monitorias.settings import MEDIA_ROOT
 
 
 def get_token_expiry():
     """Return the expiry time for email activation tokens."""
     return timezone.now() + timedelta(minutes=15)
-
-
-from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
-from django.core import validators
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-
-from core.models import Curso
-from monitorias.settings import MEDIA_ROOT
 
 
 class CustomUserManager(BaseUserManager):
