@@ -166,13 +166,13 @@ MEDIA_URL = "/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 FIXTURE_DIRS = ["fixtures"]
@@ -191,7 +191,9 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": f"{os.getenv('API_SECRET')}",
 }
 
-EMAIL_BACKEND = f"{os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')}"
+EMAIL_BACKEND = (
+    f"{os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')}"
+)
 EMAIL_HOST = f"{os.getenv('EMAIL_HOST', 'localhost')}"
 EMAIL_PORT = f"{os.getenv('EMAIL_PORT', '1025')}"
 EMAIL_USE_TLS = f"{os.getenv('EMAIL_USE_TLS', 'False')}"
