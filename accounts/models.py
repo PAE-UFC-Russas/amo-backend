@@ -1,5 +1,4 @@
 """Este módulo define os modelos do aplicativo 'accounts'."""
-from django.core.exceptions import ValidationError
 
 from datetime import timedelta, datetime
 import secrets
