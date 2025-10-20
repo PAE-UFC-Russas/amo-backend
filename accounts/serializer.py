@@ -1,5 +1,6 @@
 """Este módulo contém os serializadores utilizados na aplicação 'accounts'."""
 from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
 
 from drf_spectacular.utils import (
