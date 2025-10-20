@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "rest_access_policy",
     "accounts",
     "core",
     "django_filters",
@@ -169,12 +170,10 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
-
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 FIXTURE_DIRS = ["fixtures"]
 
@@ -192,12 +191,14 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": f"{os.getenv('API_SECRET')}",
 }
 
-EMAIL_BACKEND = f"{os.getenv('EMAIL_BACKEND')}"
-EMAIL_HOST = f"{os.getenv('EMAIL_HOST')}"
-EMAIL_PORT = f"{os.getenv('EMAIL_PORT')}"
-EMAIL_USE_TLS = f"{os.getenv('EMAIL_USE_TLS')}"
-EMAIL_HOST_USER = f"{os.getenv('EMAIL_HOST_USER')}"
-EMAIL_HOST_PASSWORD = f"{os.getenv('EMAIL_HOST_PASSWORD')}"
+EMAIL_BACKEND = (
+    f"{os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')}"
+)
+EMAIL_HOST = f"{os.getenv('EMAIL_HOST', 'localhost')}"
+EMAIL_PORT = f"{os.getenv('EMAIL_PORT', '1025')}"
+EMAIL_USE_TLS = f"{os.getenv('EMAIL_USE_TLS', 'False')}"
+EMAIL_HOST_USER = f"{os.getenv('EMAIL_HOST_USER', '')}"
+EMAIL_HOST_PASSWORD = f"{os.getenv('EMAIL_HOST_PASSWORD', '')}"
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 

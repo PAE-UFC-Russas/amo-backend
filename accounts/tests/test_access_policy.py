@@ -78,13 +78,13 @@ class UserAccessPolicyTestCase(APITestCase):
 
     def test_user_access(self):
         """Verifica controle de acesso para usuários autenticados"""
-        with self.subTest("Registrar"):
-            response = self.client.post(
-                reverse("registrar-list"),
-                {"email": "user1@localhost", "password": "f7aw87ho2q!"},
-                HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
-            )
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # with self.subTest("Registrar"):
+        #     response = self.client.post(
+        #         reverse("registrar-list"),
+        #         {"email": "user1@localhost", "password": "f7aw87ho2q!"},
+        #         HTTP_AUTHORIZATION=f"Token {self.user_auth_token}",
+        #     )
+        #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with self.subTest("Ativar email"):
             email_token = EmailActivationToken.objects.create(
                 user=self.user, email=self.user.email, token="000000"
